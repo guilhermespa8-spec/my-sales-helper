@@ -94,6 +94,7 @@ export type Database = {
       }
       quotes: {
         Row: {
+          car: string | null
           created_at: string
           customer_name: string | null
           id: string
@@ -104,6 +105,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          car?: string | null
           created_at?: string
           customer_name?: string | null
           id?: string
@@ -114,6 +116,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          car?: string | null
           created_at?: string
           customer_name?: string | null
           id?: string
