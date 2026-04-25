@@ -97,8 +97,13 @@ const QuoteNew = () => {
 
   const filteredProducts = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return [];
-    return products.filter((p) =>
+    const c = car.trim().toLowerCase();
+    let base = products;
+    if (c) {
+      base = base.filter((p) => (p.description ?? "").toLowerCase().includes(c));
+    }
+    if (!q) return c ? base : [];
+    return base.filter((p) =>
       p.name.toLowerCase().includes(q) || (p.description ?? "").toLowerCase().includes(q)
     );
   }, [products, search]);
