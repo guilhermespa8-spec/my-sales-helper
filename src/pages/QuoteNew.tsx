@@ -267,12 +267,12 @@ const QuoteNew = () => {
             <CardHeader className="pb-3"><CardTitle className="text-base">Dados</CardTitle></CardHeader>
             <CardContent className="space-y-3">
               <div>
-                <Label>Cliente</Label>
+                <Label>Mecânico</Label>
                 <Select value={customer || "__none__"} onValueChange={(v) => setCustomer(v === "__none__" ? "" : v)}>
-                  <SelectTrigger><SelectValue placeholder="Selecione o cliente" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={mechanics.length ? "Selecione o mecânico" : "Cadastre em Mecânicos"} /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__none__">Nenhum</SelectItem>
-                    <SelectItem value="Padrão">Padrão</SelectItem>
+                    {mechanics.map((m) => (<SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>))}
                   </SelectContent>
                 </Select>
               </div>
