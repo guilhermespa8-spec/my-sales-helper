@@ -74,31 +74,39 @@ const QuoteNew = () => {
 
   useEffect(() => {
     const loadData = async () => {
-      // Load Products
+      // Use Promise.all to load mechanics and cars in parallel
+      const [mecsRes, carsRes] = await Promise.all([
+        supabase.from("mechanics").select("id,name").order("name"),
+        supabase.from("cars").select("id,name,notes").order("name")
+      ]);
+
+      if (mecsRes.data) setMechanics(mecsRes.data as Mechanic[]);
+      if (carsRes.data) setCarsList(carsRes.data as CarRecord[]);
+
+      // Load Products with optimized pagination
       const pageSize = 1000;
       let from = 0;
       const all: Product[] = [];
+      
       while (true) {
         const { data, error } = await supabase
           .from("products")
           .select("id,name,description,price,car_filter")
           .order("name")
           .range(from, from + pageSize - 1);
-        if (error) { toast.error(error.message); return; }
+        
+        if (error) {
+          toast.error("Erro ao carregar produtos");
+          break;
+        }
+        
         const batch = (data ?? []) as Product[];
         all.push(...batch);
+        
         if (batch.length < pageSize) break;
         from += pageSize;
       }
       setProducts(all);
-
-      // Load Mechanics
-      const { data: mecs } = await supabase.from("mechanics").select("id,name").order("name");
-      setMechanics((mecs ?? []) as Mechanic[]);
-
-      // Load Cars
-      const { data: cars } = await supabase.from("cars").select("id,name,notes").order("name");
-      setCarsList((cars ?? []) as CarRecord[]);
     };
 
     loadData();
