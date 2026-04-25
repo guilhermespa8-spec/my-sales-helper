@@ -99,16 +99,11 @@ const QuoteNew = () => {
 
   const filteredProducts = useMemo(() => {
     const q = search.trim().toLowerCase();
-    const c = car.trim().toLowerCase();
-    let base = products;
-    if (c) {
-      base = base.filter((p) => (p.description ?? "").toLowerCase().includes(c));
-    }
-    if (!q) return c ? base : [];
-    return base.filter((p) =>
+    if (!q) return [];
+    return products.filter((p) =>
       p.name.toLowerCase().includes(q) || (p.description ?? "").toLowerCase().includes(q)
     );
-  }, [products, search, car]);
+  }, [products, search]);
 
   const suggestedParts = useMemo(() => {
     const c = car.trim().toLowerCase();
@@ -249,7 +244,7 @@ const QuoteNew = () => {
               className="pl-9"
             />
           </div>
-          {(search.trim() || car.trim()) && (
+          {search.trim() && (
             <div className="border rounded-lg max-h-72 overflow-auto divide-y">
               {filteredProducts.map((p) => (
                   <button
