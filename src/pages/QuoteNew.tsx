@@ -205,7 +205,7 @@ const QuoteNew = () => {
       </div>
 
       {/* Dados em linha */}
-      <div className="border-b bg-card/40 px-4 md:px-6 py-2 grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-2">
+      <div className="border-b bg-card px-4 md:px-6 py-2 grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-2">
         {[
           { label: "Mecânico", node: (
             <Select value={customer || "__none__"} onValueChange={(v) => setCustomer(v === "__none__" ? "" : v)}>
