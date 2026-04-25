@@ -16,6 +16,7 @@ import { toast } from "sonner";
 interface Product {
   id: string; name: string; description: string | null;
   price: number; stock: number;
+  created_at?: string; updated_at?: string;
 }
 
 const schema = z.object({
@@ -312,6 +313,7 @@ const Products = () => {
                   <TableHead className="text-center w-24">Estoque</TableHead>
                   <TableHead className="text-center w-28">Valor</TableHead>
                   <TableHead className="text-center w-24">Status</TableHead>
+                  <TableHead className="text-center w-40">Última alteração</TableHead>
                   <TableHead className="text-center w-28">Ações</TableHead>
                 </TableRow>
               </TableHeader>
@@ -329,6 +331,11 @@ const Products = () => {
                       <span className={`inline-block px-3 py-1 rounded text-xs font-semibold text-white ${p.stock > 0 ? "bg-green-600" : "bg-muted-foreground"}`}>
                         {p.stock > 0 ? "Ativo" : "Sem estoque"}
                       </span>
+                    </TableCell>
+                    <TableCell className="text-center text-xs text-muted-foreground">
+                      {p.updated_at && p.created_at && new Date(p.updated_at).getTime() - new Date(p.created_at).getTime() > 2000
+                        ? new Date(p.updated_at).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })
+                        : "—"}
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-1 justify-center">
