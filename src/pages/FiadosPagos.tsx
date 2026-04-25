@@ -129,7 +129,14 @@ const FiadosPagos = () => {
                         </div>
                       </div>
                       <div className="flex items-center gap-4">
-                        <div className="font-mono font-bold text-sm text-foreground">R$ {Number(q.total).toFixed(2)}</div>
+                        <div className="flex flex-col items-end">
+                          {q.desconto > 0 && (
+                            <span className="text-[10px] text-muted-foreground line-through decoration-destructive/50">
+                              R$ {(Number(q.total) + Number(q.desconto)).toFixed(2)}
+                            </span>
+                          )}
+                          <div className="font-mono font-bold text-sm text-foreground">R$ {Number(q.total).toFixed(2)}</div>
+                        </div>
                         <Button asChild variant="ghost" size="sm" className="h-8">
                           <Link to={`/orcamentos/${q.id}`}>Ver Detalhes</Link>
                         </Button>
