@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Pencil, Trash2, Package, Upload, Download, Search } from "lucide-react";
+import { Plus, Pencil, Trash2, Package, Upload, Download, Search, Eye } from "lucide-react";
 import { toast } from "sonner";
 
 interface Product {
@@ -34,6 +34,7 @@ const Products = () => {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
   const [form, setForm] = useState(empty);
+  const [viewing, setViewing] = useState<Product | null>(null);
   const [importOpen, setImportOpen] = useState(false);
   const [importPreview, setImportPreview] = useState<Array<{ name: string; description: string; price: number; stock: number }>>([]);
   const [importing, setImporting] = useState(false);
@@ -339,6 +340,7 @@ const Products = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-1 justify-center">
+                        <Button size="icon" variant="ghost" onClick={() => setViewing(p)} title="Ver observação"><Eye className="w-4 h-4" /></Button>
                         <Button size="icon" variant="ghost" onClick={() => openEdit(p)} title="Editar"><Pencil className="w-4 h-4" /></Button>
                         <Button size="icon" variant="ghost" onClick={() => remove(p.id)} title="Excluir"><Trash2 className="w-4 h-4 text-destructive" /></Button>
                       </div>
@@ -350,6 +352,21 @@ const Products = () => {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={!!viewing} onOpenChange={(o) => !o && setViewing(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{viewing?.name}</DialogTitle>
+            <DialogDescription>Observação do produto</DialogDescription>
+          </DialogHeader>
+          <div className="text-sm whitespace-pre-wrap min-h-[60px]">
+            {viewing?.description?.trim() ? viewing.description : <span className="text-muted-foreground italic">Sem observação cadastrada.</span>}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setViewing(null)}>Fechar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={importOpen} onOpenChange={(o) => { setImportOpen(o); if (!o) setRemoveMissing(false); }}>
         <DialogContent className="max-w-2xl">
