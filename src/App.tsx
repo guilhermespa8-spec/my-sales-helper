@@ -14,6 +14,7 @@ import QuoteNew from "./pages/QuoteNew";
 import QuoteDetail from "./pages/QuoteDetail";
 import Mechanics from "./pages/Mechanics";
 import Fiado from "./pages/Fiado";
+import Cars from "./pages/Cars";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
