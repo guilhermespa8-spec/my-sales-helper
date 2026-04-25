@@ -159,6 +159,15 @@ const QuoteNew = () => {
         <CardHeader><CardTitle className="text-base">Cliente</CardTitle></CardHeader>
         <CardContent className="space-y-3">
           <div><Label>Nome do cliente (opcional)</Label><Input value={customer} onChange={(e) => setCustomer(e.target.value)} placeholder="Ex: João Silva" maxLength={120} /></div>
+          <div>
+            <Label>Nome do vendedor</Label>
+            <Select value={seller} onValueChange={setSeller}>
+              <SelectTrigger><SelectValue placeholder="Selecione o vendedor" /></SelectTrigger>
+              <SelectContent>
+                {SELLERS.map((s) => (<SelectItem key={s} value={s}>{s}</SelectItem>))}
+              </SelectContent>
+            </Select>
+          </div>
           <div><Label>Observações (opcional)</Label><Textarea value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={500} rows={2} /></div>
         </CardContent>
       </Card>
