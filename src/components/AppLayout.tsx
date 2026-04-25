@@ -21,7 +21,7 @@ import {
   FileSpreadsheet,
 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
-import bmwBg from "@/assets/bmw-f30-bg.jpg";
+
 
 type Item = {
   to: string;
