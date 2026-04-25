@@ -21,7 +21,6 @@ const QuoteNew = () => {
   const [notes, setNotes] = useState("");
   const [items, setItems] = useState<Item[]>([]);
   const [search, setSearch] = useState("");
-  const [pickerOpen, setPickerOpen] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -90,40 +89,41 @@ const QuoteNew = () => {
       </Card>
 
       <Card className="shadow-[var(--shadow-soft)]">
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="space-y-3">
           <CardTitle className="text-base">Itens</CardTitle>
-          <div className="w-72">
-            <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full justify-start text-muted-foreground font-normal">
-                  <Search className="w-4 h-4 mr-2" /> Pesquisar produto...
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-[320px] p-0" align="end">
-                <Command shouldFilter={false}>
-                  <CommandInput placeholder="Digite o nome..." value={search} onValueChange={setSearch} />
-                  <CommandList>
-                    <CommandEmpty>Nenhum produto encontrado</CommandEmpty>
-                    <CommandGroup>
-                      {products
-                        .filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
-                        .slice(0, 50)
-                        .map((p) => (
-                          <CommandItem
-                            key={p.id}
-                            value={p.id}
-                            onSelect={() => { addItem(p.id); setSearch(""); setPickerOpen(false); }}
-                          >
-                            <span className="flex-1 truncate">{p.name}</span>
-                            <span className="ml-2 text-xs text-muted-foreground font-mono">R$ {Number(p.price).toFixed(2)}</span>
-                          </CommandItem>
-                        ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
+          <div className="relative">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Pesquisar produto por nome..."
+              className="pl-9"
+            />
           </div>
+          {search.trim() && (
+            <div className="border rounded-lg max-h-72 overflow-auto divide-y">
+              {products
+                .filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
+                .slice(0, 50)
+                .map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => { addItem(p.id); setSearch(""); }}
+                    className="w-full flex items-center justify-between gap-2 px-3 py-2 text-left hover:bg-muted/60 transition-colors"
+                  >
+                    <span className="flex-1 truncate text-sm">{p.name}</span>
+                    <span className="text-xs text-muted-foreground font-mono">R$ {Number(p.price).toFixed(2)}</span>
+                  </button>
+                ))}
+              {products.filter((p) => p.name.toLowerCase().includes(search.toLowerCase())).length === 0 && (
+                <div className="px-3 py-6 text-center text-sm text-muted-foreground">
+                  <Package className="w-8 h-8 mx-auto mb-1 opacity-40" />
+                  Nenhum produto encontrado para "{search}"
+                </div>
+              )}
+            </div>
+          )}
         </CardHeader>
         <CardContent>
           {items.length === 0 ? (
