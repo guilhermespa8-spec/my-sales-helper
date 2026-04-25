@@ -60,12 +60,26 @@ const QuoteDetail = () => {
           </div>
         </div>
 
-        {quote.customer_name && (
-          <div className="mb-4">
-            <div className="text-xs uppercase text-muted-foreground tracking-wide">Cliente</div>
-            <div className="font-semibold">{quote.customer_name}</div>
-          </div>
-        )}
+        <div className="mb-4 grid grid-cols-2 gap-4">
+          {quote.customer_name && (
+            <div>
+              <div className="text-xs uppercase text-muted-foreground tracking-wide">Cliente</div>
+              <div className="font-semibold">{quote.customer_name}</div>
+            </div>
+          )}
+          {quote.seller && (
+            <div>
+              <div className="text-xs uppercase text-muted-foreground tracking-wide">Vendedor</div>
+              <div className="font-semibold">{quote.seller}</div>
+            </div>
+          )}
+          {quote.car && (
+            <div>
+              <div className="text-xs uppercase text-muted-foreground tracking-wide">Carro</div>
+              <div className="font-semibold">{quote.car}</div>
+            </div>
+          )}
+        </div>
 
         <table className="w-full text-sm">
           <thead>
