@@ -112,9 +112,10 @@ const QuoteNew = () => {
       if (isEdit && editId) {
         const { error } = await supabase.from("quotes").update({
           customer_name: customer.trim() || null,
+          seller: seller || null,
           notes: notes.trim() || null,
           total,
-        }).eq("id", editId);
+        } as any).eq("id", editId);
         if (error) throw error;
         const { error: delErr } = await supabase.from("quote_items").delete().eq("quote_id", editId);
         if (delErr) throw delErr;
@@ -123,9 +124,10 @@ const QuoteNew = () => {
           user_id: user!.id,
           quote_number: 0,
           customer_name: customer.trim() || null,
+          seller: seller || null,
           notes: notes.trim() || null,
           total,
-        }).select().single();
+        } as any).select().single();
         if (error) throw error;
         quoteId = quote.id;
         qNumber = quote.quote_number;
