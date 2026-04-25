@@ -115,9 +115,19 @@ const QuoteNew = () => {
   const filteredProducts = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return [];
-    return products.filter((p) =>
-      p.name.toLowerCase().includes(q) || (p.description ?? "").toLowerCase().includes(q)
-    );
+    
+    // Split the search query into individual terms (words)
+    const searchTerms = q.split(/\s+/).filter(term => term.length > 0);
+    
+    return products.filter((p) => {
+      const pName = p.name.toLowerCase();
+      const pDesc = (p.description ?? "").toLowerCase();
+      
+      // Every search term must be found in either the name or description
+      return searchTerms.every(term => 
+        pName.includes(term) || pDesc.includes(term)
+      );
+    });
   }, [products, search]);
 
   const suggestedParts = useMemo(() => {
