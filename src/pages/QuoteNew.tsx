@@ -23,6 +23,7 @@ const QuoteNew = () => {
   const isEdit = Boolean(editId);
   const [products, setProducts] = useState<Product[]>([]);
   const [customer, setCustomer] = useState("");
+  const [seller, setSeller] = useState<string>("");
   const [notes, setNotes] = useState("");
   const [items, setItems] = useState<Item[]>([]);
   const [search, setSearch] = useState("");
