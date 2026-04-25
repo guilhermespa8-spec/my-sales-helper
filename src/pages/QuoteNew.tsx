@@ -177,175 +177,175 @@ const QuoteNew = () => {
   }, [search, filteredProducts, car, suggestedParts, products]);
 
   return (
-    <div className="max-w-7xl mx-auto">
-      <div className="flex items-end justify-between gap-4 flex-wrap mb-4">
+    <div className="max-w-7xl mx-auto pb-24 lg:pb-0">
+      {/* Header minimalista */}
+      <div className="flex items-end justify-between gap-4 flex-wrap mb-6 border-b pb-4">
         <div>
-          <h1 className="text-2xl font-bold text-primary">
-            {isEdit ? `Editar orçamento${quoteNumber ? ` #${String(quoteNumber).padStart(4, "0")}` : ""}` : "Novo orçamento"}
+          <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-1">
+            {isEdit ? "Editando" : "Novo"}
+          </div>
+          <h1 className="text-3xl font-light text-foreground">
+            Orçamento{quoteNumber ? <span className="text-primary font-mono ml-2">#{String(quoteNumber).padStart(4, "0")}</span> : null}
           </h1>
-          <p className="text-sm text-muted-foreground">Catálogo de produtos + carrinho</p>
         </div>
-        <Button variant="outline" onClick={() => nav("/")}>Cancelar</Button>
+        <Button variant="ghost" onClick={() => nav("/")} className="text-muted-foreground">Cancelar</Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Catálogo */}
-        <div className="lg:col-span-2 space-y-4">
-          <Card className="shadow-[var(--shadow-soft)]">
-            <CardContent className="p-4">
-              <div className="relative">
-                <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Pesquisar produto..."
-                  className="pl-12 h-12 text-base"
-                />
-              </div>
-            </CardContent>
-          </Card>
+      {/* Barra de seletores compacta */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-4">
+        <div className="space-y-1">
+          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Mecânico</Label>
+          <Select value={customer || "__none__"} onValueChange={(v) => setCustomer(v === "__none__" ? "" : v)}>
+            <SelectTrigger className="h-9 border-0 border-b rounded-none bg-transparent px-1 focus:ring-0 focus:border-primary">
+              <SelectValue placeholder={mechanics.length ? "Selecione" : "Cadastre em Mecânicos"} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__none__">Nenhum</SelectItem>
+              {mechanics.map((m) => (<SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1">
+          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Vendedor</Label>
+          <Select value={seller} onValueChange={setSeller}>
+            <SelectTrigger className="h-9 border-0 border-b rounded-none bg-transparent px-1 focus:ring-0 focus:border-primary">
+              <SelectValue placeholder="Selecione" />
+            </SelectTrigger>
+            <SelectContent>
+              {SELLERS.map((s) => (<SelectItem key={s} value={s}>{s}</SelectItem>))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1">
+          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Carro</Label>
+          <Select value={car || "__none__"} onValueChange={(v) => setCar(v === "__none__" ? "" : v)}>
+            <SelectTrigger className="h-9 border-0 border-b rounded-none bg-transparent px-1 focus:ring-0 focus:border-primary">
+              <SelectValue placeholder="Selecione" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__none__">Nenhum</SelectItem>
+              {CARS.map((c) => (<SelectItem key={c} value={c}>{c}</SelectItem>))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1">
+          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Observações</Label>
+          <Input value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={500} placeholder="Opcional"
+            className="h-9 border-0 border-b rounded-none bg-transparent px-1 focus-visible:ring-0 focus-visible:border-primary" />
+        </div>
+      </div>
 
-          <Card className="shadow-[var(--shadow-soft)]">
-            <CardHeader className="pb-3 flex-row items-center justify-between">
-              <CardTitle className="text-base flex items-center gap-2">
-                {car && !search.trim() ? (
-                  <>
-                    <Sparkles className="w-4 h-4 text-accent" />
-                    Peças sugeridas para {car}
-                  </>
-                ) : search.trim() ? (
-                  <>
-                    <Search className="w-4 h-4" /> Resultados
-                  </>
-                ) : (
-                  <>
-                    <Package className="w-4 h-4" /> Catálogo
-                  </>
-                )}
-                <span className="text-xs font-normal text-muted-foreground">({catalog.length})</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {catalog.length === 0 ? (
-                <div className="text-center py-12 text-sm text-muted-foreground">
-                  <Package className="w-10 h-10 mx-auto mb-2 opacity-40" />
-                  Nenhum produto encontrado
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[60vh] overflow-y-auto pr-1">
-                  {catalog.map((p) => {
-                    const added = items.some((i) => i.product_id === p.id);
-                    return (
-                      <button
-                        key={p.id}
-                        type="button"
-                        onClick={() => addItem(p.id)}
-                        className={`group text-left p-3 rounded-lg border transition-all hover:shadow-md hover:border-primary hover:-translate-y-0.5 ${
-                          added ? "border-accent bg-accent/5" : "border-border bg-card/60"
-                        }`}
-                      >
-                        <div className="aspect-square rounded-md bg-gradient-to-br from-muted to-muted/40 mb-2 flex items-center justify-center">
-                          <Package className="w-8 h-8 text-muted-foreground/50 group-hover:text-primary transition-colors" />
-                        </div>
-                        <div className="text-xs font-medium line-clamp-2 min-h-[2.5rem]">{p.name}</div>
-                        <div className="flex items-center justify-between mt-1">
-                          <span className="text-sm font-bold text-primary font-mono">R$ {Number(p.price).toFixed(2)}</span>
-                          {added && <span className="text-[10px] text-accent">✓</span>}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        {/* Catálogo lista */}
+        <div className="lg:col-span-3 space-y-3">
+          <div className="relative">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Pesquisar produto..."
+              className="pl-10 h-11 bg-card/60 border-border/60"
+            />
+          </div>
+
+          <div className="flex items-center justify-between text-xs text-muted-foreground px-1">
+            <span className="flex items-center gap-1.5">
+              {car && !search.trim() ? <><Sparkles className="w-3 h-3 text-accent" /> Sugeridos para {car}</>
+                : search.trim() ? <><Search className="w-3 h-3" /> Resultados</>
+                : <><Package className="w-3 h-3" /> Catálogo</>}
+            </span>
+            <span>{catalog.length} {catalog.length === 1 ? "item" : "itens"}</span>
+          </div>
+
+          <div className="border rounded-lg bg-card/40 divide-y max-h-[65vh] overflow-y-auto">
+            {catalog.length === 0 ? (
+              <div className="text-center py-12 text-sm text-muted-foreground">
+                <Package className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                Nenhum produto encontrado
+              </div>
+            ) : (
+              catalog.map((p) => {
+                const added = items.some((i) => i.product_id === p.id);
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => addItem(p.id)}
+                    className={`w-full text-left flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/50 ${
+                      added ? "bg-accent/5" : ""
+                    }`}
+                  >
+                    <div className={`w-1 h-8 rounded-full transition-colors ${added ? "bg-accent" : "bg-transparent"}`} />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium truncate">{p.name}</div>
+                      {p.description && <div className="text-xs text-muted-foreground truncate">{p.description}</div>}
+                    </div>
+                    <div className="text-sm font-mono font-semibold text-primary whitespace-nowrap">R$ {Number(p.price).toFixed(2)}</div>
+                    <Plus className={`w-4 h-4 transition-colors ${added ? "text-accent" : "text-muted-foreground"}`} />
+                  </button>
+                );
+              })
+            )}
+          </div>
         </div>
 
-        {/* Carrinho lateral */}
-        <div className="lg:sticky lg:top-20 lg:self-start space-y-4">
-          <Card className="shadow-[var(--shadow-soft)]">
-            <CardHeader className="pb-3"><CardTitle className="text-base">Dados</CardTitle></CardHeader>
-            <CardContent className="space-y-3">
-              <div>
-                <Label>Mecânico</Label>
-                <Select value={customer || "__none__"} onValueChange={(v) => setCustomer(v === "__none__" ? "" : v)}>
-                  <SelectTrigger><SelectValue placeholder={mechanics.length ? "Selecione o mecânico" : "Cadastre em Mecânicos"} /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__none__">Nenhum</SelectItem>
-                    {mechanics.map((m) => (<SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Vendedor</Label>
-                <Select value={seller} onValueChange={setSeller}>
-                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-                  <SelectContent>
-                    {SELLERS.map((s) => (<SelectItem key={s} value={s}>{s}</SelectItem>))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Carro</Label>
-                <Select value={car || "__none__"} onValueChange={(v) => setCar(v === "__none__" ? "" : v)}>
-                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__none__">Nenhum</SelectItem>
-                    {CARS.map((c) => (<SelectItem key={c} value={c}>{c}</SelectItem>))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Observações</Label>
-                <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={500} rows={2} />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-[var(--shadow-soft)] border-primary/30">
-            <CardHeader className="pb-2 flex-row items-center justify-between">
-              <CardTitle className="text-base flex items-center gap-2">
-                <ShoppingCart className="w-4 h-4" /> Carrinho
+        {/* Carrinho lateral minimal */}
+        <div className="lg:col-span-2 lg:sticky lg:top-20 lg:self-start">
+          <div className="border rounded-lg bg-card/60 backdrop-blur-sm overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3 border-b">
+              <div className="flex items-center gap-2 text-sm font-semibold">
+                <ShoppingCart className="w-4 h-4" /> Itens
                 <span className="text-xs font-normal text-muted-foreground">({items.length})</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {items.length === 0 ? (
-                <div className="text-center py-8 text-sm text-muted-foreground border-2 border-dashed rounded-lg">
-                  <ShoppingCart className="w-8 h-8 mx-auto mb-1 opacity-40" />
-                  Carrinho vazio
-                </div>
-              ) : (
-                <div className="space-y-2 max-h-[40vh] overflow-y-auto pr-1">
-                  {items.map((i, idx) => (
-                    <div key={idx} className="p-2 rounded-lg bg-muted/40 space-y-1">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="text-sm font-medium flex-1 line-clamp-2">{i.product_name}</div>
-                        <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0" onClick={() => setItems(items.filter((_, k) => k !== idx))}>
-                          <X className="w-3 h-3 text-destructive" />
-                        </Button>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Input type="number" min="1" value={i.quantity} onChange={(e) => updateItem(idx, { quantity: Math.max(1, Number(e.target.value)) })} className="h-8 w-16" />
-                        <span className="text-xs text-muted-foreground">×</span>
-                        <Input type="number" step="0.01" min="0" value={i.unit_price} onChange={(e) => updateItem(idx, { unit_price: Math.max(0, Number(e.target.value)) })} className="h-8 flex-1" />
-                        <span className="text-xs font-mono font-semibold whitespace-nowrap">R$ {(i.quantity * i.unit_price).toFixed(2)}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <div className="bg-gradient-to-br from-primary/10 to-transparent p-3 rounded-lg text-right border-t-2 border-primary/20">
-                <div className="text-xs uppercase text-muted-foreground tracking-wide">Total</div>
-                <div className="text-3xl font-bold text-primary font-mono">R$ {total.toFixed(2)}</div>
               </div>
+              {items.length > 0 && (
+                <button onClick={() => setItems([])} className="text-xs text-muted-foreground hover:text-destructive transition-colors">
+                  Limpar
+                </button>
+              )}
+            </div>
 
-              <Button onClick={save} disabled={saving} className="w-full" size="lg">
-                <Save className="w-4 h-4 mr-1" /> {saving ? "Salvando..." : "Finalizar orçamento"}
+            {items.length === 0 ? (
+              <div className="text-center py-12 text-sm text-muted-foreground px-4">
+                <ShoppingCart className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                Selecione produtos do catálogo
+              </div>
+            ) : (
+              <div className="divide-y max-h-[45vh] overflow-y-auto">
+                {items.map((i, idx) => (
+                  <div key={idx} className="px-4 py-3 space-y-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="text-sm font-medium flex-1 line-clamp-2">{i.product_name}</div>
+                      <button onClick={() => setItems(items.filter((_, k) => k !== idx))} className="text-muted-foreground hover:text-destructive shrink-0">
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Input type="number" min="1" value={i.quantity}
+                        onChange={(e) => updateItem(idx, { quantity: Math.max(1, Number(e.target.value)) })}
+                        className="h-8 w-14 text-center" />
+                      <span className="text-xs text-muted-foreground">×</span>
+                      <Input type="number" step="0.01" min="0" value={i.unit_price}
+                        onChange={(e) => updateItem(idx, { unit_price: Math.max(0, Number(e.target.value)) })}
+                        className="h-8 flex-1 font-mono text-sm" />
+                      <span className="text-sm font-mono font-semibold whitespace-nowrap min-w-[80px] text-right">
+                        R$ {(i.quantity * i.unit_price).toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="border-t px-4 py-4 bg-muted/30">
+              <div className="flex items-baseline justify-between mb-3">
+                <span className="text-xs uppercase tracking-wider text-muted-foreground">Total</span>
+                <span className="text-3xl font-light text-primary font-mono">R$ {total.toFixed(2)}</span>
+              </div>
+              <Button onClick={save} disabled={saving || items.length === 0} className="w-full" size="lg">
+                <Save className="w-4 h-4 mr-2" /> {saving ? "Salvando..." : "Finalizar orçamento"}
               </Button>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
     </div>
