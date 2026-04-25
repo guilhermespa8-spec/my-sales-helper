@@ -493,10 +493,11 @@ const QuoteNew = () => {
                     });
                   })()
                 )}
-              </div>
-            </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
-        </div>
 
         {/* Lado Direito: Carrinho */}
         <div className="lg:col-span-5 lg:sticky lg:top-8">
