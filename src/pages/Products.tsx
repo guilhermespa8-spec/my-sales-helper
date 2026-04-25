@@ -27,7 +27,7 @@ const schema = z.object({
   stock: z.number().int().min(0).max(999999),
 });
 
-const empty = { name: "", description: "", price: "0", stock: "0" };
+const empty = { name: "", description: "", price: "0", stock: "0", car_filter: "" };
 
 const Products = () => {
   const { user } = useAuth();
