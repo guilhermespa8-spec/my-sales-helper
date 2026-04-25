@@ -254,7 +254,7 @@ const QuoteNew = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__none__">Nenhum</SelectItem>
-                    {CARS.map((c) => (<SelectItem key={c} value={c}>{c}</SelectItem>))}
+                    {carsList.map((c) => (<SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>))}
                   </SelectContent>
                 </Select>
               </div>
