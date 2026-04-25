@@ -38,6 +38,12 @@ const Products = () => {
   const [importing, setImporting] = useState(false);
   const [removeMissing, setRemoveMissing] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [query, setQuery] = useState("");
+  const filtered = items.filter(p => {
+    const q = query.trim().toLowerCase();
+    if (!q) return true;
+    return p.name.toLowerCase().includes(q) || (p.description ?? "").toLowerCase().includes(q);
+  });
 
   // Computed diff for preview
   const diff = (() => {
