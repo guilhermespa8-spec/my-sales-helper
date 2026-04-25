@@ -244,7 +244,7 @@ const QuoteNew = () => {
               className="pl-9"
             />
           </div>
-          {(search.trim() || car.trim()) && (
+          {search.trim() && (
             <div className="border rounded-lg max-h-72 overflow-auto divide-y">
               {filteredProducts.map((p) => (
                   <button
