@@ -209,7 +209,7 @@ const Products = () => {
             <Download className="w-4 h-4 mr-1" /> Modelo
           </Button>
           <Button variant="outline" onClick={() => fileRef.current?.click()}>
-            <Upload className="w-4 h-4 mr-1" /> Importar planilha
+            <Upload className="w-4 h-4 mr-1" /> Sincronizar planilha
           </Button>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
