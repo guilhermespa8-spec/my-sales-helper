@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -16,12 +16,32 @@ interface Item { product_id: string; product_name: string; quantity: number; uni
 const QuoteNew = () => {
   const { user } = useAuth();
   const nav = useNavigate();
+  const { id: editId } = useParams<{ id: string }>();
+  const isEdit = Boolean(editId);
   const [products, setProducts] = useState<Product[]>([]);
   const [customer, setCustomer] = useState("");
   const [notes, setNotes] = useState("");
   const [items, setItems] = useState<Item[]>([]);
   const [search, setSearch] = useState("");
   const [saving, setSaving] = useState(false);
+  const [quoteNumber, setQuoteNumber] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!editId) return;
+    (async () => {
+      const { data: q, error } = await supabase.from("quotes").select("*").eq("id", editId).single();
+      if (error) { toast.error(error.message); return; }
+      setCustomer(q.customer_name ?? "");
+      setNotes(q.notes ?? "");
+      setQuoteNumber(q.quote_number);
+      const { data: its, error: e2 } = await supabase.from("quote_items").select("*").eq("quote_id", editId);
+      if (e2) { toast.error(e2.message); return; }
+      setItems((its ?? []).map((i: any) => ({
+        product_id: i.product_id, product_name: i.product_name,
+        quantity: i.quantity, unit_price: Number(i.unit_price),
+      })));
+    })();
+  }, [editId]);
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -81,25 +101,41 @@ const QuoteNew = () => {
     if (items.length === 0) { toast.error("Adicione ao menos 1 item"); return; }
     setSaving(true);
     try {
-      const { data: quote, error } = await supabase.from("quotes").insert({
-        user_id: user!.id,
-        quote_number: 0, // trigger sets
-        customer_name: customer.trim() || null,
-        notes: notes.trim() || null,
-        total,
-      }).select().single();
-      if (error) throw error;
+      let quoteId = editId;
+      let qNumber = quoteNumber ?? 0;
+
+      if (isEdit && editId) {
+        const { error } = await supabase.from("quotes").update({
+          customer_name: customer.trim() || null,
+          notes: notes.trim() || null,
+          total,
+        }).eq("id", editId);
+        if (error) throw error;
+        const { error: delErr } = await supabase.from("quote_items").delete().eq("quote_id", editId);
+        if (delErr) throw delErr;
+      } else {
+        const { data: quote, error } = await supabase.from("quotes").insert({
+          user_id: user!.id,
+          quote_number: 0,
+          customer_name: customer.trim() || null,
+          notes: notes.trim() || null,
+          total,
+        }).select().single();
+        if (error) throw error;
+        quoteId = quote.id;
+        qNumber = quote.quote_number;
+      }
 
       const { error: itErr } = await supabase.from("quote_items").insert(
         items.map((i) => ({
-          quote_id: quote.id, product_id: i.product_id, product_name: i.product_name,
+          quote_id: quoteId!, product_id: i.product_id, product_name: i.product_name,
           quantity: i.quantity, unit_price: i.unit_price, subtotal: i.quantity * i.unit_price,
         }))
       );
       if (itErr) throw itErr;
 
-      toast.success(`Orçamento #${String(quote.quote_number).padStart(4, "0")} criado`);
-      nav(`/orcamentos/${quote.id}`);
+      toast.success(isEdit ? "Orçamento atualizado" : `Orçamento #${String(qNumber).padStart(4, "0")} criado`);
+      nav(`/orcamentos/${quoteId}`);
     } catch (e: any) {
       toast.error(e.message ?? "Erro ao salvar");
     } finally { setSaving(false); }
@@ -108,7 +144,7 @@ const QuoteNew = () => {
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
       <div>
-        <h1 className="text-2xl font-bold text-primary">Novo orçamento</h1>
+        <h1 className="text-2xl font-bold text-primary">{isEdit ? `Editar orçamento${quoteNumber ? ` #${String(quoteNumber).padStart(4, "0")}` : ""}` : "Novo orçamento"}</h1>
         <p className="text-sm text-muted-foreground">Adicione produtos e gere a notinha</p>
       </div>
 

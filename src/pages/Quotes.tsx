@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, FileText, Eye, Trash2 } from "lucide-react";
+import { Plus, FileText, Eye, Trash2, Pencil } from "lucide-react";
 import { toast } from "sonner";
 
 interface Quote {
@@ -68,6 +68,7 @@ const Quotes = () => {
                     <TableCell>
                       <div className="flex gap-1 justify-end">
                         <Button size="icon" variant="ghost" asChild><Link to={`/orcamentos/${q.id}`}><Eye className="w-4 h-4" /></Link></Button>
+                        <Button size="icon" variant="ghost" asChild><Link to={`/orcamentos/${q.id}/editar`}><Pencil className="w-4 h-4" /></Link></Button>
                         <Button size="icon" variant="ghost" onClick={() => remove(q.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                       </div>
                     </TableCell>
