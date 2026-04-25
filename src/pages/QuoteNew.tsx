@@ -187,9 +187,9 @@ const QuoteNew = () => {
   }, [search, filteredProducts, car, suggestedParts, products]);
 
   return (
-    <div className="-mx-4 md:-mx-6 -my-6 min-h-[calc(100vh-4rem)] flex flex-col bg-background/40">
+    <div className="-mx-4 md:-mx-6 -my-6 min-h-[calc(100vh-4rem)] flex flex-col bg-background">
       {/* Top bar */}
-      <div className="border-b bg-card/70 backdrop-blur-md px-4 md:px-6 py-3 flex items-center justify-between gap-4 flex-wrap">
+      <div className="border-b bg-card px-4 md:px-6 py-3 flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3">
           <div className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">{isEdit ? "Editando" : "PDV"}</div>
           <div className="text-lg font-mono text-primary">
@@ -205,7 +205,7 @@ const QuoteNew = () => {
       </div>
 
       {/* Dados em linha */}
-      <div className="border-b bg-card/40 px-4 md:px-6 py-2 grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-2">
+      <div className="border-b bg-card px-4 md:px-6 py-2 grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-2">
         {[
           { label: "Mecânico", node: (
             <Select value={customer || "__none__"} onValueChange={(v) => setCustomer(v === "__none__" ? "" : v)}>
@@ -264,7 +264,7 @@ const QuoteNew = () => {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Digite o nome do produto..."
-                className="pl-14 pr-5 h-16 text-lg bg-card/80 border-2 shadow-[var(--shadow-soft)] focus-visible:border-primary"
+                className="pl-14 pr-5 h-16 text-lg bg-card border-2 shadow-[var(--shadow-soft)] focus-visible:border-primary"
                 autoFocus
               />
               {search && (
@@ -324,7 +324,7 @@ const QuoteNew = () => {
         </div>
 
         {/* Carrinho lateral */}
-        <div className="border-l bg-card/50 backdrop-blur-sm flex flex-col min-h-0">
+        <div className="border-l bg-card flex flex-col min-h-0">
           <div className="px-4 py-3 border-b flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm font-semibold">
               <ShoppingCart className="w-4 h-4" /> Carrinho
@@ -382,7 +382,7 @@ const QuoteNew = () => {
       </div>
 
       {/* Barra fixa de total + ação */}
-      <div className="border-t bg-card/90 backdrop-blur-md px-4 md:px-6 py-3 flex items-center justify-between gap-4 sticky bottom-0">
+      <div className="border-t bg-card px-4 md:px-6 py-3 flex items-center justify-between gap-4 sticky bottom-0">
         <div className="flex items-baseline gap-3">
           <span className="text-xs uppercase tracking-wider text-muted-foreground">Total</span>
           <span className="text-3xl font-light text-primary font-mono">R$ {total.toFixed(2)}</span>

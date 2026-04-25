@@ -21,7 +21,7 @@ import {
   FileSpreadsheet,
 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
-import bmwBg from "@/assets/bmw-f30-bg.jpg";
+
 
 type Item = {
   to: string;
@@ -52,16 +52,9 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
   const nav = useNavigate();
 
   return (
-    <div className="min-h-screen flex relative">
-      <div
-        aria-hidden
-        className="fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${bmwBg})` }}
-      />
-      <div aria-hidden className="fixed inset-0 -z-10 bg-background/70 dark:bg-background/80 backdrop-blur-[2px]" />
-
+    <div className="min-h-screen flex bg-background">
       {/* Sidebar */}
-      <aside className="no-print sticky top-0 h-screen w-20 shrink-0 border-r bg-card/80 backdrop-blur-md flex flex-col z-30">
+      <aside className="no-print sticky top-0 h-screen w-20 shrink-0 border-r bg-card flex flex-col z-30">
         <div className="flex items-center justify-center h-16 border-b">
           <div
             className="w-10 h-10 rounded-lg flex items-center justify-center"
@@ -104,7 +97,7 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
 
       {/* Main column */}
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="no-print border-b bg-card/70 backdrop-blur-md sticky top-0 z-20">
+        <header className="no-print border-b bg-card sticky top-0 z-20">
           <div className="flex items-center justify-between h-16 px-4 md:px-6">
             <span className="font-bold text-lg text-primary">VendaPro</span>
             <div className="flex items-center gap-3">
