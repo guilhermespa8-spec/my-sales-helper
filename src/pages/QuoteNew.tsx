@@ -24,6 +24,7 @@ const QuoteNew = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [customer, setCustomer] = useState("");
   const [seller, setSeller] = useState<string>("");
+  const [car, setCar] = useState("");
   const [notes, setNotes] = useState("");
   const [items, setItems] = useState<Item[]>([]);
   const [search, setSearch] = useState("");
