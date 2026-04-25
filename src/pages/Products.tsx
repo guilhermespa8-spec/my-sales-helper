@@ -151,18 +151,42 @@ const Products = () => {
   const confirmImport = async () => {
     if (!user) return;
     setImporting(true);
-    const payload = importPreview.map(p => ({
-      name: p.name, price: p.price, stock: p.stock,
-      description: p.description || null, user_id: user.id,
-    }));
-    const { error } = await supabase.from("products").insert(payload);
-    setImporting(false);
-    if (error) toast.error(error.message);
-    else {
-      toast.success(`${payload.length} produto(s) importado(s)`);
+    try {
+      // 1. Insert new
+      if (diff.toCreate.length > 0) {
+        const payload = diff.toCreate.map(p => ({
+          name: p.name, price: p.price, stock: p.stock,
+          description: p.description || null, user_id: user.id,
+        }));
+        const { error } = await supabase.from("products").insert(payload);
+        if (error) throw error;
+      }
+      // 2. Update changed
+      for (const { existing, next } of diff.toUpdate) {
+        const { error } = await supabase.from("products").update({
+          price: next.price, stock: next.stock,
+          description: next.description || null,
+        }).eq("id", existing.id);
+        if (error) throw error;
+      }
+      // 3. Delete missing (optional)
+      if (removeMissing && diff.toDelete.length > 0) {
+        const ids = diff.toDelete.map(p => p.id);
+        const { error } = await supabase.from("products").delete().in("id", ids);
+        if (error) throw error;
+      }
+      toast.success(
+        `Sincronizado: ${diff.toCreate.length} novo(s), ${diff.toUpdate.length} atualizado(s)` +
+        (removeMissing ? `, ${diff.toDelete.length} removido(s)` : "")
+      );
       setImportOpen(false);
       setImportPreview([]);
+      setRemoveMissing(false);
       load();
+    } catch (e: any) {
+      toast.error(e.message ?? "Erro ao sincronizar");
+    } finally {
+      setImporting(false);
     }
   };
 
