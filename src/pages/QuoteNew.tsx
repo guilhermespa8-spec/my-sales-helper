@@ -22,7 +22,8 @@ const QuoteNew = () => {
   const [customer, setCustomer] = useState("");
   const [notes, setNotes] = useState("");
   const [items, setItems] = useState<Item[]>([]);
-  const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState("");
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   useEffect(() => {
     supabase.from("products").select("id,name,price").order("name").then(({ data }) => {
