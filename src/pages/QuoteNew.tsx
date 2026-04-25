@@ -24,6 +24,7 @@ const QuoteNew = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [customer, setCustomer] = useState("");
   const [seller, setSeller] = useState<string>("");
+  const [car, setCar] = useState("");
   const [notes, setNotes] = useState("");
   const [items, setItems] = useState<Item[]>([]);
   const [search, setSearch] = useState("");
@@ -37,6 +38,7 @@ const QuoteNew = () => {
       if (error) { toast.error(error.message); return; }
       setCustomer(q.customer_name ?? "");
       setSeller((q as any).seller ?? "");
+      setCar((q as any).car ?? "");
       setNotes(q.notes ?? "");
       setQuoteNumber(q.quote_number);
       const { data: its, error: e2 } = await supabase.from("quote_items").select("*").eq("quote_id", editId);
@@ -96,11 +98,16 @@ const QuoteNew = () => {
 
   const filteredProducts = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return [];
-    return products.filter((p) =>
+    const c = car.trim().toLowerCase();
+    let base = products;
+    if (c) {
+      base = base.filter((p) => (p.description ?? "").toLowerCase().includes(c));
+    }
+    if (!q) return c ? base : [];
+    return base.filter((p) =>
       p.name.toLowerCase().includes(q) || (p.description ?? "").toLowerCase().includes(q)
     );
-  }, [products, search]);
+  }, [products, search, car]);
 
   const save = async () => {
     if (items.length === 0) { toast.error("Adicione ao menos 1 item"); return; }
@@ -113,6 +120,7 @@ const QuoteNew = () => {
         const { error } = await supabase.from("quotes").update({
           customer_name: customer.trim() || null,
           seller: seller || null,
+          car: car.trim() || null,
           notes: notes.trim() || null,
           total,
         } as any).eq("id", editId);
@@ -125,6 +133,7 @@ const QuoteNew = () => {
           quote_number: 0,
           customer_name: customer.trim() || null,
           seller: seller || null,
+          car: car.trim() || null,
           notes: notes.trim() || null,
           total,
         } as any).select().single();
@@ -168,6 +177,7 @@ const QuoteNew = () => {
               </SelectContent>
             </Select>
           </div>
+          <div><Label>Carro (opcional)</Label><Input value={car} onChange={(e) => setCar(e.target.value)} placeholder="Ex: Gol, Civic..." maxLength={60} /></div>
           <div><Label>Observações (opcional)</Label><Textarea value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={500} rows={2} /></div>
         </CardContent>
       </Card>
@@ -184,7 +194,7 @@ const QuoteNew = () => {
               className="pl-9"
             />
           </div>
-          {search.trim() && (
+          {(search.trim() || car.trim()) && (
             <div className="border rounded-lg max-h-72 overflow-auto divide-y">
               {filteredProducts.map((p) => (
                   <button
