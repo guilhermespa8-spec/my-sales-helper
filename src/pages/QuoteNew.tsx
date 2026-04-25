@@ -12,6 +12,7 @@ import { Plus, Trash2, Save, Search, Package } from "lucide-react";
 import { toast } from "sonner";
 
 const SELLERS = ["André", "João Victor", "Mateus", "Loja"] as const;
+const CARS = ["Corsa VHC"] as const;
 
 interface Product { id: string; name: string; description: string | null; price: number; }
 interface Item { product_id: string; product_name: string; quantity: number; unit_price: number; }
