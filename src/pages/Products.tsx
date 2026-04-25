@@ -141,21 +141,22 @@ const Products = () => {
     if (!s) return 0;
     const lastComma = s.lastIndexOf(",");
     const lastDot = s.lastIndexOf(".");
+
+    const normalizeDecimal = (value: string, separator: "," | ".") => {
+      const lastSeparator = value.lastIndexOf(separator);
+      const integerPart = value.slice(0, lastSeparator).replace(/[.,]/g, "");
+      const decimalPart = value.slice(lastSeparator + 1).replace(/[.,]/g, "");
+      return `${integerPart || "0"}.${decimalPart}`;
+    };
+
     if (lastComma > -1 && lastDot > -1) {
-      // Whichever comes last is the decimal separator
-      if (lastComma > lastDot) {
-        s = s.replace(/\./g, "").replace(",", ".");
-      } else {
-        s = s.replace(/,/g, "");
-      }
+      s = normalizeDecimal(s, lastComma > lastDot ? "," : ".");
     } else if (lastComma > -1) {
-      // Only commas: treat as decimal if 1-2 digits after, else thousands
       const after = s.length - lastComma - 1;
-      s = after === 1 || after === 2 ? s.replace(",", ".") : s.replace(/,/g, "");
+      s = after === 1 || after === 2 ? normalizeDecimal(s, ",") : s.replace(/,/g, "");
     } else if (lastDot > -1) {
-      // Only dots: treat as decimal if 1-2 digits after, else thousands
       const after = s.length - lastDot - 1;
-      s = after === 1 || after === 2 ? s : s.replace(/\./g, "");
+      s = after === 1 || after === 2 ? normalizeDecimal(s, ".") : s.replace(/\./g, "");
     }
     const n = Number(s);
     return isNaN(n) ? 0 : n;
@@ -166,7 +167,7 @@ const Products = () => {
       const buf = await file.arrayBuffer();
       const wb = XLSX.read(buf, { type: "array" });
       const ws = wb.Sheets[wb.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json<Record<string, any>>(ws, { defval: "" });
+      const rows = XLSX.utils.sheet_to_json<Record<string, any>>(ws, { defval: "", raw: false });
       const parsed = rows.map((r) => {
         const obj: Record<string, any> = {};
         Object.keys(r).forEach((k) => { obj[normalizeKey(k)] = r[k]; });
