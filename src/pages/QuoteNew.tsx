@@ -7,8 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Trash2, Save, Search, Package } from "lucide-react";
 import { toast } from "sonner";
+
+const SELLERS = ["André", "João Victor", "Mateus", "Loja"] as const;
 
 interface Product { id: string; name: string; description: string | null; price: number; }
 interface Item { product_id: string; product_name: string; quantity: number; unit_price: number; }
@@ -20,6 +23,7 @@ const QuoteNew = () => {
   const isEdit = Boolean(editId);
   const [products, setProducts] = useState<Product[]>([]);
   const [customer, setCustomer] = useState("");
+  const [seller, setSeller] = useState<string>("");
   const [notes, setNotes] = useState("");
   const [items, setItems] = useState<Item[]>([]);
   const [search, setSearch] = useState("");
@@ -32,6 +36,7 @@ const QuoteNew = () => {
       const { data: q, error } = await supabase.from("quotes").select("*").eq("id", editId).single();
       if (error) { toast.error(error.message); return; }
       setCustomer(q.customer_name ?? "");
+      setSeller((q as any).seller ?? "");
       setNotes(q.notes ?? "");
       setQuoteNumber(q.quote_number);
       const { data: its, error: e2 } = await supabase.from("quote_items").select("*").eq("quote_id", editId);
@@ -107,9 +112,10 @@ const QuoteNew = () => {
       if (isEdit && editId) {
         const { error } = await supabase.from("quotes").update({
           customer_name: customer.trim() || null,
+          seller: seller || null,
           notes: notes.trim() || null,
           total,
-        }).eq("id", editId);
+        } as any).eq("id", editId);
         if (error) throw error;
         const { error: delErr } = await supabase.from("quote_items").delete().eq("quote_id", editId);
         if (delErr) throw delErr;
@@ -118,9 +124,10 @@ const QuoteNew = () => {
           user_id: user!.id,
           quote_number: 0,
           customer_name: customer.trim() || null,
+          seller: seller || null,
           notes: notes.trim() || null,
           total,
-        }).select().single();
+        } as any).select().single();
         if (error) throw error;
         quoteId = quote.id;
         qNumber = quote.quote_number;
@@ -152,6 +159,15 @@ const QuoteNew = () => {
         <CardHeader><CardTitle className="text-base">Cliente</CardTitle></CardHeader>
         <CardContent className="space-y-3">
           <div><Label>Nome do cliente (opcional)</Label><Input value={customer} onChange={(e) => setCustomer(e.target.value)} placeholder="Ex: João Silva" maxLength={120} /></div>
+          <div>
+            <Label>Nome do vendedor</Label>
+            <Select value={seller} onValueChange={setSeller}>
+              <SelectTrigger><SelectValue placeholder="Selecione o vendedor" /></SelectTrigger>
+              <SelectContent>
+                {SELLERS.map((s) => (<SelectItem key={s} value={s}>{s}</SelectItem>))}
+              </SelectContent>
+            </Select>
+          </div>
           <div><Label>Observações (opcional)</Label><Textarea value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={500} rows={2} /></div>
         </CardContent>
       </Card>
