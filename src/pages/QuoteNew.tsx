@@ -324,7 +324,7 @@ const QuoteNew = () => {
         </div>
 
         {/* Carrinho lateral */}
-        <div className="border-l bg-card/50 backdrop-blur-sm flex flex-col min-h-0">
+        <div className="border-l bg-card flex flex-col min-h-0">
           <div className="px-4 py-3 border-b flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm font-semibold">
               <ShoppingCart className="w-4 h-4" /> Carrinho
