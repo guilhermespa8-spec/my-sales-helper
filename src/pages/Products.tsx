@@ -67,9 +67,22 @@ const Products = () => {
   })();
 
   const load = async () => {
-    const { data, error } = await supabase.from("products").select("*").order("name");
-    if (error) toast.error(error.message);
-    else setItems((data ?? []) as Product[]);
+    const pageSize = 1000;
+    let from = 0;
+    const all: Product[] = [];
+    while (true) {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .order("name")
+        .range(from, from + pageSize - 1);
+      if (error) { toast.error(error.message); return; }
+      const batch = (data ?? []) as Product[];
+      all.push(...batch);
+      if (batch.length < pageSize) break;
+      from += pageSize;
+    }
+    setItems(all);
   };
 
   useEffect(() => { load(); }, []);
