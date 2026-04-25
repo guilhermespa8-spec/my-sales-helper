@@ -43,11 +43,34 @@ const Products = () => {
   const fileRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
   const q = query.trim().toLowerCase();
+  
   const matched = items.filter(p => {
     if (!q) return true;
-    return p.name.toLowerCase().includes(q) || (p.description ?? "").toLowerCase().includes(q);
+    
+    // Normalize string: remove spaces, dots and hyphens
+    const normalize = (str: string) => str.toLowerCase().replace(/[\s\.\-]/g, "");
+    
+    const searchTerms = q.split(/\s+/).filter(term => term.length > 0);
+    const searchNormalized = normalize(q);
+    
+    const pName = p.name.toLowerCase();
+    const pDesc = (p.description ?? "").toLowerCase();
+    const pNameNormalized = normalize(p.name);
+    const pDescNormalized = normalize(p.description ?? "");
+    
+    // Match 1: All individual terms are present
+    const allTermsMatch = searchTerms.every(term => 
+      pName.includes(term) || pDesc.includes(term)
+    );
+
+    // Match 2: Normalized search matches normalized name or description
+    const normalizedMatch = pNameNormalized.includes(searchNormalized) || 
+                           pDescNormalized.includes(searchNormalized);
+    
+    return allTermsMatch || normalizedMatch;
   });
-  const filtered = q ? matched : matched.slice(0, 10);
+
+  const filtered = q ? matched : matched.slice(0, 50); // Increased initial view to 50 items
 
   // Computed diff for preview
   const diff = (() => {
