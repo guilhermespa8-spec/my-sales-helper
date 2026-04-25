@@ -160,6 +160,7 @@ export type Database = {
           fiado: boolean
           id: string
           notes: string | null
+          pago_em: string | null
           quote_number: number
           seller: string | null
           total: number
@@ -172,6 +173,7 @@ export type Database = {
           fiado?: boolean
           id?: string
           notes?: string | null
+          pago_em?: string | null
           quote_number: number
           seller?: string | null
           total?: number
@@ -184,6 +186,7 @@ export type Database = {
           fiado?: boolean
           id?: string
           notes?: string | null
+          pago_em?: string | null
           quote_number?: number
           seller?: string | null
           total?: number

@@ -20,6 +20,7 @@ import {
   Wallet,
   FileSpreadsheet,
   Car,
+  CheckCircle2,
 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 
@@ -40,7 +41,7 @@ const menu: Item[] = [
   { to: "#cadastros", label: "Cadastros", icon: ClipboardList, disabled: true },
   { to: "/mecanicos", label: "Mecânicos", icon: Wrench },
   { to: "/fiado", label: "Fiado", icon: Wallet },
-  { to: "#fornecedores", label: "Fornecedores", icon: Truck, disabled: true },
+  { to: "/fiados-pagos", label: "Fiados Pagos", icon: CheckCircle2 },
   { to: "#servicos", label: "Serviços", icon: Wrench, disabled: true },
   { to: "#relatorios", label: "Relatórios", icon: BarChart3, disabled: true },
   { to: "#financeiro", label: "Financeiro", icon: Wallet, disabled: true },
