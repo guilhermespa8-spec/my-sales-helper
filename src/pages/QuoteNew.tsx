@@ -101,25 +101,41 @@ const QuoteNew = () => {
     if (items.length === 0) { toast.error("Adicione ao menos 1 item"); return; }
     setSaving(true);
     try {
-      const { data: quote, error } = await supabase.from("quotes").insert({
-        user_id: user!.id,
-        quote_number: 0, // trigger sets
-        customer_name: customer.trim() || null,
-        notes: notes.trim() || null,
-        total,
-      }).select().single();
-      if (error) throw error;
+      let quoteId = editId;
+      let qNumber = quoteNumber ?? 0;
+
+      if (isEdit && editId) {
+        const { error } = await supabase.from("quotes").update({
+          customer_name: customer.trim() || null,
+          notes: notes.trim() || null,
+          total,
+        }).eq("id", editId);
+        if (error) throw error;
+        const { error: delErr } = await supabase.from("quote_items").delete().eq("quote_id", editId);
+        if (delErr) throw delErr;
+      } else {
+        const { data: quote, error } = await supabase.from("quotes").insert({
+          user_id: user!.id,
+          quote_number: 0,
+          customer_name: customer.trim() || null,
+          notes: notes.trim() || null,
+          total,
+        }).select().single();
+        if (error) throw error;
+        quoteId = quote.id;
+        qNumber = quote.quote_number;
+      }
 
       const { error: itErr } = await supabase.from("quote_items").insert(
         items.map((i) => ({
-          quote_id: quote.id, product_id: i.product_id, product_name: i.product_name,
+          quote_id: quoteId!, product_id: i.product_id, product_name: i.product_name,
           quantity: i.quantity, unit_price: i.unit_price, subtotal: i.quantity * i.unit_price,
         }))
       );
       if (itErr) throw itErr;
 
-      toast.success(`Orçamento #${String(quote.quote_number).padStart(4, "0")} criado`);
-      nav(`/orcamentos/${quote.id}`);
+      toast.success(isEdit ? "Orçamento atualizado" : `Orçamento #${String(qNumber).padStart(4, "0")} criado`);
+      nav(`/orcamentos/${quoteId}`);
     } catch (e: any) {
       toast.error(e.message ?? "Erro ao salvar");
     } finally { setSaving(false); }
@@ -128,7 +144,7 @@ const QuoteNew = () => {
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
       <div>
-        <h1 className="text-2xl font-bold text-primary">Novo orçamento</h1>
+        <h1 className="text-2xl font-bold text-primary">{isEdit ? `Editar orçamento${quoteNumber ? ` #${String(quoteNumber).padStart(4, "0")}` : ""}` : "Novo orçamento"}</h1>
         <p className="text-sm text-muted-foreground">Adicione produtos e gere a notinha</p>
       </div>
 
