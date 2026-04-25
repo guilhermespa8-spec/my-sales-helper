@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Receipt, Package, FileText, LogOut, Moon, Sun } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
+import bmwBg from "@/assets/bmw-f30-bg.jpg";
 
 const links = [
   { to: "/", label: "Orçamentos", icon: FileText, end: true },
@@ -16,8 +17,14 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
   const nav = useNavigate();
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <header className="no-print border-b bg-card sticky top-0 z-30">
+    <div className="min-h-screen flex flex-col relative">
+      <div
+        aria-hidden
+        className="fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(${bmwBg})` }}
+      />
+      <div aria-hidden className="fixed inset-0 -z-10 bg-background/70 dark:bg-background/80 backdrop-blur-[2px]" />
+      <header className="no-print border-b bg-card/70 backdrop-blur-md sticky top-0 z-30">
         <div className="container flex items-center justify-between h-16">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-2">
