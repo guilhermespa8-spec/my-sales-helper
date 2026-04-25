@@ -16,6 +16,7 @@ const CARS = ["Corsa VHC"] as const;
 
 interface Product { id: string; name: string; description: string | null; price: number; }
 interface Item { product_id: string; product_name: string; quantity: number; unit_price: number; }
+interface Mechanic { id: string; name: string; }
 
 const QuoteNew = () => {
   const { user } = useAuth();
@@ -23,6 +24,7 @@ const QuoteNew = () => {
   const { id: editId } = useParams<{ id: string }>();
   const isEdit = Boolean(editId);
   const [products, setProducts] = useState<Product[]>([]);
+  const [mechanics, setMechanics] = useState<Mechanic[]>([]);
   const [customer, setCustomer] = useState("");
   const [seller, setSeller] = useState<string>("");
   const [car, setCar] = useState("");
