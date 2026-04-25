@@ -25,6 +25,7 @@ const QuoteNew = () => {
   const isEdit = Boolean(editId);
   const [products, setProducts] = useState<Product[]>([]);
   const [mechanics, setMechanics] = useState<Mechanic[]>([]);
+  const [carsList, setCarsList] = useState<CarRecord[]>([]);
   const [customer, setCustomer] = useState("");
   const [seller, setSeller] = useState<string>("");
   const [car, setCar] = useState("");
