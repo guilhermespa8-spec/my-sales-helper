@@ -241,12 +241,32 @@ const Products = () => {
       </div>
 
       <Card className="shadow-[var(--shadow-soft)]">
-        <CardHeader><CardTitle className="text-base">Catálogo ({items.length})</CardTitle></CardHeader>
+        <CardHeader className="space-y-3">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <CardTitle className="text-base">
+              Catálogo ({filtered.length}{query ? ` de ${items.length}` : ""})
+            </CardTitle>
+          </div>
+          <div className="relative">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Pesquisar produto por nome ou descrição..."
+              className="pl-9"
+            />
+          </div>
+        </CardHeader>
         <CardContent>
           {items.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <Package className="w-12 h-12 mx-auto mb-2 opacity-40" />
               Nenhum produto. Cadastre o primeiro!
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <Search className="w-10 h-10 mx-auto mb-2 opacity-40" />
+              Nenhum produto encontrado para "{query}"
             </div>
           ) : (
             <Table>
@@ -259,7 +279,7 @@ const Products = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {items.map((p) => (
+                {filtered.map((p) => (
                   <TableRow key={p.id}>
                     <TableCell>
                       <div className="font-medium">{p.name}</div>
