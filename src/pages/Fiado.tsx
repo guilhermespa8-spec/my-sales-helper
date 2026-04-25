@@ -6,6 +6,16 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Wrench, Receipt, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Quote {
   id: string;
@@ -19,6 +29,8 @@ interface Quote {
 const Fiado = () => {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -44,13 +56,20 @@ const Fiado = () => {
     return Array.from(map.entries()).sort(([a], [b]) => a.localeCompare(b, "pt-BR"));
   }, [quotes]);
 
-  const markPaid = async (id: string) => {
-    if (!confirm("Tem certeza que deseja quitar este fiado? Esta ação não pode ser desfeita.")) return;
+  const markPaid = async () => {
+    if (!confirmingId) return;
     
-    const { error } = await supabase.from("quotes").update({ fiado: false }).eq("id", id);
-    if (error) { toast.error("Erro ao baixar fiado"); return; }
-    toast.success("Fiado quitado");
-    load();
+    setIsSubmitting(true);
+    const { error } = await supabase.from("quotes").update({ fiado: false }).eq("id", confirmingId);
+    setIsSubmitting(false);
+    
+    if (error) {
+      toast.error("Erro ao baixar fiado");
+    } else {
+      toast.success("Fiado quitado com sucesso");
+      setConfirmingId(null);
+      load();
+    }
   };
 
   return (
@@ -106,7 +125,7 @@ const Fiado = () => {
                         <Button asChild variant="outline" size="sm">
                           <Link to={`/orcamentos/${q.id}`}>Ver</Link>
                         </Button>
-                        <Button size="sm" onClick={() => markPaid(q.id)}>
+                        <Button size="sm" onClick={() => setConfirmingId(q.id)}>
                           <CheckCircle2 className="w-4 h-4 mr-1" /> Quitar
                         </Button>
                       </div>
@@ -118,6 +137,30 @@ const Fiado = () => {
           );
         })
       )}
+
+      <AlertDialog open={!!confirmingId} onOpenChange={(open) => !open && setConfirmingId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar liquidação de fiado</AlertDialogTitle>
+            <AlertDialogDescription>
+              Você está prestes a marcar esta venda como paga. Esta ação removerá o débito da conta do mecânico e não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                markPaid();
+              }}
+              className="bg-primary hover:bg-primary/90"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Processando..." : "Confirmar e Quitar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
