@@ -178,7 +178,16 @@ const QuoteNew = () => {
               </SelectContent>
             </Select>
           </div>
-          <div><Label>Carro (opcional)</Label><Input value={car} onChange={(e) => setCar(e.target.value)} placeholder="Ex: Gol, Civic..." maxLength={60} /></div>
+          <div>
+            <Label>Carro (opcional)</Label>
+            <Select value={car || "__none__"} onValueChange={(v) => setCar(v === "__none__" ? "" : v)}>
+              <SelectTrigger><SelectValue placeholder="Selecione o carro" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none__">Nenhum</SelectItem>
+                {CARS.map((c) => (<SelectItem key={c} value={c}>{c}</SelectItem>))}
+              </SelectContent>
+            </Select>
+          </div>
           <div><Label>Observações (opcional)</Label><Textarea value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={500} rows={2} /></div>
         </CardContent>
       </Card>
