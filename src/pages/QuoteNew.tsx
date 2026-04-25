@@ -33,6 +33,16 @@ const QuoteNew = () => {
   const [search, setSearch] = useState("");
   const [saving, setSaving] = useState(false);
   const [quoteNumber, setQuoteNumber] = useState<number | null>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") { e.preventDefault(); searchRef.current?.focus(); }
+      if (e.key === "Escape" && document.activeElement === searchRef.current) { setSearch(""); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   useEffect(() => {
     if (!editId) return;
