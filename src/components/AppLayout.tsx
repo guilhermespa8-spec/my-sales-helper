@@ -19,6 +19,7 @@ import {
   BarChart3,
   Wallet,
   FileSpreadsheet,
+  Car,
 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 
