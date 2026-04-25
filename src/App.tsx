@@ -38,6 +38,7 @@ const App = () => (
             <Route path="/orcamentos/:id/editar" element={<Protected><QuoteNew /></Protected>} />
             <Route path="/orcamentos/:id" element={<Protected><QuoteDetail /></Protected>} />
             <Route path="/mecanicos" element={<Protected><Mechanics /></Protected>} />
+            <Route path="/fiado" element={<Protected><Fiado /></Protected>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
