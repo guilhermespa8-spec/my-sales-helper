@@ -60,7 +60,10 @@ const Fiado = () => {
     if (!confirmingId) return;
     
     setIsSubmitting(true);
-    const { error } = await supabase.from("quotes").update({ fiado: false }).eq("id", confirmingId);
+    const { error } = await supabase
+      .from("quotes")
+      .update({ fiado: false, pago_em: new Date().toISOString() })
+      .eq("id", confirmingId);
     setIsSubmitting(false);
     
     if (error) {
