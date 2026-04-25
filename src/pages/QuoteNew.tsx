@@ -12,11 +12,11 @@ import { Plus, Trash2, Save, Search, Package, ShoppingCart, X, Sparkles, Minus, 
 import { toast } from "sonner";
 
 const SELLERS = ["André", "João Victor", "Mateus", "Loja"] as const;
-const CARS = ["Corsa VHC"] as const;
 
-interface Product { id: string; name: string; description: string | null; price: number; }
+interface Product { id: string; name: string; description: string | null; price: number; car_filter?: string | null; }
 interface Item { product_id: string; product_name: string; quantity: number; unit_price: number; }
 interface Mechanic { id: string; name: string; }
+interface CarRecord { id: string; name: string; notes: string | null; }
 
 const QuoteNew = () => {
   const { user } = useAuth();
