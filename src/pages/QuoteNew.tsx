@@ -65,41 +65,35 @@ const QuoteNew = () => {
   }, [editId]);
 
   useEffect(() => {
-    const loadProducts = async () => {
+    const loadData = async () => {
+      // Load Products
       const pageSize = 1000;
       let from = 0;
       const all: Product[] = [];
-
       while (true) {
         const { data, error } = await supabase
           .from("products")
-          .select("id,name,description,price")
+          .select("id,name,description,price,car_filter")
           .order("name")
           .range(from, from + pageSize - 1);
-
-        if (error) {
-          toast.error(error.message);
-          return;
-        }
-
+        if (error) { toast.error(error.message); return; }
         const batch = (data ?? []) as Product[];
         all.push(...batch);
         if (batch.length < pageSize) break;
         from += pageSize;
       }
-
       setProducts(all);
+
+      // Load Mechanics
+      const { data: mecs } = await supabase.from("mechanics").select("id,name").order("name");
+      setMechanics((mecs ?? []) as Mechanic[]);
+
+      // Load Cars
+      const { data: cars } = await supabase.from("cars").select("id,name,notes").order("name");
+      setCarsList((cars ?? []) as CarRecord[]);
     };
 
-    loadProducts();
-  }, []);
-
-  useEffect(() => {
-    (async () => {
-      const { data, error } = await supabase.from("mechanics").select("id,name").order("name");
-      if (error) { toast.error(error.message); return; }
-      setMechanics((data ?? []) as Mechanic[]);
-    })();
+    loadData();
   }, []);
 
   const addItem = (productId: string) => {
