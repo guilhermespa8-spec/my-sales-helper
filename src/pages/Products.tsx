@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
+import * as XLSX from "xlsx";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -7,9 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Pencil, Trash2, Package } from "lucide-react";
+import { Plus, Pencil, Trash2, Package, Upload, Download } from "lucide-react";
 import { toast } from "sonner";
 
 interface Product {
@@ -32,6 +33,10 @@ const Products = () => {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
   const [form, setForm] = useState(empty);
+  const [importOpen, setImportOpen] = useState(false);
+  const [importPreview, setImportPreview] = useState<Array<{ name: string; description: string; price: number; stock: number }>>([]);
+  const [importing, setImporting] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const load = async () => {
     const { data, error } = await supabase.from("products").select("*").order("name");
@@ -72,6 +77,73 @@ const Products = () => {
     if (error) toast.error(error.message); else { toast.success("Produto excluído"); load(); }
   };
 
+  const downloadTemplate = () => {
+    const ws = XLSX.utils.aoa_to_sheet([
+      ["nome", "preco", "estoque", "descricao"],
+      ["Camiseta Branca", 49.9, 10, "Algodão tamanho M"],
+      ["Boné Azul", 29.9, 5, ""],
+    ]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Produtos");
+    XLSX.writeFile(wb, "modelo-produtos.xlsx");
+  };
+
+  const normalizeKey = (k: string) =>
+    k.toString().toLowerCase().trim()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]/g, "");
+
+  const parseNumber = (v: any) => {
+    if (v === null || v === undefined || v === "") return 0;
+    if (typeof v === "number") return v;
+    const s = String(v).replace(/[R$\s]/g, "").replace(/\./g, "").replace(",", ".");
+    const n = Number(s);
+    return isNaN(n) ? 0 : n;
+  };
+
+  const handleFile = async (file: File) => {
+    try {
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf, { type: "array" });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json<Record<string, any>>(ws, { defval: "" });
+      const parsed = rows.map((r) => {
+        const obj: Record<string, any> = {};
+        Object.keys(r).forEach((k) => { obj[normalizeKey(k)] = r[k]; });
+        const name = String(obj.nome ?? obj.name ?? obj.produto ?? "").trim();
+        const price = parseNumber(obj.preco ?? obj.price ?? obj.valor);
+        const stock = Math.floor(parseNumber(obj.estoque ?? obj.stock ?? obj.quantidade ?? 0));
+        const description = String(obj.descricao ?? obj.description ?? "").trim();
+        return { name, description, price, stock };
+      }).filter(p => p.name.length > 0);
+      if (parsed.length === 0) { toast.error("Nenhuma linha válida. Verifique a coluna 'nome'."); return; }
+      setImportPreview(parsed);
+      setImportOpen(true);
+    } catch (e: any) {
+      toast.error("Erro ao ler arquivo: " + e.message);
+    } finally {
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  };
+
+  const confirmImport = async () => {
+    if (!user) return;
+    setImporting(true);
+    const payload = importPreview.map(p => ({
+      name: p.name, price: p.price, stock: p.stock,
+      description: p.description || null, user_id: user.id,
+    }));
+    const { error } = await supabase.from("products").insert(payload);
+    setImporting(false);
+    if (error) toast.error(error.message);
+    else {
+      toast.success(`${payload.length} produto(s) importado(s)`);
+      setImportOpen(false);
+      setImportPreview([]);
+      load();
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
@@ -79,26 +151,41 @@ const Products = () => {
           <h1 className="text-2xl font-bold text-primary">Produtos</h1>
           <p className="text-sm text-muted-foreground">Gerencie seu catálogo e preços</p>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={openNew}><Plus className="w-4 h-4 mr-1" /> Novo produto</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader><DialogTitle>{editing ? "Editar produto" : "Novo produto"}</DialogTitle></DialogHeader>
-            <div className="space-y-3">
-              <div><Label>Nome</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
-              <div><Label>Descrição</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
-              <div className="grid grid-cols-2 gap-3">
-                <div><Label>Preço (R$)</Label><Input type="number" step="0.01" min="0" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} /></div>
-                <div><Label>Estoque</Label><Input type="number" min="0" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} /></div>
+        <div className="flex flex-wrap gap-2">
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".csv,.xlsx,.xls"
+            className="hidden"
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
+          />
+          <Button variant="outline" onClick={downloadTemplate}>
+            <Download className="w-4 h-4 mr-1" /> Modelo
+          </Button>
+          <Button variant="outline" onClick={() => fileRef.current?.click()}>
+            <Upload className="w-4 h-4 mr-1" /> Importar planilha
+          </Button>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={openNew}><Plus className="w-4 h-4 mr-1" /> Novo produto</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader><DialogTitle>{editing ? "Editar produto" : "Novo produto"}</DialogTitle></DialogHeader>
+              <div className="space-y-3">
+                <div><Label>Nome</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
+                <div><Label>Descrição</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div><Label>Preço (R$)</Label><Input type="number" step="0.01" min="0" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} /></div>
+                  <div><Label>Estoque</Label><Input type="number" min="0" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} /></div>
+                </div>
               </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-              <Button onClick={save}>Salvar</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+                <Button onClick={save}>Salvar</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       <Card className="shadow-[var(--shadow-soft)]">
@@ -141,6 +228,43 @@ const Products = () => {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={importOpen} onOpenChange={setImportOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Confirmar importação</DialogTitle>
+            <DialogDescription>
+              {importPreview.length} produto(s) prontos para importar. Confira os dados abaixo.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-96 overflow-auto border rounded">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nome</TableHead>
+                  <TableHead className="text-right">Preço</TableHead>
+                  <TableHead className="text-right">Estoque</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {importPreview.map((p, i) => (
+                  <TableRow key={i}>
+                    <TableCell>{p.name}</TableCell>
+                    <TableCell className="text-right font-mono">R$ {p.price.toFixed(2)}</TableCell>
+                    <TableCell className="text-right">{p.stock}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setImportOpen(false)} disabled={importing}>Cancelar</Button>
+            <Button onClick={confirmImport} disabled={importing}>
+              {importing ? "Importando..." : `Importar ${importPreview.length} produto(s)`}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
