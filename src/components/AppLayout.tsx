@@ -19,6 +19,7 @@ import {
   BarChart3,
   Wallet,
   FileSpreadsheet,
+  Car,
 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 
@@ -35,7 +36,7 @@ const menu: Item[] = [
   { to: "/", label: "Início", icon: Home, end: true },
   { to: "/produtos", label: "Produtos", icon: Package },
   { to: "/orcamentos/novo", label: "Orçamento Rápido", icon: Zap },
-  { to: "#vendas", label: "Vendas", icon: DollarSign, disabled: true },
+  { to: "/carros", label: "Carros", icon: Car },
   { to: "#cadastros", label: "Cadastros", icon: ClipboardList, disabled: true },
   { to: "/mecanicos", label: "Mecânicos", icon: Wrench },
   { to: "/fiado", label: "Fiado", icon: Wallet },

@@ -12,11 +12,11 @@ import { Plus, Trash2, Save, Search, Package, ShoppingCart, X, Sparkles, Minus, 
 import { toast } from "sonner";
 
 const SELLERS = ["André", "João Victor", "Mateus", "Loja"] as const;
-const CARS = ["Corsa VHC"] as const;
 
-interface Product { id: string; name: string; description: string | null; price: number; }
+interface Product { id: string; name: string; description: string | null; price: number; car_filter?: string | null; }
 interface Item { product_id: string; product_name: string; quantity: number; unit_price: number; }
 interface Mechanic { id: string; name: string; }
+interface CarRecord { id: string; name: string; notes: string | null; }
 
 const QuoteNew = () => {
   const { user } = useAuth();
@@ -25,6 +25,7 @@ const QuoteNew = () => {
   const isEdit = Boolean(editId);
   const [products, setProducts] = useState<Product[]>([]);
   const [mechanics, setMechanics] = useState<Mechanic[]>([]);
+  const [carsList, setCarsList] = useState<CarRecord[]>([]);
   const [customer, setCustomer] = useState("");
   const [seller, setSeller] = useState<string>("");
   const [car, setCar] = useState("");
@@ -64,41 +65,35 @@ const QuoteNew = () => {
   }, [editId]);
 
   useEffect(() => {
-    const loadProducts = async () => {
+    const loadData = async () => {
+      // Load Products
       const pageSize = 1000;
       let from = 0;
       const all: Product[] = [];
-
       while (true) {
         const { data, error } = await supabase
           .from("products")
-          .select("id,name,description,price")
+          .select("id,name,description,price,car_filter")
           .order("name")
           .range(from, from + pageSize - 1);
-
-        if (error) {
-          toast.error(error.message);
-          return;
-        }
-
+        if (error) { toast.error(error.message); return; }
         const batch = (data ?? []) as Product[];
         all.push(...batch);
         if (batch.length < pageSize) break;
         from += pageSize;
       }
-
       setProducts(all);
+
+      // Load Mechanics
+      const { data: mecs } = await supabase.from("mechanics").select("id,name").order("name");
+      setMechanics((mecs ?? []) as Mechanic[]);
+
+      // Load Cars
+      const { data: cars } = await supabase.from("cars").select("id,name,notes").order("name");
+      setCarsList((cars ?? []) as CarRecord[]);
     };
 
-    loadProducts();
-  }, []);
-
-  useEffect(() => {
-    (async () => {
-      const { data, error } = await supabase.from("mechanics").select("id,name").order("name");
-      if (error) { toast.error(error.message); return; }
-      setMechanics((data ?? []) as Mechanic[]);
-    })();
+    loadData();
   }, []);
 
   const addItem = (productId: string) => {
@@ -126,10 +121,20 @@ const QuoteNew = () => {
   }, [products, search]);
 
   const suggestedParts = useMemo(() => {
-    const c = car.trim().toLowerCase();
-    if (!c) return [];
-    return products.filter((p) => (p.description ?? "").toLowerCase().includes(c));
-  }, [products, car]);
+    if (!car) return [];
+    const selectedCar = carsList.find(c => c.name === car);
+    const filter = selectedCar?.notes?.trim().toLowerCase();
+    if (!filter) return [];
+    
+    return products.filter((p) => {
+      const pFilter = (p.car_filter ?? "").toLowerCase();
+      const pName = p.name.toLowerCase();
+      const pDesc = (p.description ?? "").toLowerCase();
+      
+      // Filter by the car's notes/filter string
+      return pFilter.includes(filter) || pName.includes(filter) || pDesc.includes(filter);
+    });
+  }, [products, car, carsList]);
 
   const save = async () => {
     if (items.length === 0) { toast.error("Adicione ao menos 1 item"); return; }
@@ -249,7 +254,7 @@ const QuoteNew = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__none__">Nenhum</SelectItem>
-                    {CARS.map((c) => (<SelectItem key={c} value={c}>{c}</SelectItem>))}
+                    {carsList.map((c) => (<SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>))}
                   </SelectContent>
                 </Select>
               </div>

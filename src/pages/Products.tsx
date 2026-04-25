@@ -16,6 +16,7 @@ import { toast } from "sonner";
 interface Product {
   id: string; name: string; description: string | null;
   price: number; stock: number;
+  car_filter: string | null;
   created_at?: string; updated_at?: string;
 }
 
@@ -26,7 +27,7 @@ const schema = z.object({
   stock: z.number().int().min(0).max(999999),
 });
 
-const empty = { name: "", description: "", price: "0", stock: "0" };
+const empty = { name: "", description: "", price: "0", stock: "0", car_filter: "" };
 
 const Products = () => {
   const { user } = useAuth();
@@ -93,7 +94,13 @@ const Products = () => {
   const openNew = () => { setEditing(null); setForm(empty); setOpen(true); };
   const openEdit = (p: Product) => {
     setEditing(p);
-    setForm({ name: p.name, description: p.description ?? "", price: String(p.price), stock: String(p.stock) });
+    setForm({
+      name: p.name,
+      description: p.description ?? "",
+      price: String(p.price),
+      stock: String(p.stock),
+      car_filter: p.car_filter ?? ""
+    });
     setOpen(true);
   };
 
@@ -106,7 +113,9 @@ const Products = () => {
     const d = parsed.data;
     const payload = {
       name: d.name, price: d.price, stock: d.stock,
-      description: d.description ?? null, user_id: user!.id,
+      description: d.description ?? null,
+      car_filter: form.car_filter.trim() || null,
+      user_id: user!.id,
     };
     const { error } = editing
       ? await supabase.from("products").update(payload).eq("id", editing.id)
@@ -263,6 +272,17 @@ const Products = () => {
                 <div><Label>Preço (R$)</Label><Input type="number" step="0.01" min="0" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} /></div>
                 <div><Label>Estoque</Label><Input type="number" min="0" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} /></div>
               </div>
+              <div>
+                <Label>Carro (Filtro)</Label>
+                <Input
+                  value={form.car_filter}
+                  onChange={(e) => setForm({ ...form, car_filter: e.target.value })}
+                  placeholder="Ex: corsa, vhc, f30..."
+                />
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  Use palavras-chave que correspondam ao "Filtro" cadastrado no carro.
+                </p>
+              </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
@@ -312,10 +332,10 @@ const Products = () => {
                 <TableRow>
                   <TableHead className="w-16 text-center">Código</TableHead>
                   <TableHead className="text-center">Descrição</TableHead>
+                  <TableHead className="text-center">Filtro Carro</TableHead>
                   <TableHead className="text-center w-24">Estoque</TableHead>
                   <TableHead className="text-center w-28">Valor</TableHead>
                   <TableHead className="text-center w-24">Status</TableHead>
-                  <TableHead className="text-center w-40">Última alteração</TableHead>
                   <TableHead className="text-center w-28">Ações</TableHead>
                 </TableRow>
               </TableHeader>
@@ -326,6 +346,9 @@ const Products = () => {
                     <TableCell className="text-center">
                       <div className="font-medium">{p.name}</div>
                       {p.description && <div className="text-xs text-muted-foreground line-clamp-1">{p.description}</div>}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <span className="inline-block px-2 py-0.5 rounded border text-[10px] bg-muted/50">{p.car_filter || "—"}</span>
                     </TableCell>
                     <TableCell className="text-center">{p.stock}</TableCell>
                     <TableCell className="text-center font-mono">R$ {Number(p.price).toFixed(2)}</TableCell>
