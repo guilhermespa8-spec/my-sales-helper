@@ -36,7 +36,29 @@ const Products = () => {
   const [importOpen, setImportOpen] = useState(false);
   const [importPreview, setImportPreview] = useState<Array<{ name: string; description: string; price: number; stock: number }>>([]);
   const [importing, setImporting] = useState(false);
+  const [removeMissing, setRemoveMissing] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  // Computed diff for preview
+  const diff = (() => {
+    const byName = new Map(items.map(p => [p.name.trim().toLowerCase(), p]));
+    const seen = new Set<string>();
+    const toUpdate: Array<{ existing: Product; next: typeof importPreview[number] }> = [];
+    const toCreate: typeof importPreview = [];
+    importPreview.forEach(p => {
+      const key = p.name.trim().toLowerCase();
+      seen.add(key);
+      const existing = byName.get(key);
+      if (existing) {
+        const changed = Number(existing.price) !== p.price || existing.stock !== p.stock || (existing.description ?? "") !== p.description;
+        if (changed) toUpdate.push({ existing, next: p });
+      } else {
+        toCreate.push(p);
+      }
+    });
+    const toDelete = items.filter(p => !seen.has(p.name.trim().toLowerCase()));
+    return { toUpdate, toCreate, toDelete };
+  })();
 
   const load = async () => {
     const { data, error } = await supabase.from("products").select("*").order("name");
