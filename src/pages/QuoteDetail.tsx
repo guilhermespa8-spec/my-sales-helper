@@ -9,6 +9,7 @@ import { toast } from "sonner";
 interface Quote {
   id: string; quote_number: number; customer_name: string | null;
   total: number; notes: string | null; created_at: string;
+  seller: string | null; car: string | null;
 }
 interface Item { id: string; product_name: string; quantity: number; unit_price: number; subtotal: number; }
 
