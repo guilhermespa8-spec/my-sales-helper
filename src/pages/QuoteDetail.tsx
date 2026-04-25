@@ -73,12 +73,6 @@ const QuoteDetail = () => {
               <div className="font-semibold">{quote.seller}</div>
             </div>
           )}
-          {quote.car && (
-            <div>
-              <div className="text-xs uppercase text-muted-foreground tracking-wide">Carro</div>
-              <div className="font-semibold">{quote.car}</div>
-            </div>
-          )}
         </div>
 
         <table className="w-full text-sm">
