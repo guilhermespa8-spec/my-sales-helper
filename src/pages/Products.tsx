@@ -332,6 +332,11 @@ const Products = () => {
                         {p.stock > 0 ? "Ativo" : "Sem estoque"}
                       </span>
                     </TableCell>
+                    <TableCell className="text-center text-xs text-muted-foreground">
+                      {p.updated_at && p.created_at && new Date(p.updated_at).getTime() - new Date(p.created_at).getTime() > 2000
+                        ? new Date(p.updated_at).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })
+                        : "—"}
+                    </TableCell>
                     <TableCell>
                       <div className="flex gap-1 justify-center">
                         <Button size="icon" variant="ghost" onClick={() => openEdit(p)} title="Editar"><Pencil className="w-4 h-4" /></Button>
