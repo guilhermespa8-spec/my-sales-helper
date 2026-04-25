@@ -310,7 +310,7 @@ const QuoteNew = () => {
                 <span>{search.trim() ? "Resultados da Busca" : car ? `Sugeridos para ${car}` : "Catálogo"}</span>
                 <span>{catalog.length} itens</span>
               </div>
-              <div className="max-h-[400px] overflow-y-auto divide-y divide-muted-foreground/5 scrollbar-thin">
+              <div className="max-h-[800px] overflow-y-auto divide-y divide-muted-foreground/5 scrollbar-thin">
                 {catalog.length === 0 ? (
                   <div className="text-center py-12 text-sm text-muted-foreground italic">Nenhum produto encontrado</div>
                 ) : (
@@ -329,8 +329,8 @@ const QuoteNew = () => {
                           {added ? <span className="text-xs font-bold">{added.quantity}</span> : <Plus className="w-4 h-4" />}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="text-sm font-medium text-foreground truncate">{p.name}</div>
-                          <div className="text-xs text-muted-foreground truncate">{p.description || "Sem descrição"}</div>
+                          <div className="text-sm font-medium text-foreground whitespace-normal">{p.name}</div>
+                          <div className="text-xs text-muted-foreground whitespace-normal">{p.description || "Sem descrição"}</div>
                         </div>
                         <div className="text-base font-mono font-bold text-primary">
                           R$ {Number(p.price).toFixed(2)}
