@@ -87,6 +87,41 @@ const Fiado = () => {
     }
   };
 
+  const applyDiscount = async () => {
+    if (!discountingQuote) return;
+    const discount = Number(discountValue);
+    if (isNaN(discount) || discount < 0) {
+      toast.error("Valor de desconto inválido");
+      return;
+    }
+
+    if (discount >= discountingQuote.total) {
+      toast.error("O desconto não pode ser maior ou igual ao total");
+      return;
+    }
+
+    setIsSubmitting(true);
+    const newTotal = discountingQuote.total - discount;
+    const { error } = await supabase
+      .from("quotes")
+      .update({ 
+        total: newTotal,
+        desconto: discountingQuote.desconto + discount
+      })
+      .eq("id", discountingQuote.id);
+    
+    setIsSubmitting(false);
+
+    if (error) {
+      toast.error("Erro ao aplicar desconto");
+    } else {
+      toast.success("Desconto aplicado com sucesso");
+      setDiscountingQuote(null);
+      setDiscountValue("");
+      load();
+    }
+  };
+
   return (
     <div className="space-y-4 max-w-5xl mx-auto">
       <div className="flex items-center gap-3">
