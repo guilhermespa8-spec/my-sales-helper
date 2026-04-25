@@ -43,12 +43,13 @@ const QuoteDetail = () => {
   const handleAssignMechanic = async () => {
     if (!id || !selectedMechanic) { toast.error("Selecione um mecânico"); return; }
     setSaving(true);
-    const { error } = await supabase.from("quotes").update({ customer_name: selectedMechanic }).eq("id", id);
+    const { error } = await supabase.from("quotes").update({ customer_name: selectedMechanic, fiado: true }).eq("id", id);
     setSaving(false);
     if (error) { toast.error("Erro ao salvar"); return; }
     setQuote((q) => q ? { ...q, customer_name: selectedMechanic } : q);
     setDialogOpen(false);
-    toast.success(`Venda adicionada ao mecânico ${selectedMechanic}`);
+    toast.success(`Venda adicionada ao fiado de ${selectedMechanic}`);
+    nav("/fiado");
   };
 
   if (!quote) return <div className="text-center py-12 text-muted-foreground">Carregando...</div>;
