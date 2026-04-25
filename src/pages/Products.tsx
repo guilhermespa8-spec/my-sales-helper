@@ -36,7 +36,29 @@ const Products = () => {
   const [importOpen, setImportOpen] = useState(false);
   const [importPreview, setImportPreview] = useState<Array<{ name: string; description: string; price: number; stock: number }>>([]);
   const [importing, setImporting] = useState(false);
+  const [removeMissing, setRemoveMissing] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  // Computed diff for preview
+  const diff = (() => {
+    const byName = new Map(items.map(p => [p.name.trim().toLowerCase(), p]));
+    const seen = new Set<string>();
+    const toUpdate: Array<{ existing: Product; next: typeof importPreview[number] }> = [];
+    const toCreate: typeof importPreview = [];
+    importPreview.forEach(p => {
+      const key = p.name.trim().toLowerCase();
+      seen.add(key);
+      const existing = byName.get(key);
+      if (existing) {
+        const changed = Number(existing.price) !== p.price || existing.stock !== p.stock || (existing.description ?? "") !== p.description;
+        if (changed) toUpdate.push({ existing, next: p });
+      } else {
+        toCreate.push(p);
+      }
+    });
+    const toDelete = items.filter(p => !seen.has(p.name.trim().toLowerCase()));
+    return { toUpdate, toCreate, toDelete };
+  })();
 
   const load = async () => {
     const { data, error } = await supabase.from("products").select("*").order("name");
@@ -129,18 +151,42 @@ const Products = () => {
   const confirmImport = async () => {
     if (!user) return;
     setImporting(true);
-    const payload = importPreview.map(p => ({
-      name: p.name, price: p.price, stock: p.stock,
-      description: p.description || null, user_id: user.id,
-    }));
-    const { error } = await supabase.from("products").insert(payload);
-    setImporting(false);
-    if (error) toast.error(error.message);
-    else {
-      toast.success(`${payload.length} produto(s) importado(s)`);
+    try {
+      // 1. Insert new
+      if (diff.toCreate.length > 0) {
+        const payload = diff.toCreate.map(p => ({
+          name: p.name, price: p.price, stock: p.stock,
+          description: p.description || null, user_id: user.id,
+        }));
+        const { error } = await supabase.from("products").insert(payload);
+        if (error) throw error;
+      }
+      // 2. Update changed
+      for (const { existing, next } of diff.toUpdate) {
+        const { error } = await supabase.from("products").update({
+          price: next.price, stock: next.stock,
+          description: next.description || null,
+        }).eq("id", existing.id);
+        if (error) throw error;
+      }
+      // 3. Delete missing (optional)
+      if (removeMissing && diff.toDelete.length > 0) {
+        const ids = diff.toDelete.map(p => p.id);
+        const { error } = await supabase.from("products").delete().in("id", ids);
+        if (error) throw error;
+      }
+      toast.success(
+        `Sincronizado: ${diff.toCreate.length} novo(s), ${diff.toUpdate.length} atualizado(s)` +
+        (removeMissing ? `, ${diff.toDelete.length} removido(s)` : "")
+      );
       setImportOpen(false);
       setImportPreview([]);
+      setRemoveMissing(false);
       load();
+    } catch (e: any) {
+      toast.error(e.message ?? "Erro ao sincronizar");
+    } finally {
+      setImporting(false);
     }
   };
 
@@ -163,7 +209,7 @@ const Products = () => {
             <Download className="w-4 h-4 mr-1" /> Modelo
           </Button>
           <Button variant="outline" onClick={() => fileRef.current?.click()}>
-            <Upload className="w-4 h-4 mr-1" /> Importar planilha
+            <Upload className="w-4 h-4 mr-1" /> Sincronizar planilha
           </Button>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
@@ -229,38 +275,97 @@ const Products = () => {
         </CardContent>
       </Card>
 
-      <Dialog open={importOpen} onOpenChange={setImportOpen}>
+      <Dialog open={importOpen} onOpenChange={(o) => { setImportOpen(o); if (!o) setRemoveMissing(false); }}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Confirmar importação</DialogTitle>
+            <DialogTitle>Sincronizar planilha</DialogTitle>
             <DialogDescription>
-              {importPreview.length} produto(s) prontos para importar. Confira os dados abaixo.
+              Resumo das mudanças que serão aplicadas no catálogo.
             </DialogDescription>
           </DialogHeader>
-          <div className="max-h-96 overflow-auto border rounded">
+
+          <div className="grid grid-cols-3 gap-2 text-center">
+            <div className="rounded border p-3">
+              <div className="text-2xl font-bold text-green-600">{diff.toCreate.length}</div>
+              <div className="text-xs text-muted-foreground">novos</div>
+            </div>
+            <div className="rounded border p-3">
+              <div className="text-2xl font-bold text-blue-600">{diff.toUpdate.length}</div>
+              <div className="text-xs text-muted-foreground">atualizados</div>
+            </div>
+            <div className="rounded border p-3">
+              <div className="text-2xl font-bold text-destructive">{diff.toDelete.length}</div>
+              <div className="text-xs text-muted-foreground">fora da planilha</div>
+            </div>
+          </div>
+
+          <div className="max-h-72 overflow-auto border rounded">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Nome</TableHead>
                   <TableHead className="text-right">Preço</TableHead>
                   <TableHead className="text-right">Estoque</TableHead>
+                  <TableHead className="text-right">Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {importPreview.map((p, i) => (
-                  <TableRow key={i}>
+                {diff.toCreate.map((p, i) => (
+                  <TableRow key={"c" + i}>
                     <TableCell>{p.name}</TableCell>
                     <TableCell className="text-right font-mono">R$ {p.price.toFixed(2)}</TableCell>
                     <TableCell className="text-right">{p.stock}</TableCell>
+                    <TableCell className="text-right text-xs text-green-600">novo</TableCell>
                   </TableRow>
                 ))}
+                {diff.toUpdate.map(({ existing, next }, i) => (
+                  <TableRow key={"u" + i}>
+                    <TableCell>{next.name}</TableCell>
+                    <TableCell className="text-right font-mono text-xs">
+                      <span className="text-muted-foreground line-through">R$ {Number(existing.price).toFixed(2)}</span>
+                      {" → "}
+                      <span className="font-bold">R$ {next.price.toFixed(2)}</span>
+                    </TableCell>
+                    <TableCell className="text-right text-xs">
+                      <span className="text-muted-foreground line-through">{existing.stock}</span> → <span className="font-bold">{next.stock}</span>
+                    </TableCell>
+                    <TableCell className="text-right text-xs text-blue-600">atualizar</TableCell>
+                  </TableRow>
+                ))}
+                {diff.toDelete.map((p, i) => (
+                  <TableRow key={"d" + i}>
+                    <TableCell className="text-muted-foreground">{p.name}</TableCell>
+                    <TableCell className="text-right font-mono text-muted-foreground">R$ {Number(p.price).toFixed(2)}</TableCell>
+                    <TableCell className="text-right text-muted-foreground">{p.stock}</TableCell>
+                    <TableCell className="text-right text-xs text-destructive">não está na planilha</TableCell>
+                  </TableRow>
+                ))}
+                {diff.toCreate.length === 0 && diff.toUpdate.length === 0 && diff.toDelete.length === 0 && (
+                  <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-6">Nenhuma mudança detectada — tudo já está sincronizado.</TableCell></TableRow>
+                )}
               </TableBody>
             </Table>
           </div>
+
+          {diff.toDelete.length > 0 && (
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
+              <input
+                type="checkbox"
+                checked={removeMissing}
+                onChange={(e) => setRemoveMissing(e.target.checked)}
+                className="w-4 h-4"
+              />
+              Excluir do site os {diff.toDelete.length} produto(s) que não estão mais na planilha
+            </label>
+          )}
+
           <DialogFooter>
             <Button variant="outline" onClick={() => setImportOpen(false)} disabled={importing}>Cancelar</Button>
-            <Button onClick={confirmImport} disabled={importing}>
-              {importing ? "Importando..." : `Importar ${importPreview.length} produto(s)`}
+            <Button
+              onClick={confirmImport}
+              disabled={importing || (diff.toCreate.length === 0 && diff.toUpdate.length === 0 && (!removeMissing || diff.toDelete.length === 0))}
+            >
+              {importing ? "Sincronizando..." : "Aplicar mudanças"}
             </Button>
           </DialogFooter>
         </DialogContent>
