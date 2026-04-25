@@ -125,7 +125,7 @@ const Fiado = () => {
                         <Button asChild variant="outline" size="sm">
                           <Link to={`/orcamentos/${q.id}`}>Ver</Link>
                         </Button>
-                        <Button size="sm" onClick={() => markPaid(q.id)}>
+                        <Button size="sm" onClick={() => setConfirmingId(q.id)}>
                           <CheckCircle2 className="w-4 h-4 mr-1" /> Quitar
                         </Button>
                       </div>
