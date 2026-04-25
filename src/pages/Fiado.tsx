@@ -89,24 +89,26 @@ const Fiado = () => {
 
   const applyDiscount = async () => {
     if (!discountingQuote) return;
-    const discount = Number(discountValue);
-    if (isNaN(discount) || discount < 0) {
-      toast.error("Valor de desconto inválido");
+    const discountPercent = Number(discountValue);
+    if (isNaN(discountPercent) || discountPercent < 0 || discountPercent > 100) {
+      toast.error("Porcentagem de desconto inválida (0-100)");
       return;
     }
 
-    if (discount >= discountingQuote.total) {
-      toast.error("O desconto não pode ser maior ou igual ao total");
+    const discountAmount = (discountingQuote.total * discountPercent) / 100;
+    
+    if (discountAmount >= discountingQuote.total && discountingQuote.total > 0) {
+      toast.error("O desconto não pode ser de 100% ou mais");
       return;
     }
 
     setIsSubmitting(true);
-    const newTotal = discountingQuote.total - discount;
+    const newTotal = discountingQuote.total - discountAmount;
     const { error } = await supabase
       .from("quotes")
       .update({ 
         total: newTotal,
-        desconto: discountingQuote.desconto + discount
+        desconto: (discountingQuote.desconto || 0) + discountAmount
       })
       .eq("id", discountingQuote.id);
     
@@ -238,19 +240,26 @@ const Fiado = () => {
               <div className="text-2xl font-bold font-mono">R$ {discountingQuote?.total.toFixed(2)}</div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="discount">Valor do Desconto (R$)</Label>
-              <Input
-                id="discount"
-                type="number"
-                step="0.01"
-                min="0.01"
-                placeholder="0,00"
-                value={discountValue}
-                onChange={(e) => setDiscountValue(e.target.value)}
-                autoFocus
-              />
+              <Label htmlFor="discount">Desconto (%)</Label>
+              <div className="relative">
+                <Input
+                  id="discount"
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="100"
+                  placeholder="0"
+                  value={discountValue}
+                  onChange={(e) => setDiscountValue(e.target.value)}
+                  className="pr-8"
+                  autoFocus
+                />
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
+                  %
+                </div>
+              </div>
               <p className="text-[10px] text-muted-foreground">
-                O desconto será subtraído do total e registrado no histórico.
+                O desconto será calculado sobre o valor atual (R$ {discountingQuote?.total.toFixed(2)}).
               </p>
             </div>
           </div>
