@@ -99,6 +99,7 @@ export type Database = {
           id: string
           notes: string | null
           quote_number: number
+          seller: string | null
           total: number
           user_id: string
         }
@@ -108,6 +109,7 @@ export type Database = {
           id?: string
           notes?: string | null
           quote_number: number
+          seller?: string | null
           total?: number
           user_id: string
         }
@@ -117,6 +119,7 @@ export type Database = {
           id?: string
           notes?: string | null
           quote_number?: number
+          seller?: string | null
           total?: number
           user_id?: string
         }
