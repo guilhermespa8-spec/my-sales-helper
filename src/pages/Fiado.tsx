@@ -56,13 +56,20 @@ const Fiado = () => {
     return Array.from(map.entries()).sort(([a], [b]) => a.localeCompare(b, "pt-BR"));
   }, [quotes]);
 
-  const markPaid = async (id: string) => {
-    if (!confirm("Tem certeza que deseja quitar este fiado? Esta ação não pode ser desfeita.")) return;
+  const markPaid = async () => {
+    if (!confirmingId) return;
     
-    const { error } = await supabase.from("quotes").update({ fiado: false }).eq("id", id);
-    if (error) { toast.error("Erro ao baixar fiado"); return; }
-    toast.success("Fiado quitado");
-    load();
+    setIsSubmitting(true);
+    const { error } = await supabase.from("quotes").update({ fiado: false }).eq("confirmingId", confirmingId);
+    setIsSubmitting(false);
+    
+    if (error) {
+      toast.error("Erro ao baixar fiado");
+    } else {
+      toast.success("Fiado quitado com sucesso");
+      setConfirmingId(null);
+      load();
+    }
   };
 
   return (
