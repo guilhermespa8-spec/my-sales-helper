@@ -382,7 +382,7 @@ const QuoteNew = () => {
       </div>
 
       {/* Barra fixa de total + ação */}
-      <div className="border-t bg-card/90 backdrop-blur-md px-4 md:px-6 py-3 flex items-center justify-between gap-4 sticky bottom-0">
+      <div className="border-t bg-card px-4 md:px-6 py-3 flex items-center justify-between gap-4 sticky bottom-0">
         <div className="flex items-baseline gap-3">
           <span className="text-xs uppercase tracking-wider text-muted-foreground">Total</span>
           <span className="text-3xl font-light text-primary font-mono">R$ {total.toFixed(2)}</span>
