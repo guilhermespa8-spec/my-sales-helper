@@ -12,6 +12,7 @@ import { Plus, Trash2, Save, Search, Package } from "lucide-react";
 import { toast } from "sonner";
 
 const SELLERS = ["André", "João Victor", "Mateus", "Loja"] as const;
+const CARS = ["Corsa VHC"] as const;
 
 interface Product { id: string; name: string; description: string | null; price: number; }
 interface Item { product_id: string; product_name: string; quantity: number; unit_price: number; }
@@ -177,7 +178,16 @@ const QuoteNew = () => {
               </SelectContent>
             </Select>
           </div>
-          <div><Label>Carro (opcional)</Label><Input value={car} onChange={(e) => setCar(e.target.value)} placeholder="Ex: Gol, Civic..." maxLength={60} /></div>
+          <div>
+            <Label>Carro (opcional)</Label>
+            <Select value={car || "__none__"} onValueChange={(v) => setCar(v === "__none__" ? "" : v)}>
+              <SelectTrigger><SelectValue placeholder="Selecione o carro" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none__">Nenhum</SelectItem>
+                {CARS.map((c) => (<SelectItem key={c} value={c}>{c}</SelectItem>))}
+              </SelectContent>
+            </Select>
+          </div>
           <div><Label>Observações (opcional)</Label><Textarea value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={500} rows={2} /></div>
         </CardContent>
       </Card>
