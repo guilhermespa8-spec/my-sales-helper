@@ -327,7 +327,7 @@ const QuoteNew = () => {
                 <ShoppingCart className="w-5 h-5 text-primary" />
                 Resumo do Pedido
               </CardTitle>
-              <Badge variant="outline" className="bg-background/50">{items.length} itens</Badge>
+              <div className="px-2 py-1 rounded-full border bg-background/50 text-[10px] font-bold uppercase tracking-wider">{items.length} itens</div>
             </CardHeader>
             <CardContent className="p-0">
               <div className="max-h-[500px] overflow-y-auto divide-y divide-muted-foreground/5 scrollbar-thin">
