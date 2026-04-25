@@ -120,6 +120,7 @@ const QuoteNew = () => {
         const { error } = await supabase.from("quotes").update({
           customer_name: customer.trim() || null,
           seller: seller || null,
+          car: car.trim() || null,
           notes: notes.trim() || null,
           total,
         } as any).eq("id", editId);
