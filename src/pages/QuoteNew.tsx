@@ -228,105 +228,148 @@ const QuoteNew = () => {
   }, [search, filteredProducts, car, suggestedParts, products]);
 
   return (
-    <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8 space-y-8">
-      {/* Cabeçalho Minimalista */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b pb-6">
-        <div>
-          <h1 className="text-3xl font-semibold text-foreground tracking-tight">
-            {isEdit ? "Editar Orçamento" : "Novo Orçamento"}
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Preencha os dados e adicione os itens para gerar o orçamento.
-            {quoteNumber && <span className="ml-2 font-mono font-bold text-primary">#{String(quoteNumber).padStart(4, "0")}</span>}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => nav("/")}>
-            <X className="w-4 h-4 mr-2" /> Cancelar
-          </Button>
-          <Button onClick={save} disabled={saving || items.length === 0} size="sm" className="shadow-sm">
-            <Save className="w-4 h-4 mr-2" /> {saving ? "Salvando..." : "Finalizar Orçamento"}
-          </Button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Lado Esquerdo: Dados e Busca */}
-        <div className="lg:col-span-7 space-y-8">
-          {/* Card de Dados */}
-          <Card className="border-none shadow-sm bg-card/50 backdrop-blur-sm">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg font-medium">Informações Gerais</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label className="text-xs uppercase tracking-wider text-muted-foreground">Mecânico</Label>
-                <Select value={customer || "__none__"} onValueChange={(v) => setCustomer(v === "__none__" ? "" : v)}>
-                  <SelectTrigger className="bg-background border-muted-foreground/20">
-                    <SelectValue placeholder={mechanics.length ? "Selecione" : "Cadastre em Mecânicos"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__none__">Nenhum</SelectItem>
-                    {mechanics.map((m) => (<SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>))}
-                  </SelectContent>
-                </Select>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/30">
+      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 space-y-8">
+        {/* Cabeçalho Premium com Gradiente */}
+        <div className="relative overflow-hidden rounded-2xl border border-border/50 shadow-elevated">
+          <div className="absolute inset-0" style={{ background: "var(--gradient-brand)" }} />
+          <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/20" />
+          <div className="relative px-6 sm:px-10 py-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6 text-primary-foreground">
+            <div className="flex items-center gap-5">
+              <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center shadow-lg ring-1 ring-white/20">
+                <Receipt className="w-7 h-7" />
               </div>
-              <div className="space-y-2">
-                <Label className="text-xs uppercase tracking-wider text-muted-foreground">Vendedor</Label>
-                <Select value={seller} onValueChange={setSeller}>
-                  <SelectTrigger className="bg-background border-muted-foreground/20">
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {SELLERS.map((s) => (<SelectItem key={s} value={s}>{s}</SelectItem>))}
-                  </SelectContent>
-                </Select>
+              <div>
+                <div className="flex items-center gap-3 mb-1 flex-wrap">
+                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                    {isEdit ? "Editar Orçamento" : "Novo Orçamento"}
+                  </h1>
+                  {quoteNumber && (
+                    <span className="px-3 py-1 rounded-full bg-white/15 backdrop-blur-sm text-xs font-mono font-bold ring-1 ring-white/20">
+                      #{String(quoteNumber).padStart(4, "0")}
+                    </span>
+                  )}
+                </div>
+                <p className="text-sm text-primary-foreground/80">
+                  Preencha os dados e adicione os itens para gerar o orçamento
+                </p>
               </div>
-              <div className="space-y-2">
-                <Label className="text-xs uppercase tracking-wider text-muted-foreground">Carro</Label>
-                <Select value={car || "__none__"} onValueChange={(v) => setCar(v === "__none__" ? "" : v)}>
-                  <SelectTrigger className="bg-background border-muted-foreground/20">
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__none__">Nenhum</SelectItem>
-                    {carsList.map((c) => (<SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs uppercase tracking-wider text-muted-foreground">Observações</Label>
-                <Input value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={500} placeholder="Notas do orçamento"
-                  className="bg-background border-muted-foreground/20 focus-visible:ring-primary/20" />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Busca de Produtos */}
-          <div className="space-y-4">
-            <div className="relative group">
-              <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" />
-              <Input
-                ref={searchRef}
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Pesquisar produtos (Ctrl+K)..."
-                className="pl-12 h-14 text-lg bg-background border-muted-foreground/20 rounded-xl shadow-sm focus-visible:ring-primary/20 focus-visible:border-primary transition-all"
-                autoFocus
-              />
-              {search && (
-                <button onClick={() => setSearch("")} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                  <X className="w-5 h-5" />
-                </button>
-              )}
             </div>
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="sm" onClick={() => nav("/")}
+                className="text-primary-foreground hover:bg-white/15 hover:text-primary-foreground">
+                <X className="w-4 h-4 mr-2" /> Cancelar
+              </Button>
+              <Button onClick={save} disabled={saving || items.length === 0} size="sm"
+                className="bg-white text-primary hover:bg-white/90 shadow-lg font-semibold">
+                <Save className="w-4 h-4 mr-2" /> {saving ? "Salvando..." : "Finalizar"}
+              </Button>
+            </div>
+          </div>
+        </div>
 
-            <div className="bg-card/30 rounded-xl border border-muted-foreground/10 overflow-hidden divide-y divide-muted-foreground/10">
-              <div className="px-4 py-2 bg-muted/50 flex items-center justify-between text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
-                <span>{search.trim() ? "Resultados da Busca" : car ? `Sugeridos para ${car}` : "Catálogo Completo"}</span>
-                <span>{catalog.length} itens</span>
-              </div>
-              <div className="max-h-[800px] overflow-y-auto divide-y divide-muted-foreground/5 scrollbar-thin">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          {/* Lado Esquerdo: Dados e Busca */}
+          <div className="lg:col-span-7 space-y-6">
+            {/* Card de Dados */}
+            <Card className="border border-border/50 shadow-soft bg-card overflow-hidden">
+              <CardHeader className="pb-4 border-b bg-muted/30">
+                <CardTitle className="text-base font-semibold flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-primary" />
+                  Informações Gerais
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-6">
+                <div className="space-y-2">
+                  <Label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                    <Wrench className="w-3 h-3" /> Mecânico
+                  </Label>
+                  <Select value={customer || "__none__"} onValueChange={(v) => setCustomer(v === "__none__" ? "" : v)}>
+                    <SelectTrigger className="h-11 bg-background">
+                      <SelectValue placeholder={mechanics.length ? "Selecione" : "Cadastre em Mecânicos"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">Nenhum</SelectItem>
+                      {mechanics.map((m) => (<SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                    <User className="w-3 h-3" /> Vendedor
+                  </Label>
+                  <Select value={seller} onValueChange={setSeller}>
+                    <SelectTrigger className="h-11 bg-background">
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SELLERS.map((s) => (<SelectItem key={s} value={s}>{s}</SelectItem>))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                    <CarIcon className="w-3 h-3" /> Carro
+                  </Label>
+                  <Select value={car || "__none__"} onValueChange={(v) => setCar(v === "__none__" ? "" : v)}>
+                    <SelectTrigger className="h-11 bg-background">
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">Nenhum</SelectItem>
+                      {carsList.map((c) => (<SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                    <FileText className="w-3 h-3" /> Observações
+                  </Label>
+                  <Input value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={500}
+                    placeholder="Notas do orçamento" className="h-11 bg-background" />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Busca de Produtos */}
+            <Card className="border border-border/50 shadow-soft bg-card overflow-hidden">
+              <CardHeader className="pb-4 border-b bg-muted/30">
+                <CardTitle className="text-base font-semibold flex items-center gap-2">
+                  <Package className="w-4 h-4 text-primary" />
+                  Adicionar Produtos
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-5 space-y-4">
+                <div className="relative group">
+                  <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                  <Input
+                    ref={searchRef}
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Pesquisar produtos..."
+                    className="pl-12 pr-20 h-12 text-base bg-background rounded-xl shadow-sm focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:border-primary transition-all"
+                    autoFocus
+                  />
+                  {search ? (
+                    <button onClick={() => setSearch("")} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                      <X className="w-5 h-5" />
+                    </button>
+                  ) : (
+                    <kbd className="hidden sm:inline-flex absolute right-3 top-1/2 -translate-y-1/2 items-center gap-1 px-2 py-1 rounded-md bg-muted text-[10px] font-mono text-muted-foreground border">
+                      <Command className="w-3 h-3" />K
+                    </kbd>
+                  )}
+                </div>
+
+                <div className="rounded-xl border border-border overflow-hidden bg-background">
+                  <div className="px-4 py-2.5 bg-muted/50 flex items-center justify-between text-[11px] uppercase tracking-wider text-muted-foreground font-bold border-b">
+                    <span className="flex items-center gap-1.5">
+                      {search.trim() ? <Search className="w-3 h-3" /> : car ? <Sparkles className="w-3 h-3 text-accent" /> : <Package className="w-3 h-3" />}
+                      {search.trim() ? "Resultados" : car ? `Sugeridos · ${car}` : "Catálogo"}
+                    </span>
+                    <span className="font-mono">{catalog.length}</span>
+                  </div>
+                  <div className="max-h-[700px] overflow-y-auto divide-y divide-border/50 scrollbar-thin">
                 {catalog.length === 0 ? (
                   <div className="text-center py-12 text-sm text-muted-foreground italic">Nenhum produto encontrado</div>
                 ) : (
