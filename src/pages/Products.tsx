@@ -54,7 +54,11 @@ const Products = () => {
       price: Number(form.price), stock: Number(form.stock),
     });
     if (!parsed.success) { toast.error(parsed.error.errors[0].message); return; }
-    const payload = { ...parsed.data, user_id: user!.id, description: parsed.data.description ?? null };
+    const d = parsed.data;
+    const payload = {
+      name: d.name, price: d.price, stock: d.stock,
+      description: d.description ?? null, user_id: user!.id,
+    };
     const { error } = editing
       ? await supabase.from("products").update(payload).eq("id", editing.id)
       : await supabase.from("products").insert([payload]);
