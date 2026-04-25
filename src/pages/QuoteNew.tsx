@@ -110,6 +110,12 @@ const QuoteNew = () => {
     );
   }, [products, search, car]);
 
+  const suggestedParts = useMemo(() => {
+    const c = car.trim().toLowerCase();
+    if (!c) return [];
+    return products.filter((p) => (p.description ?? "").toLowerCase().includes(c));
+  }, [products, car]);
+
   const save = async () => {
     if (items.length === 0) { toast.error("Adicione ao menos 1 item"); return; }
     setSaving(true);
