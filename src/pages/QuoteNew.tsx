@@ -34,6 +34,14 @@ const QuoteNew = () => {
   const [search, setSearch] = useState("");
   const [saving, setSaving] = useState(false);
   const [quoteNumber, setQuoteNumber] = useState<number | null>(null);
+  const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
+  const toggleGroup = (name: string) => {
+    setOpenGroups(prev => {
+      const next = new Set(prev);
+      if (next.has(name)) next.delete(name); else next.add(name);
+      return next;
+    });
+  };
   const searchRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -324,7 +332,7 @@ const QuoteNew = () => {
                     });
 
                     return Array.from(groups.entries()).map(([groupName, prods]) => {
-                      const [isOpen, setIsOpen] = useState(false);
+                      const isOpen = openGroups.has(groupName);
                       const hasMultiple = prods.length > 1;
 
                       if (!hasMultiple) {
