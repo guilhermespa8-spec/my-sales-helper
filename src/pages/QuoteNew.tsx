@@ -106,7 +106,7 @@ const QuoteNew = () => {
     return base.filter((p) =>
       p.name.toLowerCase().includes(q) || (p.description ?? "").toLowerCase().includes(q)
     );
-  }, [products, search]);
+  }, [products, search, car]);
 
   const save = async () => {
     if (items.length === 0) { toast.error("Adicione ao menos 1 item"); return; }
