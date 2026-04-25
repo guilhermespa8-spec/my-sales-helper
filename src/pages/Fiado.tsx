@@ -45,6 +45,8 @@ const Fiado = () => {
   }, [quotes]);
 
   const markPaid = async (id: string) => {
+    if (!confirm("Tem certeza que deseja quitar este fiado? Esta ação não pode ser desfeita.")) return;
+    
     const { error } = await supabase.from("quotes").update({ fiado: false }).eq("id", id);
     if (error) { toast.error("Erro ao baixar fiado"); return; }
     toast.success("Fiado quitado");
