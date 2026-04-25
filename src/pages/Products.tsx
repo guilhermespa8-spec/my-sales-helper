@@ -348,7 +348,7 @@ const Products = () => {
                       {p.description && <div className="text-xs text-muted-foreground line-clamp-1">{p.description}</div>}
                     </TableCell>
                     <TableCell className="text-center">
-                      <Badge variant="outline" className="text-[10px]">{p.car_filter || "—"}</Badge>
+                      <span className="inline-block px-2 py-0.5 rounded border text-[10px] bg-muted/50">{p.car_filter || "—"}</span>
                     </TableCell>
                     <TableCell className="text-center">{p.stock}</TableCell>
                     <TableCell className="text-center font-mono">R$ {Number(p.price).toFixed(2)}</TableCell>
