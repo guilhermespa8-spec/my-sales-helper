@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      cars: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          notes: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          notes?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       mechanics: {
         Row: {
           created_at: string
@@ -46,6 +73,7 @@ export type Database = {
       }
       products: {
         Row: {
+          car_filter: string | null
           created_at: string
           description: string | null
           id: string
@@ -56,6 +84,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          car_filter?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -66,6 +95,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          car_filter?: string | null
           created_at?: string
           description?: string | null
           id?: string
