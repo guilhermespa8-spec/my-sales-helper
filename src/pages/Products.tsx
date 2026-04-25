@@ -77,6 +77,73 @@ const Products = () => {
     if (error) toast.error(error.message); else { toast.success("Produto excluído"); load(); }
   };
 
+  const downloadTemplate = () => {
+    const ws = XLSX.utils.aoa_to_sheet([
+      ["nome", "preco", "estoque", "descricao"],
+      ["Camiseta Branca", 49.9, 10, "Algodão tamanho M"],
+      ["Boné Azul", 29.9, 5, ""],
+    ]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Produtos");
+    XLSX.writeFile(wb, "modelo-produtos.xlsx");
+  };
+
+  const normalizeKey = (k: string) =>
+    k.toString().toLowerCase().trim()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]/g, "");
+
+  const parseNumber = (v: any) => {
+    if (v === null || v === undefined || v === "") return 0;
+    if (typeof v === "number") return v;
+    const s = String(v).replace(/[R$\s]/g, "").replace(/\./g, "").replace(",", ".");
+    const n = Number(s);
+    return isNaN(n) ? 0 : n;
+  };
+
+  const handleFile = async (file: File) => {
+    try {
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf, { type: "array" });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json<Record<string, any>>(ws, { defval: "" });
+      const parsed = rows.map((r) => {
+        const obj: Record<string, any> = {};
+        Object.keys(r).forEach((k) => { obj[normalizeKey(k)] = r[k]; });
+        const name = String(obj.nome ?? obj.name ?? obj.produto ?? "").trim();
+        const price = parseNumber(obj.preco ?? obj.price ?? obj.valor);
+        const stock = Math.floor(parseNumber(obj.estoque ?? obj.stock ?? obj.quantidade ?? 0));
+        const description = String(obj.descricao ?? obj.description ?? "").trim();
+        return { name, description, price, stock };
+      }).filter(p => p.name.length > 0);
+      if (parsed.length === 0) { toast.error("Nenhuma linha válida. Verifique a coluna 'nome'."); return; }
+      setImportPreview(parsed);
+      setImportOpen(true);
+    } catch (e: any) {
+      toast.error("Erro ao ler arquivo: " + e.message);
+    } finally {
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  };
+
+  const confirmImport = async () => {
+    if (!user) return;
+    setImporting(true);
+    const payload = importPreview.map(p => ({
+      name: p.name, price: p.price, stock: p.stock,
+      description: p.description || null, user_id: user.id,
+    }));
+    const { error } = await supabase.from("products").insert(payload);
+    setImporting(false);
+    if (error) toast.error(error.message);
+    else {
+      toast.success(`${payload.length} produto(s) importado(s)`);
+      setImportOpen(false);
+      setImportPreview([]);
+      load();
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
