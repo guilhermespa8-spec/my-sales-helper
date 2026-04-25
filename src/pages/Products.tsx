@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Pencil, Trash2, Package, Upload, Download } from "lucide-react";
+import { Plus, Pencil, Trash2, Package, Upload, Download, Search } from "lucide-react";
 import { toast } from "sonner";
 
 interface Product {
@@ -38,6 +38,12 @@ const Products = () => {
   const [importing, setImporting] = useState(false);
   const [removeMissing, setRemoveMissing] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [query, setQuery] = useState("");
+  const filtered = items.filter(p => {
+    const q = query.trim().toLowerCase();
+    if (!q) return true;
+    return p.name.toLowerCase().includes(q) || (p.description ?? "").toLowerCase().includes(q);
+  });
 
   // Computed diff for preview
   const diff = (() => {
@@ -235,12 +241,32 @@ const Products = () => {
       </div>
 
       <Card className="shadow-[var(--shadow-soft)]">
-        <CardHeader><CardTitle className="text-base">Catálogo ({items.length})</CardTitle></CardHeader>
+        <CardHeader className="space-y-3">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <CardTitle className="text-base">
+              Catálogo ({filtered.length}{query ? ` de ${items.length}` : ""})
+            </CardTitle>
+          </div>
+          <div className="relative">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Pesquisar produto por nome ou descrição..."
+              className="pl-9"
+            />
+          </div>
+        </CardHeader>
         <CardContent>
           {items.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <Package className="w-12 h-12 mx-auto mb-2 opacity-40" />
               Nenhum produto. Cadastre o primeiro!
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <Search className="w-10 h-10 mx-auto mb-2 opacity-40" />
+              Nenhum produto encontrado para "{query}"
             </div>
           ) : (
             <Table>
@@ -253,7 +279,7 @@ const Products = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {items.map((p) => (
+                {filtered.map((p) => (
                   <TableRow key={p.id}>
                     <TableCell>
                       <div className="font-medium">{p.name}</div>
