@@ -137,7 +137,26 @@ const Products = () => {
   const parseNumber = (v: any) => {
     if (v === null || v === undefined || v === "") return 0;
     if (typeof v === "number") return v;
-    const s = String(v).replace(/[R$\s]/g, "").replace(/\./g, "").replace(",", ".");
+    let s = String(v).replace(/[R$\s]/g, "").replace(/[^\d.,-]/g, "");
+    if (!s) return 0;
+    const lastComma = s.lastIndexOf(",");
+    const lastDot = s.lastIndexOf(".");
+    if (lastComma > -1 && lastDot > -1) {
+      // Whichever comes last is the decimal separator
+      if (lastComma > lastDot) {
+        s = s.replace(/\./g, "").replace(",", ".");
+      } else {
+        s = s.replace(/,/g, "");
+      }
+    } else if (lastComma > -1) {
+      // Only commas: treat as decimal if 1-2 digits after, else thousands
+      const after = s.length - lastComma - 1;
+      s = after === 1 || after === 2 ? s.replace(",", ".") : s.replace(/,/g, "");
+    } else if (lastDot > -1) {
+      // Only dots: treat as decimal if 1-2 digits after, else thousands
+      const after = s.length - lastDot - 1;
+      s = after === 1 || after === 2 ? s : s.replace(/\./g, "");
+    }
     const n = Number(s);
     return isNaN(n) ? 0 : n;
   };
