@@ -223,6 +223,45 @@ const Fiado = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={!!discountingQuote} onOpenChange={(open) => !open && setDiscountingQuote(null)}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Percent className="w-5 h-5 text-primary" />
+              Aplicar Desconto
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="bg-muted/50 p-4 rounded-lg space-y-1">
+              <div className="text-xs uppercase text-muted-foreground tracking-wider font-semibold">Valor Atual</div>
+              <div className="text-2xl font-bold font-mono">R$ {discountingQuote?.total.toFixed(2)}</div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="discount">Valor do Desconto (R$)</Label>
+              <Input
+                id="discount"
+                type="number"
+                step="0.01"
+                min="0.01"
+                placeholder="0,00"
+                value={discountValue}
+                onChange={(e) => setDiscountValue(e.target.value)}
+                autoFocus
+              />
+              <p className="text-[10px] text-muted-foreground">
+                O desconto será subtraído do total e registrado no histórico.
+              </p>
+            </div>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="ghost" onClick={() => setDiscountingQuote(null)}>Cancelar</Button>
+            <Button onClick={applyDiscount} disabled={isSubmitting || !discountValue}>
+              {isSubmitting ? "Aplicando..." : "Aplicar Desconto"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
