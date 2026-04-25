@@ -174,6 +174,7 @@ const QuoteNew = () => {
               </SelectContent>
             </Select>
           </div>
+          <div><Label>Carro (opcional)</Label><Input value={car} onChange={(e) => setCar(e.target.value)} placeholder="Ex: Gol, Civic..." maxLength={60} /></div>
           <div><Label>Observações (opcional)</Label><Textarea value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={500} rows={2} /></div>
         </CardContent>
       </Card>
