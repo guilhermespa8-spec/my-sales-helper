@@ -28,7 +28,7 @@ const FiadosPagos = () => {
     // Fetch quotes that were fiado but now are not (fiado = false) and have a pay date
     const { data, error } = await supabase
       .from("quotes")
-      .select("id,quote_number,customer_name,total,created_at,pago_em")
+      .select("id,quote_number,customer_name,total,desconto,created_at,pago_em")
       .eq("fiado", false)
       .not("pago_em", "is", null)
       .order("pago_em", { ascending: false });
