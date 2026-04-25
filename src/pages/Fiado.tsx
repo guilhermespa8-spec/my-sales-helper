@@ -40,6 +40,8 @@ const Fiado = () => {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
+  const [discountingQuote, setDiscountingQuote] = useState<Quote | null>(null);
+  const [discountValue, setDiscountValue] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const load = async () => {
