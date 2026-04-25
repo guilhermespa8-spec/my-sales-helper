@@ -21,6 +21,10 @@ const QuoteDetail = () => {
   const nav = useNavigate();
   const [quote, setQuote] = useState<Quote | null>(null);
   const [items, setItems] = useState<Item[]>([]);
+  const [mechanics, setMechanics] = useState<{ id: string; name: string }[]>([]);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedMechanic, setSelectedMechanic] = useState<string>("");
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -28,10 +32,24 @@ const QuoteDetail = () => {
       const { data: q, error } = await supabase.from("quotes").select("*").eq("id", id).maybeSingle();
       if (error || !q) { toast.error("Orçamento não encontrado"); nav("/"); return; }
       setQuote(q as Quote);
+      setSelectedMechanic((q as Quote).customer_name ?? "");
       const { data: its } = await supabase.from("quote_items").select("*").eq("quote_id", id);
       setItems((its ?? []) as Item[]);
+      const { data: mecs } = await supabase.from("mechanics").select("id,name").order("name");
+      setMechanics((mecs ?? []) as { id: string; name: string }[]);
     })();
   }, [id, nav]);
+
+  const handleAssignMechanic = async () => {
+    if (!id || !selectedMechanic) { toast.error("Selecione um mecânico"); return; }
+    setSaving(true);
+    const { error } = await supabase.from("quotes").update({ customer_name: selectedMechanic }).eq("id", id);
+    setSaving(false);
+    if (error) { toast.error("Erro ao salvar"); return; }
+    setQuote((q) => q ? { ...q, customer_name: selectedMechanic } : q);
+    setDialogOpen(false);
+    toast.success(`Venda adicionada ao mecânico ${selectedMechanic}`);
+  };
 
   if (!quote) return <div className="text-center py-12 text-muted-foreground">Carregando...</div>;
 
@@ -40,9 +58,14 @@ const QuoteDetail = () => {
 
   return (
     <div className="max-w-3xl mx-auto space-y-4">
-      <div className="no-print flex items-center justify-between">
+      <div className="no-print flex items-center justify-between gap-2 flex-wrap">
         <Button variant="ghost" onClick={() => nav("/")}><ArrowLeft className="w-4 h-4 mr-1" /> Voltar</Button>
-        <Button onClick={() => window.print()}><Printer className="w-4 h-4 mr-1" /> Imprimir notinha</Button>
+        <div className="flex gap-2">
+          <Button variant="secondary" onClick={() => setDialogOpen(true)}>
+            <Wrench className="w-4 h-4 mr-1" /> ADICIONAR VENDA AO MECÂNICO
+          </Button>
+          <Button onClick={() => window.print()}><Printer className="w-4 h-4 mr-1" /> Imprimir notinha</Button>
+        </div>
       </div>
 
       <Card className="print-area p-8 shadow-[var(--shadow-soft)]">
