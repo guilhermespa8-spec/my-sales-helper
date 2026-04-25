@@ -127,12 +127,10 @@ const QuoteNew = () => {
     if (!filter) return [];
     
     return products.filter((p) => {
-      const pFilter = (p.car_filter ?? "").toLowerCase();
-      const pName = p.name.toLowerCase();
       const pDesc = (p.description ?? "").toLowerCase();
       
-      // Filter by the car's notes/filter string
-      return pFilter.includes(filter) || pName.includes(filter) || pDesc.includes(filter);
+      // Filter ONLY by the product's description
+      return pDesc.includes(filter);
     });
   }, [products, car, carsList]);
 
