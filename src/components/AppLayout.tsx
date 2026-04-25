@@ -37,7 +37,7 @@ const menu: Item[] = [
   { to: "/orcamentos/novo", label: "Orçamento Rápido", icon: Zap },
   { to: "#vendas", label: "Vendas", icon: DollarSign, disabled: true },
   { to: "#cadastros", label: "Cadastros", icon: ClipboardList, disabled: true },
-  { to: "#clientes", label: "Clientes", icon: Users, disabled: true },
+  { to: "/mecanicos", label: "Mecânicos", icon: Wrench },
   { to: "#fornecedores", label: "Fornecedores", icon: Truck, disabled: true },
   { to: "#servicos", label: "Serviços", icon: Wrench, disabled: true },
   { to: "#relatorios", label: "Relatórios", icon: BarChart3, disabled: true },
