@@ -171,13 +171,25 @@ const Fiado = () => {
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="font-mono font-semibold">R$ {Number(q.total).toFixed(2)}</div>
-                        <Button asChild variant="outline" size="sm">
-                          <Link to={`/orcamentos/${q.id}`}>Ver</Link>
-                        </Button>
-                        <Button size="sm" onClick={() => setConfirmingId(q.id)}>
-                          <CheckCircle2 className="w-4 h-4 mr-1" /> Quitar
-                        </Button>
+                        <div className="flex flex-col items-end">
+                          {q.desconto > 0 && (
+                            <span className="text-[10px] text-muted-foreground line-through decoration-destructive/50">
+                              R$ {(Number(q.total) + Number(q.desconto)).toFixed(2)}
+                            </span>
+                          )}
+                          <div className="font-mono font-semibold">R$ {Number(q.total).toFixed(2)}</div>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-primary" onClick={() => setDiscountingQuote(q)} title="Aplicar Desconto">
+                            <Percent className="w-3.5 h-3.5" />
+                          </Button>
+                          <Button asChild variant="outline" size="sm" className="h-8">
+                            <Link to={`/orcamentos/${q.id}`}>Ver</Link>
+                          </Button>
+                          <Button size="sm" className="h-8" onClick={() => setConfirmingId(q.id)}>
+                            <CheckCircle2 className="w-4 h-4 mr-1" /> Quitar
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   );
