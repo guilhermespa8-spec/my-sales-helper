@@ -275,38 +275,97 @@ const Products = () => {
         </CardContent>
       </Card>
 
-      <Dialog open={importOpen} onOpenChange={setImportOpen}>
+      <Dialog open={importOpen} onOpenChange={(o) => { setImportOpen(o); if (!o) setRemoveMissing(false); }}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Confirmar importação</DialogTitle>
+            <DialogTitle>Sincronizar planilha</DialogTitle>
             <DialogDescription>
-              {importPreview.length} produto(s) prontos para importar. Confira os dados abaixo.
+              Resumo das mudanças que serão aplicadas no catálogo.
             </DialogDescription>
           </DialogHeader>
-          <div className="max-h-96 overflow-auto border rounded">
+
+          <div className="grid grid-cols-3 gap-2 text-center">
+            <div className="rounded border p-3">
+              <div className="text-2xl font-bold text-green-600">{diff.toCreate.length}</div>
+              <div className="text-xs text-muted-foreground">novos</div>
+            </div>
+            <div className="rounded border p-3">
+              <div className="text-2xl font-bold text-blue-600">{diff.toUpdate.length}</div>
+              <div className="text-xs text-muted-foreground">atualizados</div>
+            </div>
+            <div className="rounded border p-3">
+              <div className="text-2xl font-bold text-destructive">{diff.toDelete.length}</div>
+              <div className="text-xs text-muted-foreground">fora da planilha</div>
+            </div>
+          </div>
+
+          <div className="max-h-72 overflow-auto border rounded">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Nome</TableHead>
                   <TableHead className="text-right">Preço</TableHead>
                   <TableHead className="text-right">Estoque</TableHead>
+                  <TableHead className="text-right">Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {importPreview.map((p, i) => (
-                  <TableRow key={i}>
+                {diff.toCreate.map((p, i) => (
+                  <TableRow key={"c" + i}>
                     <TableCell>{p.name}</TableCell>
                     <TableCell className="text-right font-mono">R$ {p.price.toFixed(2)}</TableCell>
                     <TableCell className="text-right">{p.stock}</TableCell>
+                    <TableCell className="text-right text-xs text-green-600">novo</TableCell>
                   </TableRow>
                 ))}
+                {diff.toUpdate.map(({ existing, next }, i) => (
+                  <TableRow key={"u" + i}>
+                    <TableCell>{next.name}</TableCell>
+                    <TableCell className="text-right font-mono text-xs">
+                      <span className="text-muted-foreground line-through">R$ {Number(existing.price).toFixed(2)}</span>
+                      {" → "}
+                      <span className="font-bold">R$ {next.price.toFixed(2)}</span>
+                    </TableCell>
+                    <TableCell className="text-right text-xs">
+                      <span className="text-muted-foreground line-through">{existing.stock}</span> → <span className="font-bold">{next.stock}</span>
+                    </TableCell>
+                    <TableCell className="text-right text-xs text-blue-600">atualizar</TableCell>
+                  </TableRow>
+                ))}
+                {diff.toDelete.map((p, i) => (
+                  <TableRow key={"d" + i}>
+                    <TableCell className="text-muted-foreground">{p.name}</TableCell>
+                    <TableCell className="text-right font-mono text-muted-foreground">R$ {Number(p.price).toFixed(2)}</TableCell>
+                    <TableCell className="text-right text-muted-foreground">{p.stock}</TableCell>
+                    <TableCell className="text-right text-xs text-destructive">não está na planilha</TableCell>
+                  </TableRow>
+                ))}
+                {diff.toCreate.length === 0 && diff.toUpdate.length === 0 && diff.toDelete.length === 0 && (
+                  <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-6">Nenhuma mudança detectada — tudo já está sincronizado.</TableCell></TableRow>
+                )}
               </TableBody>
             </Table>
           </div>
+
+          {diff.toDelete.length > 0 && (
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
+              <input
+                type="checkbox"
+                checked={removeMissing}
+                onChange={(e) => setRemoveMissing(e.target.checked)}
+                className="w-4 h-4"
+              />
+              Excluir do site os {diff.toDelete.length} produto(s) que não estão mais na planilha
+            </label>
+          )}
+
           <DialogFooter>
             <Button variant="outline" onClick={() => setImportOpen(false)} disabled={importing}>Cancelar</Button>
-            <Button onClick={confirmImport} disabled={importing}>
-              {importing ? "Importando..." : `Importar ${importPreview.length} produto(s)`}
+            <Button
+              onClick={confirmImport}
+              disabled={importing || (diff.toCreate.length === 0 && diff.toUpdate.length === 0 && (!removeMissing || diff.toDelete.length === 0))}
+            >
+              {importing ? "Sincronizando..." : "Aplicar mudanças"}
             </Button>
           </DialogFooter>
         </DialogContent>
