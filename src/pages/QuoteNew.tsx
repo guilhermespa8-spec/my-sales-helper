@@ -133,6 +133,7 @@ const QuoteNew = () => {
           quote_number: 0,
           customer_name: customer.trim() || null,
           seller: seller || null,
+          car: car.trim() || null,
           notes: notes.trim() || null,
           total,
         } as any).select().single();
