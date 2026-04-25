@@ -323,7 +323,36 @@ const QuoteNew = () => {
                   <div className="text-center py-12 text-sm text-muted-foreground italic">Nenhum produto encontrado</div>
                 ) : (
                   (() => {
-                    // Group products by their base name (e.g., "Correia Dentada")
+                    const isRecommended = Boolean(car && !search.trim());
+                    
+                    if (!isRecommended) {
+                      return catalog.map((p) => {
+                        const added = items.find((i) => i.product_id === p.id);
+                        return (
+                          <button
+                            key={p.id}
+                            type="button"
+                            onClick={() => addItem(p.id)}
+                            className="w-full text-left flex items-center gap-4 px-5 py-4 transition-colors hover:bg-primary/5 group"
+                          >
+                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-all ${
+                              added ? "bg-primary text-primary-foreground shadow-md" : "bg-muted text-muted-foreground group-hover:bg-primary/10"
+                            }`}>
+                              {added ? <span className="text-xs font-bold">{added.quantity}</span> : <Plus className="w-4 h-4" />}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="text-sm font-medium text-foreground whitespace-normal">{p.name}</div>
+                              <div className="text-xs text-muted-foreground whitespace-normal">{p.description || "Sem descrição"}</div>
+                            </div>
+                            <div className="text-base font-mono font-bold text-primary">
+                              R$ {Number(p.price).toFixed(2)}
+                            </div>
+                          </button>
+                        );
+                      });
+                    }
+
+                    // Group products ONLY for recommended parts (when car is selected and no search)
                     const groups = new Map<string, Product[]>();
                     catalog.forEach(p => {
                       const baseName = p.name.split(/[\-\.\s\d]/)[0] || p.name;
