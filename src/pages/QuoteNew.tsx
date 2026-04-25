@@ -577,6 +577,7 @@ const QuoteNew = () => {
         </div>
       </div>
     </div>
+   </div>
   );
 };
 
