@@ -33,12 +33,12 @@ type Item = {
 
 const menu: Item[] = [
   { to: "/", label: "Início", icon: Home, end: true },
+  { to: "/produtos", label: "Produtos", icon: Package },
+  { to: "/orcamentos/novo", label: "Orçamento Rápido", icon: Zap },
   { to: "#vendas", label: "Vendas", icon: DollarSign, disabled: true },
   { to: "#cadastros", label: "Cadastros", icon: ClipboardList, disabled: true },
   { to: "#clientes", label: "Clientes", icon: Users, disabled: true },
   { to: "#fornecedores", label: "Fornecedores", icon: Truck, disabled: true },
-  { to: "/orcamentos/novo", label: "Orçamento Rápido", icon: Zap },
-  { to: "/produtos", label: "Produtos", icon: Package },
   { to: "#servicos", label: "Serviços", icon: Wrench, disabled: true },
   { to: "#relatorios", label: "Relatórios", icon: BarChart3, disabled: true },
   { to: "#financeiro", label: "Financeiro", icon: Wallet, disabled: true },
