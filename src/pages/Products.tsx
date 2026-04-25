@@ -228,6 +228,43 @@ const Products = () => {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={importOpen} onOpenChange={setImportOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Confirmar importação</DialogTitle>
+            <DialogDescription>
+              {importPreview.length} produto(s) prontos para importar. Confira os dados abaixo.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-96 overflow-auto border rounded">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nome</TableHead>
+                  <TableHead className="text-right">Preço</TableHead>
+                  <TableHead className="text-right">Estoque</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {importPreview.map((p, i) => (
+                  <TableRow key={i}>
+                    <TableCell>{p.name}</TableCell>
+                    <TableCell className="text-right font-mono">R$ {p.price.toFixed(2)}</TableCell>
+                    <TableCell className="text-right">{p.stock}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setImportOpen(false)} disabled={importing}>Cancelar</Button>
+            <Button onClick={confirmImport} disabled={importing}>
+              {importing ? "Importando..." : `Importar ${importPreview.length} produto(s)`}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
