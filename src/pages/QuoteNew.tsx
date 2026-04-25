@@ -16,6 +16,7 @@ const CARS = ["Corsa VHC"] as const;
 
 interface Product { id: string; name: string; description: string | null; price: number; }
 interface Item { product_id: string; product_name: string; quantity: number; unit_price: number; }
+interface Mechanic { id: string; name: string; }
 
 const QuoteNew = () => {
   const { user } = useAuth();
@@ -23,6 +24,7 @@ const QuoteNew = () => {
   const { id: editId } = useParams<{ id: string }>();
   const isEdit = Boolean(editId);
   const [products, setProducts] = useState<Product[]>([]);
+  const [mechanics, setMechanics] = useState<Mechanic[]>([]);
   const [customer, setCustomer] = useState("");
   const [seller, setSeller] = useState<string>("");
   const [car, setCar] = useState("");
@@ -79,6 +81,14 @@ const QuoteNew = () => {
     };
 
     loadProducts();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      const { data, error } = await supabase.from("mechanics").select("id,name").order("name");
+      if (error) { toast.error(error.message); return; }
+      setMechanics((data ?? []) as Mechanic[]);
+    })();
   }, []);
 
   const addItem = (productId: string) => {
@@ -257,12 +267,12 @@ const QuoteNew = () => {
             <CardHeader className="pb-3"><CardTitle className="text-base">Dados</CardTitle></CardHeader>
             <CardContent className="space-y-3">
               <div>
-                <Label>Cliente</Label>
+                <Label>Mecânico</Label>
                 <Select value={customer || "__none__"} onValueChange={(v) => setCustomer(v === "__none__" ? "" : v)}>
-                  <SelectTrigger><SelectValue placeholder="Selecione o cliente" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={mechanics.length ? "Selecione o mecânico" : "Cadastre em Mecânicos"} /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__none__">Nenhum</SelectItem>
-                    <SelectItem value="Padrão">Padrão</SelectItem>
+                    {mechanics.map((m) => (<SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>))}
                   </SelectContent>
                 </Select>
               </div>
