@@ -116,25 +116,29 @@ const QuoteNew = () => {
     const q = search.trim().toLowerCase();
     if (!q) return [];
     
-    // Original terms for exact word matching
+    // Normalize string: remove spaces, dots and hyphens
+    const normalize = (str: string) => str.toLowerCase().replace(/[\s\.\-]/g, "");
+    
     const searchTerms = q.split(/\s+/).filter(term => term.length > 0);
-    // Combined string without spaces to find codes like "OC259" when searching "OC 259"
-    const searchCombined = q.replace(/\s+/g, "");
+    const searchNormalized = normalize(q);
     
     return products.filter((p) => {
       const pName = p.name.toLowerCase();
       const pDesc = (p.description ?? "").toLowerCase();
-      const pNameCompact = pName.replace(/\s+/g, "");
+      const pNameNormalized = normalize(p.name);
+      const pDescNormalized = normalize(p.description ?? "");
       
       // Match 1: All individual terms are present (standard flexible search)
       const allTermsMatch = searchTerms.every(term => 
         pName.includes(term) || pDesc.includes(term)
       );
 
-      // Match 2: The combined search string matches the compact name (e.g., "oc 259" -> "oc259")
-      const combinedMatch = pNameCompact.includes(searchCombined);
+      // Match 2: Normalized search matches normalized name or description
+      // This handles "n 6017" matching "n-6017" or "oc 259" matching "oc259"
+      const normalizedMatch = pNameNormalized.includes(searchNormalized) || 
+                             pDescNormalized.includes(searchNormalized);
       
-      return allTermsMatch || combinedMatch;
+      return allTermsMatch || normalizedMatch;
     });
   }, [products, search]);
 
