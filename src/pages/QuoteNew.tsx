@@ -116,17 +116,25 @@ const QuoteNew = () => {
     const q = search.trim().toLowerCase();
     if (!q) return [];
     
-    // Split the search query into individual terms (words)
+    // Original terms for exact word matching
     const searchTerms = q.split(/\s+/).filter(term => term.length > 0);
+    // Combined string without spaces to find codes like "OC259" when searching "OC 259"
+    const searchCombined = q.replace(/\s+/g, "");
     
     return products.filter((p) => {
       const pName = p.name.toLowerCase();
       const pDesc = (p.description ?? "").toLowerCase();
+      const pNameCompact = pName.replace(/\s+/g, "");
       
-      // Every search term must be found in either the name or description
-      return searchTerms.every(term => 
+      // Match 1: All individual terms are present (standard flexible search)
+      const allTermsMatch = searchTerms.every(term => 
         pName.includes(term) || pDesc.includes(term)
       );
+
+      // Match 2: The combined search string matches the compact name (e.g., "oc 259" -> "oc259")
+      const combinedMatch = pNameCompact.includes(searchCombined);
+      
+      return allTermsMatch || combinedMatch;
     });
   }, [products, search]);
 
