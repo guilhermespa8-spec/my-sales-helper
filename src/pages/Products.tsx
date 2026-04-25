@@ -332,10 +332,10 @@ const Products = () => {
                 <TableRow>
                   <TableHead className="w-16 text-center">Código</TableHead>
                   <TableHead className="text-center">Descrição</TableHead>
+                  <TableHead className="text-center">Filtro Carro</TableHead>
                   <TableHead className="text-center w-24">Estoque</TableHead>
                   <TableHead className="text-center w-28">Valor</TableHead>
                   <TableHead className="text-center w-24">Status</TableHead>
-                  <TableHead className="text-center w-40">Última alteração</TableHead>
                   <TableHead className="text-center w-28">Ações</TableHead>
                 </TableRow>
               </TableHeader>
