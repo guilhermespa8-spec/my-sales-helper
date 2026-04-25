@@ -83,6 +83,14 @@ const QuoteNew = () => {
     loadProducts();
   }, []);
 
+  useEffect(() => {
+    (async () => {
+      const { data, error } = await supabase.from("mechanics").select("id,name").order("name");
+      if (error) { toast.error(error.message); return; }
+      setMechanics((data ?? []) as Mechanic[]);
+    })();
+  }, []);
+
   const addItem = (productId: string) => {
     const p = products.find((x) => x.id === productId);
     if (!p) return;
