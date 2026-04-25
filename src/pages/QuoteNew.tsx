@@ -38,6 +38,7 @@ const QuoteNew = () => {
       if (error) { toast.error(error.message); return; }
       setCustomer(q.customer_name ?? "");
       setSeller((q as any).seller ?? "");
+      setCar((q as any).car ?? "");
       setNotes(q.notes ?? "");
       setQuoteNumber(q.quote_number);
       const { data: its, error: e2 } = await supabase.from("quote_items").select("*").eq("quote_id", editId);
