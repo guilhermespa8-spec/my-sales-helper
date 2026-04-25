@@ -13,6 +13,7 @@ interface Quote {
   quote_number: number;
   customer_name: string | null;
   total: number;
+  desconto: number;
   created_at: string;
   pago_em: string | null;
 }
@@ -27,7 +28,7 @@ const FiadosPagos = () => {
     // Fetch quotes that were fiado but now are not (fiado = false) and have a pay date
     const { data, error } = await supabase
       .from("quotes")
-      .select("id,quote_number,customer_name,total,created_at,pago_em")
+      .select("id,quote_number,customer_name,total,desconto,created_at,pago_em")
       .eq("fiado", false)
       .not("pago_em", "is", null)
       .order("pago_em", { ascending: false });
@@ -128,7 +129,14 @@ const FiadosPagos = () => {
                         </div>
                       </div>
                       <div className="flex items-center gap-4">
-                        <div className="font-mono font-bold text-sm text-foreground">R$ {Number(q.total).toFixed(2)}</div>
+                        <div className="flex flex-col items-end">
+                          {q.desconto > 0 && (
+                            <span className="text-[10px] text-muted-foreground line-through decoration-destructive/50">
+                              R$ {(Number(q.total) + Number(q.desconto)).toFixed(2)}
+                            </span>
+                          )}
+                          <div className="font-mono font-bold text-sm text-foreground">R$ {Number(q.total).toFixed(2)}</div>
+                        </div>
                         <Button asChild variant="ghost" size="sm" className="h-8">
                           <Link to={`/orcamentos/${q.id}`}>Ver Detalhes</Link>
                         </Button>

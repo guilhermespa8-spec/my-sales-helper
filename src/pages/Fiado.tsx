@@ -4,8 +4,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Wrench, Receipt, CheckCircle2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Wrench, Receipt, CheckCircle2, Percent, X } from "lucide-react";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,6 +31,7 @@ interface Quote {
   quote_number: number;
   customer_name: string | null;
   total: number;
+  desconto: number;
   created_at: string;
   fiado: boolean;
 }
@@ -30,13 +40,15 @@ const Fiado = () => {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
+  const [discountingQuote, setDiscountingQuote] = useState<Quote | null>(null);
+  const [discountValue, setDiscountValue] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const load = async () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("quotes")
-      .select("id,quote_number,customer_name,total,created_at,fiado")
+      .select("id,quote_number,customer_name,total,desconto,created_at,fiado")
       .eq("fiado", true)
       .order("created_at", { ascending: false });
     if (error) toast.error("Erro ao carregar fiado");
@@ -71,6 +83,41 @@ const Fiado = () => {
     } else {
       toast.success("Fiado quitado com sucesso");
       setConfirmingId(null);
+      load();
+    }
+  };
+
+  const applyDiscount = async () => {
+    if (!discountingQuote) return;
+    const discount = Number(discountValue);
+    if (isNaN(discount) || discount < 0) {
+      toast.error("Valor de desconto inválido");
+      return;
+    }
+
+    if (discount >= discountingQuote.total) {
+      toast.error("O desconto não pode ser maior ou igual ao total");
+      return;
+    }
+
+    setIsSubmitting(true);
+    const newTotal = discountingQuote.total - discount;
+    const { error } = await supabase
+      .from("quotes")
+      .update({ 
+        total: newTotal,
+        desconto: discountingQuote.desconto + discount
+      })
+      .eq("id", discountingQuote.id);
+    
+    setIsSubmitting(false);
+
+    if (error) {
+      toast.error("Erro ao aplicar desconto");
+    } else {
+      toast.success("Desconto aplicado com sucesso");
+      setDiscountingQuote(null);
+      setDiscountValue("");
       load();
     }
   };
@@ -124,13 +171,25 @@ const Fiado = () => {
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="font-mono font-semibold">R$ {Number(q.total).toFixed(2)}</div>
-                        <Button asChild variant="outline" size="sm">
-                          <Link to={`/orcamentos/${q.id}`}>Ver</Link>
-                        </Button>
-                        <Button size="sm" onClick={() => setConfirmingId(q.id)}>
-                          <CheckCircle2 className="w-4 h-4 mr-1" /> Quitar
-                        </Button>
+                        <div className="flex flex-col items-end">
+                          {q.desconto > 0 && (
+                            <span className="text-[10px] text-muted-foreground line-through decoration-destructive/50">
+                              R$ {(Number(q.total) + Number(q.desconto)).toFixed(2)}
+                            </span>
+                          )}
+                          <div className="font-mono font-semibold">R$ {Number(q.total).toFixed(2)}</div>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-primary" onClick={() => setDiscountingQuote(q)} title="Aplicar Desconto">
+                            <Percent className="w-3.5 h-3.5" />
+                          </Button>
+                          <Button asChild variant="outline" size="sm" className="h-8">
+                            <Link to={`/orcamentos/${q.id}`}>Ver</Link>
+                          </Button>
+                          <Button size="sm" className="h-8" onClick={() => setConfirmingId(q.id)}>
+                            <CheckCircle2 className="w-4 h-4 mr-1" /> Quitar
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   );
@@ -164,6 +223,45 @@ const Fiado = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={!!discountingQuote} onOpenChange={(open) => !open && setDiscountingQuote(null)}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Percent className="w-5 h-5 text-primary" />
+              Aplicar Desconto
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="bg-muted/50 p-4 rounded-lg space-y-1">
+              <div className="text-xs uppercase text-muted-foreground tracking-wider font-semibold">Valor Atual</div>
+              <div className="text-2xl font-bold font-mono">R$ {discountingQuote?.total.toFixed(2)}</div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="discount">Valor do Desconto (R$)</Label>
+              <Input
+                id="discount"
+                type="number"
+                step="0.01"
+                min="0.01"
+                placeholder="0,00"
+                value={discountValue}
+                onChange={(e) => setDiscountValue(e.target.value)}
+                autoFocus
+              />
+              <p className="text-[10px] text-muted-foreground">
+                O desconto será subtraído do total e registrado no histórico.
+              </p>
+            </div>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="ghost" onClick={() => setDiscountingQuote(null)}>Cancelar</Button>
+            <Button onClick={applyDiscount} disabled={isSubmitting || !discountValue}>
+              {isSubmitting ? "Aplicando..." : "Aplicar Desconto"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
