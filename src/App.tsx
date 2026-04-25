@@ -7,16 +7,26 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AppLayout from "@/components/AppLayout";
-import Index from "./pages/Index";
-import Auth from "./pages/Auth";
-import Products from "./pages/Products";
-import QuoteNew from "./pages/QuoteNew";
-import QuoteDetail from "./pages/QuoteDetail";
-import Mechanics from "./pages/Mechanics";
-import Fiado from "./pages/Fiado";
-import FiadosPagos from "./pages/FiadosPagos";
-import Cars from "./pages/Cars";
-import NotFound from "./pages/NotFound";
+import { lazy, Suspense } from "react";
+
+// Lazy loading components for better performance
+const Index = lazy(() => import("./pages/Index"));
+const Auth = lazy(() => import("./pages/Auth"));
+const Products = lazy(() => import("./pages/Products"));
+const QuoteNew = lazy(() => import("./pages/QuoteNew"));
+const QuoteDetail = lazy(() => import("./pages/QuoteDetail"));
+const Mechanics = lazy(() => import("./pages/Mechanics"));
+const Fiado = lazy(() => import("./pages/Fiado"));
+const FiadosPagos = lazy(() => import("./pages/FiadosPagos"));
+const Cars = lazy(() => import("./pages/Cars"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+
+// Loading fallback component
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+  </div>
+);
 
 const queryClient = new QueryClient();
 
@@ -32,19 +42,21 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/" element={<Protected><Index /></Protected>} />
-            <Route path="/produtos" element={<Protected><Products /></Protected>} />
-            <Route path="/orcamentos/novo" element={<Protected><QuoteNew /></Protected>} />
-            <Route path="/orcamentos/:id/editar" element={<Protected><QuoteNew /></Protected>} />
-            <Route path="/orcamentos/:id" element={<Protected><QuoteDetail /></Protected>} />
-            <Route path="/mecanicos" element={<Protected><Mechanics /></Protected>} />
-            <Route path="/fiado" element={<Protected><Fiado /></Protected>} />
-            <Route path="/fiados-pagos" element={<Protected><FiadosPagos /></Protected>} />
-            <Route path="/carros" element={<Protected><Cars /></Protected>} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/" element={<Protected><Index /></Protected>} />
+              <Route path="/produtos" element={<Protected><Products /></Protected>} />
+              <Route path="/orcamentos/novo" element={<Protected><QuoteNew /></Protected>} />
+              <Route path="/orcamentos/:id/editar" element={<Protected><QuoteNew /></Protected>} />
+              <Route path="/orcamentos/:id" element={<Protected><QuoteDetail /></Protected>} />
+              <Route path="/mecanicos" element={<Protected><Mechanics /></Protected>} />
+              <Route path="/fiado" element={<Protected><Fiado /></Protected>} />
+              <Route path="/fiados-pagos" element={<Protected><FiadosPagos /></Protected>} />
+              <Route path="/carros" element={<Protected><Cars /></Protected>} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
