@@ -113,7 +113,9 @@ const Products = () => {
     const d = parsed.data;
     const payload = {
       name: d.name, price: d.price, stock: d.stock,
-      description: d.description ?? null, user_id: user!.id,
+      description: d.description ?? null,
+      car_filter: form.car_filter.trim() || null,
+      user_id: user!.id,
     };
     const { error } = editing
       ? await supabase.from("products").update(payload).eq("id", editing.id)
