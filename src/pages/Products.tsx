@@ -41,11 +41,12 @@ const Products = () => {
   const [removeMissing, setRemoveMissing] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
-  const filtered = items.filter(p => {
-    const q = query.trim().toLowerCase();
+  const q = query.trim().toLowerCase();
+  const matched = items.filter(p => {
     if (!q) return true;
     return p.name.toLowerCase().includes(q) || (p.description ?? "").toLowerCase().includes(q);
   });
+  const filtered = q ? matched : matched.slice(0, 10);
 
   // Computed diff for preview
   const diff = (() => {
@@ -291,7 +292,7 @@ const Products = () => {
       <Card className="shadow-[var(--shadow-soft)]">
         <CardHeader className="py-3">
           <CardTitle className="text-sm text-muted-foreground font-normal">
-            Catálogo ({filtered.length}{query ? ` de ${items.length}` : ""})
+            Catálogo ({filtered.length} de {items.length}{!q && items.length > 10 ? " — exibindo 10" : ""})
           </CardTitle>
         </CardHeader>
         <CardContent>
