@@ -230,65 +230,67 @@ const Products = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-primary">Produtos</h1>
-          <p className="text-sm text-muted-foreground">Gerencie seu catálogo e preços</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <input
-            ref={fileRef}
-            type="file"
-            accept=".csv,.xlsx,.xls"
-            className="hidden"
-            onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
-          />
-          <Button variant="outline" onClick={downloadTemplate}>
-            <Download className="w-4 h-4 mr-1" /> Modelo
-          </Button>
-          <Button variant="outline" onClick={() => fileRef.current?.click()}>
-            <Upload className="w-4 h-4 mr-1" /> Sincronizar planilha
-          </Button>
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={openNew}><Plus className="w-4 h-4 mr-1" /> Novo produto</Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader><DialogTitle>{editing ? "Editar produto" : "Novo produto"}</DialogTitle></DialogHeader>
-              <div className="space-y-3">
-                <div><Label>Nome</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
-                <div><Label>Descrição</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div><Label>Preço (R$)</Label><Input type="number" step="0.01" min="0" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} /></div>
-                  <div><Label>Estoque</Label><Input type="number" min="0" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} /></div>
-                </div>
+    <div className="space-y-4">
+      <div>
+        <h1 className="text-2xl font-bold text-primary">Produtos</h1>
+        <p className="text-sm text-muted-foreground">Gerencie seu catálogo e preços</p>
+      </div>
+
+      {/* Toolbar style inspired by reference */}
+      <div className="flex flex-wrap items-center gap-2">
+        <input
+          ref={fileRef}
+          type="file"
+          accept=".csv,.xlsx,.xls"
+          className="hidden"
+          onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
+        />
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button onClick={openNew} className="bg-green-600 hover:bg-green-700 text-white font-semibold">
+              <Plus className="w-4 h-4 mr-1" /> Novo Produto
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader><DialogTitle>{editing ? "Editar produto" : "Novo produto"}</DialogTitle></DialogHeader>
+            <div className="space-y-3">
+              <div><Label>Nome</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
+              <div><Label>Descrição</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label>Preço (R$)</Label><Input type="number" step="0.01" min="0" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} /></div>
+                <div><Label>Estoque</Label><Input type="number" min="0" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} /></div>
               </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-                <Button onClick={save}>Salvar</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+              <Button onClick={save}>Salvar</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <div className="relative flex-1 min-w-[240px]">
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Pesquisa por descrição, nome..."
+            className="pl-9"
+          />
         </div>
+
+        <Button variant="outline" onClick={downloadTemplate}>
+          <Download className="w-4 h-4 mr-1" /> Modelo
+        </Button>
+        <Button onClick={() => fileRef.current?.click()} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold">
+          <Upload className="w-4 h-4 mr-1" /> Importar Produtos
+        </Button>
       </div>
 
       <Card className="shadow-[var(--shadow-soft)]">
-        <CardHeader className="space-y-3">
-          <div className="flex items-center justify-between gap-3 flex-wrap">
-            <CardTitle className="text-base">
-              Catálogo ({filtered.length}{query ? ` de ${items.length}` : ""})
-            </CardTitle>
-          </div>
-          <div className="relative">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Pesquisar produto por nome ou descrição..."
-              className="pl-9"
-            />
-          </div>
+        <CardHeader className="py-3">
+          <CardTitle className="text-sm text-muted-foreground font-normal">
+            Catálogo ({filtered.length}{query ? ` de ${items.length}` : ""})
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {items.length === 0 ? (
@@ -305,25 +307,33 @@ const Products = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Nome</TableHead>
-                  <TableHead className="text-right">Preço</TableHead>
-                  <TableHead className="text-right">Estoque</TableHead>
-                  <TableHead className="w-24"></TableHead>
+                  <TableHead className="w-16 text-center">Código</TableHead>
+                  <TableHead className="text-center">Descrição</TableHead>
+                  <TableHead className="text-center w-24">Estoque</TableHead>
+                  <TableHead className="text-center w-28">Valor</TableHead>
+                  <TableHead className="text-center w-24">Status</TableHead>
+                  <TableHead className="text-center w-28">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filtered.map((p) => (
+                {filtered.map((p, idx) => (
                   <TableRow key={p.id}>
-                    <TableCell>
+                    <TableCell className="text-center font-mono text-muted-foreground">{idx + 1}</TableCell>
+                    <TableCell className="text-center">
                       <div className="font-medium">{p.name}</div>
                       {p.description && <div className="text-xs text-muted-foreground line-clamp-1">{p.description}</div>}
                     </TableCell>
-                    <TableCell className="text-right font-mono">R$ {Number(p.price).toFixed(2)}</TableCell>
-                    <TableCell className="text-right">{p.stock}</TableCell>
+                    <TableCell className="text-center">{p.stock}</TableCell>
+                    <TableCell className="text-center font-mono">R$ {Number(p.price).toFixed(2)}</TableCell>
+                    <TableCell className="text-center">
+                      <span className={`inline-block px-3 py-1 rounded text-xs font-semibold text-white ${p.stock > 0 ? "bg-green-600" : "bg-muted-foreground"}`}>
+                        {p.stock > 0 ? "Ativo" : "Sem estoque"}
+                      </span>
+                    </TableCell>
                     <TableCell>
-                      <div className="flex gap-1 justify-end">
-                        <Button size="icon" variant="ghost" onClick={() => openEdit(p)}><Pencil className="w-4 h-4" /></Button>
-                        <Button size="icon" variant="ghost" onClick={() => remove(p.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                      <div className="flex gap-1 justify-center">
+                        <Button size="icon" variant="ghost" onClick={() => openEdit(p)} title="Editar"><Pencil className="w-4 h-4" /></Button>
+                        <Button size="icon" variant="ghost" onClick={() => remove(p.id)} title="Excluir"><Trash2 className="w-4 h-4 text-destructive" /></Button>
                       </div>
                     </TableCell>
                   </TableRow>
