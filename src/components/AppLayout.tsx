@@ -20,6 +20,7 @@ import {
   Wallet,
   FileSpreadsheet,
   Car,
+  CheckCircle2,
 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 
