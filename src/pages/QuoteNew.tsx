@@ -121,10 +121,20 @@ const QuoteNew = () => {
   }, [products, search]);
 
   const suggestedParts = useMemo(() => {
-    const c = car.trim().toLowerCase();
-    if (!c) return [];
-    return products.filter((p) => (p.description ?? "").toLowerCase().includes(c));
-  }, [products, car]);
+    if (!car) return [];
+    const selectedCar = carsList.find(c => c.name === car);
+    const filter = selectedCar?.notes?.trim().toLowerCase();
+    if (!filter) return [];
+    
+    return products.filter((p) => {
+      const pFilter = (p.car_filter ?? "").toLowerCase();
+      const pName = p.name.toLowerCase();
+      const pDesc = (p.description ?? "").toLowerCase();
+      
+      // Filter by the car's notes/filter string
+      return pFilter.includes(filter) || pName.includes(filter) || pDesc.includes(filter);
+    });
+  }, [products, car, carsList]);
 
   const save = async () => {
     if (items.length === 0) { toast.error("Adicione ao menos 1 item"); return; }
