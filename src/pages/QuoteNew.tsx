@@ -24,6 +24,7 @@ const QuoteNew = () => {
   const [items, setItems] = useState<Item[]>([]);
   const [search, setSearch] = useState("");
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     supabase.from("products").select("id,name,price").order("name").then(({ data }) => {
