@@ -7,8 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Trash2, Save } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Plus, Trash2, Save, Search } from "lucide-react";
 import { toast } from "sonner";
 
 interface Product { id: string; name: string; price: number; }
@@ -21,6 +22,8 @@ const QuoteNew = () => {
   const [customer, setCustomer] = useState("");
   const [notes, setNotes] = useState("");
   const [items, setItems] = useState<Item[]>([]);
+  const [search, setSearch] = useState("");
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -91,17 +94,37 @@ const QuoteNew = () => {
       <Card className="shadow-[var(--shadow-soft)]">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-base">Itens</CardTitle>
-          <div className="w-64">
-            <Select onValueChange={addItem}>
-              <SelectTrigger><SelectValue placeholder="+ Adicionar produto" /></SelectTrigger>
-              <SelectContent>
-                {products.length === 0 ? (
-                  <div className="px-2 py-3 text-sm text-muted-foreground">Nenhum produto cadastrado</div>
-                ) : products.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>{p.name} — R$ {Number(p.price).toFixed(2)}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="w-72">
+            <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-full justify-start text-muted-foreground font-normal">
+                  <Search className="w-4 h-4 mr-2" /> Pesquisar produto...
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[320px] p-0" align="end">
+                <Command shouldFilter={false}>
+                  <CommandInput placeholder="Digite o nome..." value={search} onValueChange={setSearch} />
+                  <CommandList>
+                    <CommandEmpty>Nenhum produto encontrado</CommandEmpty>
+                    <CommandGroup>
+                      {products
+                        .filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
+                        .slice(0, 50)
+                        .map((p) => (
+                          <CommandItem
+                            key={p.id}
+                            value={p.id}
+                            onSelect={() => { addItem(p.id); setSearch(""); setPickerOpen(false); }}
+                          >
+                            <span className="flex-1 truncate">{p.name}</span>
+                            <span className="ml-2 text-xs text-muted-foreground font-mono">R$ {Number(p.price).toFixed(2)}</span>
+                          </CommandItem>
+                        ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
         </CardHeader>
         <CardContent>
