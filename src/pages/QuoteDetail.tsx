@@ -3,8 +3,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Printer, ArrowLeft, Receipt } from "lucide-react";
+import { Printer, ArrowLeft, Receipt, Wrench } from "lucide-react";
 import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 interface Quote {
   id: string; quote_number: number; customer_name: string | null;
@@ -18,6 +21,10 @@ const QuoteDetail = () => {
   const nav = useNavigate();
   const [quote, setQuote] = useState<Quote | null>(null);
   const [items, setItems] = useState<Item[]>([]);
+  const [mechanics, setMechanics] = useState<{ id: string; name: string }[]>([]);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedMechanic, setSelectedMechanic] = useState<string>("");
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -25,10 +32,24 @@ const QuoteDetail = () => {
       const { data: q, error } = await supabase.from("quotes").select("*").eq("id", id).maybeSingle();
       if (error || !q) { toast.error("Orçamento não encontrado"); nav("/"); return; }
       setQuote(q as Quote);
+      setSelectedMechanic((q as Quote).customer_name ?? "");
       const { data: its } = await supabase.from("quote_items").select("*").eq("quote_id", id);
       setItems((its ?? []) as Item[]);
+      const { data: mecs } = await supabase.from("mechanics").select("id,name").order("name");
+      setMechanics((mecs ?? []) as { id: string; name: string }[]);
     })();
   }, [id, nav]);
+
+  const handleAssignMechanic = async () => {
+    if (!id || !selectedMechanic) { toast.error("Selecione um mecânico"); return; }
+    setSaving(true);
+    const { error } = await supabase.from("quotes").update({ customer_name: selectedMechanic }).eq("id", id);
+    setSaving(false);
+    if (error) { toast.error("Erro ao salvar"); return; }
+    setQuote((q) => q ? { ...q, customer_name: selectedMechanic } : q);
+    setDialogOpen(false);
+    toast.success(`Venda adicionada ao mecânico ${selectedMechanic}`);
+  };
 
   if (!quote) return <div className="text-center py-12 text-muted-foreground">Carregando...</div>;
 
@@ -37,9 +58,14 @@ const QuoteDetail = () => {
 
   return (
     <div className="max-w-3xl mx-auto space-y-4">
-      <div className="no-print flex items-center justify-between">
+      <div className="no-print flex items-center justify-between gap-2 flex-wrap">
         <Button variant="ghost" onClick={() => nav("/")}><ArrowLeft className="w-4 h-4 mr-1" /> Voltar</Button>
-        <Button onClick={() => window.print()}><Printer className="w-4 h-4 mr-1" /> Imprimir notinha</Button>
+        <div className="flex gap-2">
+          <Button variant="secondary" onClick={() => setDialogOpen(true)}>
+            <Wrench className="w-4 h-4 mr-1" /> ADICIONAR VENDA AO MECÂNICO
+          </Button>
+          <Button onClick={() => window.print()}><Printer className="w-4 h-4 mr-1" /> Imprimir notinha</Button>
+        </div>
       </div>
 
       <Card className="print-area p-8 shadow-[var(--shadow-soft)]">
@@ -114,6 +140,34 @@ const QuoteDetail = () => {
           Documento de orçamento — não possui valor fiscal
         </div>
       </Card>
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Adicionar venda ao mecânico</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Label>Mecânico</Label>
+            <Select value={selectedMechanic || "__none__"} onValueChange={(v) => setSelectedMechanic(v === "__none__" ? "" : v)}>
+              <SelectTrigger>
+                <SelectValue placeholder={mechanics.length ? "Selecione o mecânico" : "Cadastre em Mecânicos"} />
+              </SelectTrigger>
+              <SelectContent>
+                {mechanics.map((m) => (<SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>))}
+              </SelectContent>
+            </Select>
+            {quote.customer_name && (
+              <p className="text-xs text-muted-foreground">Atualmente vinculado a: <strong>{quote.customer_name}</strong></p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setDialogOpen(false)}>Cancelar</Button>
+            <Button onClick={handleAssignMechanic} disabled={saving || !selectedMechanic}>
+              {saving ? "Salvando..." : "Confirmar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
