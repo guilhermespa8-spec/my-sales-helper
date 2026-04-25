@@ -94,7 +94,13 @@ const Products = () => {
   const openNew = () => { setEditing(null); setForm(empty); setOpen(true); };
   const openEdit = (p: Product) => {
     setEditing(p);
-    setForm({ name: p.name, description: p.description ?? "", price: String(p.price), stock: String(p.stock) });
+    setForm({
+      name: p.name,
+      description: p.description ?? "",
+      price: String(p.price),
+      stock: String(p.stock),
+      car_filter: p.car_filter ?? ""
+    });
     setOpen(true);
   };
 
