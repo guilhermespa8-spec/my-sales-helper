@@ -264,7 +264,7 @@ const QuoteNew = () => {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Digite o nome do produto..."
-                className="pl-14 pr-5 h-16 text-lg bg-card/80 border-2 shadow-[var(--shadow-soft)] focus-visible:border-primary"
+                className="pl-14 pr-5 h-16 text-lg bg-card border-2 shadow-[var(--shadow-soft)] focus-visible:border-primary"
                 autoFocus
               />
               {search && (
