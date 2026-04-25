@@ -2,7 +2,8 @@ import { ReactNode } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Receipt, Package, FileText, LogOut } from "lucide-react";
+import { Receipt, Package, FileText, LogOut, Moon, Sun } from "lucide-react";
+import { useTheme } from "@/hooks/useTheme";
 
 const links = [
   { to: "/", label: "Orçamentos", icon: FileText, end: true },
@@ -11,6 +12,7 @@ const links = [
 
 const AppLayout = ({ children }: { children: ReactNode }) => {
   const { user, signOut } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const nav = useNavigate();
 
   return (
@@ -38,6 +40,9 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
           </div>
           <div className="flex items-center gap-3">
             <span className="hidden sm:block text-sm text-muted-foreground truncate max-w-[180px]">{user?.email}</span>
+            <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Alternar tema">
+              {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </Button>
             <Button variant="ghost" size="sm" onClick={async () => { await signOut(); nav("/auth"); }}>
               <LogOut className="w-4 h-4 mr-1" /> Sair
             </Button>
