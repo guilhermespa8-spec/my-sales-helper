@@ -353,6 +353,21 @@ const Products = () => {
         </CardContent>
       </Card>
 
+      <Dialog open={!!viewing} onOpenChange={(o) => !o && setViewing(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{viewing?.name}</DialogTitle>
+            <DialogDescription>Observação do produto</DialogDescription>
+          </DialogHeader>
+          <div className="text-sm whitespace-pre-wrap min-h-[60px]">
+            {viewing?.description?.trim() ? viewing.description : <span className="text-muted-foreground italic">Sem observação cadastrada.</span>}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setViewing(null)}>Fechar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={importOpen} onOpenChange={(o) => { setImportOpen(o); if (!o) setRemoveMissing(false); }}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
