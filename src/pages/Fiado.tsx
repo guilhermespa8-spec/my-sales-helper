@@ -46,7 +46,7 @@ const Fiado = () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("quotes")
-      .select("id,quote_number,customer_name,total,created_at,fiado")
+      .select("id,quote_number,customer_name,total,desconto,created_at,fiado")
       .eq("fiado", true)
       .order("created_at", { ascending: false });
     if (error) toast.error("Erro ao carregar fiado");
