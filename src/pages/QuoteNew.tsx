@@ -208,7 +208,7 @@ const QuoteNew = () => {
     const q = search.trim().toLowerCase();
     if (q) return filteredProducts;
     if (car) return suggestedParts;
-    return products.slice(0, 24);
+    return products;
   }, [search, filteredProducts, car, suggestedParts, products]);
 
   return (
@@ -307,37 +307,103 @@ const QuoteNew = () => {
 
             <div className="bg-card/30 rounded-xl border border-muted-foreground/10 overflow-hidden divide-y divide-muted-foreground/10">
               <div className="px-4 py-2 bg-muted/50 flex items-center justify-between text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
-                <span>{search.trim() ? "Resultados da Busca" : car ? `Sugeridos para ${car}` : "Catálogo"}</span>
+                <span>{search.trim() ? "Resultados da Busca" : car ? `Sugeridos para ${car}` : "Catálogo Completo"}</span>
                 <span>{catalog.length} itens</span>
               </div>
               <div className="max-h-[800px] overflow-y-auto divide-y divide-muted-foreground/5 scrollbar-thin">
                 {catalog.length === 0 ? (
                   <div className="text-center py-12 text-sm text-muted-foreground italic">Nenhum produto encontrado</div>
                 ) : (
-                  catalog.map((p) => {
-                    const added = items.find((i) => i.product_id === p.id);
-                    return (
-                      <button
-                        key={p.id}
-                        type="button"
-                        onClick={() => addItem(p.id)}
-                        className="w-full text-left flex items-center gap-4 px-5 py-4 transition-colors hover:bg-primary/5 group"
-                      >
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-all ${
-                          added ? "bg-primary text-primary-foreground shadow-md" : "bg-muted text-muted-foreground group-hover:bg-primary/10"
-                        }`}>
-                          {added ? <span className="text-xs font-bold">{added.quantity}</span> : <Plus className="w-4 h-4" />}
+                  (() => {
+                    // Group products by their base name (e.g., "Correia Dentada")
+                    const groups = new Map<string, Product[]>();
+                    catalog.forEach(p => {
+                      const baseName = p.name.split(/[\-\.\s\d]/)[0] || p.name;
+                      if (!groups.has(baseName)) groups.set(baseName, []);
+                      groups.get(baseName)!.push(p);
+                    });
+
+                    return Array.from(groups.entries()).map(([groupName, prods]) => {
+                      const [isOpen, setIsOpen] = useState(false);
+                      const hasMultiple = prods.length > 1;
+
+                      if (!hasMultiple) {
+                        const p = prods[0];
+                        const added = items.find((i) => i.product_id === p.id);
+                        return (
+                          <button
+                            key={p.id}
+                            type="button"
+                            onClick={() => addItem(p.id)}
+                            className="w-full text-left flex items-center gap-4 px-5 py-4 transition-colors hover:bg-primary/5 group"
+                          >
+                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-all ${
+                              added ? "bg-primary text-primary-foreground shadow-md" : "bg-muted text-muted-foreground group-hover:bg-primary/10"
+                            }`}>
+                              {added ? <span className="text-xs font-bold">{added.quantity}</span> : <Plus className="w-4 h-4" />}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="text-sm font-medium text-foreground whitespace-normal">{p.name}</div>
+                              <div className="text-xs text-muted-foreground whitespace-normal">{p.description || "Sem descrição"}</div>
+                            </div>
+                            <div className="text-base font-mono font-bold text-primary">
+                              R$ {Number(p.price).toFixed(2)}
+                            </div>
+                          </button>
+                        );
+                      }
+
+                      return (
+                        <div key={groupName} className="flex flex-col">
+                          <button
+                            type="button"
+                            onClick={() => setIsOpen(!isOpen)}
+                            className="w-full text-left flex items-center justify-between px-5 py-4 transition-colors hover:bg-primary/5 bg-primary/5 border-l-4 border-primary"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                                <Package className="w-5 h-5" />
+                              </div>
+                              <div>
+                                <div className="text-sm font-bold text-primary uppercase tracking-tight">{groupName}s</div>
+                                <div className="text-[10px] text-muted-foreground font-medium">{prods.length} variações disponíveis</div>
+                              </div>
+                            </div>
+                            {isOpen ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                          </button>
+                          
+                          {isOpen && (
+                            <div className="bg-muted/20 divide-y divide-muted-foreground/5">
+                              {prods.map((p) => {
+                                const added = items.find((i) => i.product_id === p.id);
+                                return (
+                                  <button
+                                    key={p.id}
+                                    type="button"
+                                    onClick={() => addItem(p.id)}
+                                    className="w-full text-left flex items-center gap-4 px-8 py-3 transition-colors hover:bg-primary/5 group border-l-4 border-transparent hover:border-primary/30"
+                                  >
+                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all ${
+                                      added ? "bg-primary text-primary-foreground shadow-md" : "bg-muted text-muted-foreground group-hover:bg-primary/10"
+                                    }`}>
+                                      {added ? <span className="text-xs font-bold">{added.quantity}</span> : <Plus className="w-3 h-3" />}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <div className="text-xs font-medium text-foreground">{p.name}</div>
+                                      <div className="text-[10px] text-muted-foreground">{p.description}</div>
+                                    </div>
+                                    <div className="text-sm font-mono font-bold text-primary">
+                                      R$ {Number(p.price).toFixed(2)}
+                                    </div>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          )}
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm font-medium text-foreground whitespace-normal">{p.name}</div>
-                          <div className="text-xs text-muted-foreground whitespace-normal">{p.description || "Sem descrição"}</div>
-                        </div>
-                        <div className="text-base font-mono font-bold text-primary">
-                          R$ {Number(p.price).toFixed(2)}
-                        </div>
-                      </button>
-                    );
-                  })
+                      );
+                    });
+                  })()
                 )}
               </div>
             </div>
