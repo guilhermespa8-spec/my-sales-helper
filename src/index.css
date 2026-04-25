@@ -77,7 +77,8 @@
 
 @layer base {
   * { @apply border-border; }
-  body { @apply bg-background text-foreground; font-family: 'Inter', system-ui, sans-serif; }
+  html { @apply bg-background; }
+  body { @apply text-foreground; font-family: 'Inter', system-ui, sans-serif; background-color: transparent; }
 }
 
 @media print {
