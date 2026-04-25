@@ -169,7 +169,16 @@ const QuoteNew = () => {
       <Card className="shadow-[var(--shadow-soft)]">
         <CardHeader><CardTitle className="text-base">Cliente</CardTitle></CardHeader>
         <CardContent className="space-y-3">
-          <div><Label>Nome do cliente (opcional)</Label><Input value={customer} onChange={(e) => setCustomer(e.target.value)} placeholder="Ex: João Silva" maxLength={120} /></div>
+          <div>
+            <Label>Nome do cliente</Label>
+            <Select value={customer || "__none__"} onValueChange={(v) => setCustomer(v === "__none__" ? "" : v)}>
+              <SelectTrigger><SelectValue placeholder="Selecione o cliente" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none__">Nenhum</SelectItem>
+                <SelectItem value="Padrão">Padrão</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <div>
             <Label>Nome do vendedor</Label>
             <Select value={seller} onValueChange={setSeller}>
