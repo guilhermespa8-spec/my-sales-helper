@@ -272,6 +272,17 @@ const Products = () => {
                 <div><Label>Preço (R$)</Label><Input type="number" step="0.01" min="0" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} /></div>
                 <div><Label>Estoque</Label><Input type="number" min="0" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} /></div>
               </div>
+              <div>
+                <Label>Carro (Filtro)</Label>
+                <Input
+                  value={form.car_filter}
+                  onChange={(e) => setForm({ ...form, car_filter: e.target.value })}
+                  placeholder="Ex: corsa, vhc, f30..."
+                />
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  Use palavras-chave que correspondam ao "Filtro" cadastrado no carro.
+                </p>
+              </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
