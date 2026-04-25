@@ -38,6 +38,7 @@ const menu: Item[] = [
   { to: "#vendas", label: "Vendas", icon: DollarSign, disabled: true },
   { to: "#cadastros", label: "Cadastros", icon: ClipboardList, disabled: true },
   { to: "/mecanicos", label: "Mecânicos", icon: Wrench },
+  { to: "/fiado", label: "Fiado", icon: Wallet },
   { to: "#fornecedores", label: "Fornecedores", icon: Truck, disabled: true },
   { to: "#servicos", label: "Serviços", icon: Wrench, disabled: true },
   { to: "#relatorios", label: "Relatórios", icon: BarChart3, disabled: true },
