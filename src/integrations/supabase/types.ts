@@ -127,6 +127,7 @@ export type Database = {
           car: string | null
           created_at: string
           customer_name: string | null
+          fiado: boolean
           id: string
           notes: string | null
           quote_number: number
@@ -138,6 +139,7 @@ export type Database = {
           car?: string | null
           created_at?: string
           customer_name?: string | null
+          fiado?: boolean
           id?: string
           notes?: string | null
           quote_number: number
@@ -149,6 +151,7 @@ export type Database = {
           car?: string | null
           created_at?: string
           customer_name?: string | null
+          fiado?: boolean
           id?: string
           notes?: string | null
           quote_number?: number

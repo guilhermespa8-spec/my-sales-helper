@@ -13,6 +13,7 @@ import Products from "./pages/Products";
 import QuoteNew from "./pages/QuoteNew";
 import QuoteDetail from "./pages/QuoteDetail";
 import Mechanics from "./pages/Mechanics";
+import Fiado from "./pages/Fiado";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,6 +38,7 @@ const App = () => (
             <Route path="/orcamentos/:id/editar" element={<Protected><QuoteNew /></Protected>} />
             <Route path="/orcamentos/:id" element={<Protected><QuoteDetail /></Protected>} />
             <Route path="/mecanicos" element={<Protected><Mechanics /></Protected>} />
+            <Route path="/fiado" element={<Protected><Fiado /></Protected>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
