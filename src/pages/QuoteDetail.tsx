@@ -140,6 +140,34 @@ const QuoteDetail = () => {
           Documento de orçamento — não possui valor fiscal
         </div>
       </Card>
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Adicionar venda ao mecânico</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Label>Mecânico</Label>
+            <Select value={selectedMechanic || "__none__"} onValueChange={(v) => setSelectedMechanic(v === "__none__" ? "" : v)}>
+              <SelectTrigger>
+                <SelectValue placeholder={mechanics.length ? "Selecione o mecânico" : "Cadastre em Mecânicos"} />
+              </SelectTrigger>
+              <SelectContent>
+                {mechanics.map((m) => (<SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>))}
+              </SelectContent>
+            </Select>
+            {quote.customer_name && (
+              <p className="text-xs text-muted-foreground">Atualmente vinculado a: <strong>{quote.customer_name}</strong></p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setDialogOpen(false)}>Cancelar</Button>
+            <Button onClick={handleAssignMechanic} disabled={saving || !selectedMechanic}>
+              {saving ? "Salvando..." : "Confirmar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
