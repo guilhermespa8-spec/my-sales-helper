@@ -124,6 +124,29 @@ const Fiado = () => {
     }
   };
 
+  const removeDiscount = async (quote: Quote) => {
+    if (quote.desconto <= 0) return;
+
+    setIsSubmitting(true);
+    const originalTotal = Number(quote.total) + Number(quote.desconto);
+    const { error } = await supabase
+      .from("quotes")
+      .update({ 
+        total: originalTotal,
+        desconto: 0
+      })
+      .eq("id", quote.id);
+    
+    setIsSubmitting(false);
+
+    if (error) {
+      toast.error("Erro ao remover desconto");
+    } else {
+      toast.success("Desconto removido com sucesso");
+      load();
+    }
+  };
+
   return (
     <div className="space-y-4 max-w-5xl mx-auto">
       <div className="flex items-center gap-3">
@@ -182,9 +205,28 @@ const Fiado = () => {
                           <div className="font-mono font-semibold">R$ {Number(q.total).toFixed(2)}</div>
                         </div>
                         <div className="flex items-center gap-1">
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-primary" onClick={() => setDiscountingQuote(q)} title="Aplicar Desconto">
-                            <Percent className="w-3.5 h-3.5" />
-                          </Button>
+                          {q.desconto > 0 ? (
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10" 
+                              onClick={() => removeDiscount(q)} 
+                              title="Remover Desconto"
+                              disabled={isSubmitting}
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </Button>
+                          ) : (
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-8 w-8 text-primary" 
+                              onClick={() => setDiscountingQuote(q)} 
+                              title="Aplicar Desconto"
+                            >
+                              <Percent className="w-3.5 h-3.5" />
+                            </Button>
+                          )}
                           <Button asChild variant="outline" size="sm" className="h-8">
                             <Link to={`/orcamentos/${q.id}`}>Ver</Link>
                           </Button>
