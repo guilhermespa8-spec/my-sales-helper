@@ -57,7 +57,7 @@ const Products = () => {
     const payload = { ...parsed.data, user_id: user!.id, description: parsed.data.description ?? null };
     const { error } = editing
       ? await supabase.from("products").update(payload).eq("id", editing.id)
-      : await supabase.from("products").insert(payload);
+      : await supabase.from("products").insert([payload]);
     if (error) toast.error(error.message);
     else { toast.success(editing ? "Produto atualizado" : "Produto cadastrado"); setOpen(false); load(); }
   };
