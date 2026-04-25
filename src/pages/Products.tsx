@@ -340,6 +340,7 @@ const Products = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-1 justify-center">
+                        <Button size="icon" variant="ghost" onClick={() => setViewing(p)} title="Ver observação"><Eye className="w-4 h-4" /></Button>
                         <Button size="icon" variant="ghost" onClick={() => openEdit(p)} title="Editar"><Pencil className="w-4 h-4" /></Button>
                         <Button size="icon" variant="ghost" onClick={() => remove(p.id)} title="Excluir"><Trash2 className="w-4 h-4 text-destructive" /></Button>
                       </div>
