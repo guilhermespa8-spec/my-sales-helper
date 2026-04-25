@@ -122,6 +122,8 @@ const Fiado = () => {
       setDiscountValue("");
       load();
     }
+  };
+
   const removeDiscount = async (quote: Quote) => {
     if (quote.desconto <= 0) return;
 
