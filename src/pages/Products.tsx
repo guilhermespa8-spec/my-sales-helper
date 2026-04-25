@@ -16,6 +16,7 @@ import { toast } from "sonner";
 interface Product {
   id: string; name: string; description: string | null;
   price: number; stock: number;
+  created_at?: string; updated_at?: string;
 }
 
 const schema = z.object({
