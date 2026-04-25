@@ -110,6 +110,12 @@ const QuoteNew = () => {
     );
   }, [products, search, car]);
 
+  const suggestedParts = useMemo(() => {
+    const c = car.trim().toLowerCase();
+    if (!c) return [];
+    return products.filter((p) => (p.description ?? "").toLowerCase().includes(c));
+  }, [products, car]);
+
   const save = async () => {
     if (items.length === 0) { toast.error("Adicione ao menos 1 item"); return; }
     setSaving(true);
@@ -191,6 +197,45 @@ const QuoteNew = () => {
           <div><Label>Observações (opcional)</Label><Textarea value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={500} rows={2} /></div>
         </CardContent>
       </Card>
+
+      {car && (
+        <Card className="shadow-[var(--shadow-soft)] border-accent/40">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Package className="w-4 h-4 text-accent" />
+              Peças Sugeridas
+              <span className="text-xs font-normal text-muted-foreground">({suggestedParts.length} para {car})</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {suggestedParts.length === 0 ? (
+              <div className="text-center py-6 text-sm text-muted-foreground">
+                Nenhuma peça com observação "{car}" encontrada.
+              </div>
+            ) : (
+              <div className="border rounded-lg max-h-72 overflow-auto divide-y">
+                {suggestedParts.map((p) => {
+                  const added = items.some((i) => i.product_id === p.id);
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => addItem(p.id)}
+                      className="w-full flex items-center justify-between gap-2 px-3 py-2 text-left hover:bg-muted/60 transition-colors"
+                    >
+                      <span className="flex-1 truncate text-sm">
+                        {p.name}
+                        {added && <span className="ml-2 text-xs text-success">✓ adicionado</span>}
+                      </span>
+                      <span className="text-xs text-muted-foreground font-mono">R$ {Number(p.price).toFixed(2)}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <Card className="shadow-[var(--shadow-soft)]">
         <CardHeader className="space-y-3">
