@@ -63,7 +63,7 @@ const Quotes = () => {
                   <TableRow key={q.id}>
                     <TableCell className="font-mono font-semibold">#{String(q.quote_number).padStart(4, "0")}</TableCell>
                     <TableCell>{q.customer_name || <span className="text-muted-foreground italic">Sem cliente</span>}</TableCell>
-                    <TableCell className="text-muted-foreground text-sm">{new Date(q.created_at).toLocaleDateString("pt-BR")}</TableCell>
+                    <TableCell className="text-muted-foreground text-sm">{new Date(q.created_at).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}</TableCell>
                     <TableCell className="text-right font-mono font-semibold">R$ {Number(q.total).toFixed(2)}</TableCell>
                     <TableCell>
                       <div className="flex gap-1 justify-end">
