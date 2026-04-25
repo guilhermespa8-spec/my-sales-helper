@@ -13,6 +13,7 @@ interface Quote {
   quote_number: number;
   customer_name: string | null;
   total: number;
+  desconto: number;
   created_at: string;
   pago_em: string | null;
 }
