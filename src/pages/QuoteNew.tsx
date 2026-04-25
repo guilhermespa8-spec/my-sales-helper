@@ -16,12 +16,32 @@ interface Item { product_id: string; product_name: string; quantity: number; uni
 const QuoteNew = () => {
   const { user } = useAuth();
   const nav = useNavigate();
+  const { id: editId } = useParams<{ id: string }>();
+  const isEdit = Boolean(editId);
   const [products, setProducts] = useState<Product[]>([]);
   const [customer, setCustomer] = useState("");
   const [notes, setNotes] = useState("");
   const [items, setItems] = useState<Item[]>([]);
   const [search, setSearch] = useState("");
   const [saving, setSaving] = useState(false);
+  const [quoteNumber, setQuoteNumber] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!editId) return;
+    (async () => {
+      const { data: q, error } = await supabase.from("quotes").select("*").eq("id", editId).single();
+      if (error) { toast.error(error.message); return; }
+      setCustomer(q.customer_name ?? "");
+      setNotes(q.notes ?? "");
+      setQuoteNumber(q.quote_number);
+      const { data: its, error: e2 } = await supabase.from("quote_items").select("*").eq("quote_id", editId);
+      if (e2) { toast.error(e2.message); return; }
+      setItems((its ?? []).map((i: any) => ({
+        product_id: i.product_id, product_name: i.product_name,
+        quantity: i.quantity, unit_price: Number(i.unit_price),
+      })));
+    })();
+  }, [editId]);
 
   useEffect(() => {
     const loadProducts = async () => {
