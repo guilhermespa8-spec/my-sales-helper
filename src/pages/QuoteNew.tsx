@@ -24,7 +24,7 @@ const QuoteNew = () => {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    supabase.from("products").select("id,name,price").order("name").then(({ data }) => {
+    supabase.from("products").select("id,name,price").order("name").range(0, 9999).then(({ data }) => {
       setProducts((data ?? []) as Product[]);
     });
   }, []);
@@ -104,7 +104,6 @@ const QuoteNew = () => {
             <div className="border rounded-lg max-h-72 overflow-auto divide-y">
               {products
                 .filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
-                .slice(0, 50)
                 .map((p) => (
                   <button
                     key={p.id}
