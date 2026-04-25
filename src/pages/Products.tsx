@@ -347,6 +347,9 @@ const Products = () => {
                       <div className="font-medium">{p.name}</div>
                       {p.description && <div className="text-xs text-muted-foreground line-clamp-1">{p.description}</div>}
                     </TableCell>
+                    <TableCell className="text-center">
+                      <Badge variant="outline" className="text-[10px]">{p.car_filter || "—"}</Badge>
+                    </TableCell>
                     <TableCell className="text-center">{p.stock}</TableCell>
                     <TableCell className="text-center font-mono">R$ {Number(p.price).toFixed(2)}</TableCell>
                     <TableCell className="text-center">
