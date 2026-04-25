@@ -68,6 +68,7 @@ const Quotes = () => {
                     <TableCell>
                       <div className="flex gap-1 justify-end">
                         <Button size="icon" variant="ghost" asChild><Link to={`/orcamentos/${q.id}`}><Eye className="w-4 h-4" /></Link></Button>
+                        <Button size="icon" variant="ghost" asChild><Link to={`/orcamentos/${q.id}/editar`}><Pencil className="w-4 h-4" /></Link></Button>
                         <Button size="icon" variant="ghost" onClick={() => remove(q.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                       </div>
                     </TableCell>
