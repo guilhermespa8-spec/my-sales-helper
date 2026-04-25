@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Trash2, Save, Search, Package } from "lucide-react";
 import { toast } from "sonner";
 
-interface Product { id: string; name: string; price: number; }
+interface Product { id: string; name: string; description: string | null; price: number; }
 interface Item { product_id: string; product_name: string; quantity: number; unit_price: number; }
 
 const QuoteNew = () => {
@@ -24,9 +24,33 @@ const QuoteNew = () => {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    supabase.from("products").select("id,name,price").order("name").range(0, 9999).then(({ data }) => {
-      setProducts((data ?? []) as Product[]);
-    });
+    const loadProducts = async () => {
+      const pageSize = 1000;
+      let from = 0;
+      const all: Product[] = [];
+
+      while (true) {
+        const { data, error } = await supabase
+          .from("products")
+          .select("id,name,description,price")
+          .order("name")
+          .range(from, from + pageSize - 1);
+
+        if (error) {
+          toast.error(error.message);
+          return;
+        }
+
+        const batch = (data ?? []) as Product[];
+        all.push(...batch);
+        if (batch.length < pageSize) break;
+        from += pageSize;
+      }
+
+      setProducts(all);
+    };
+
+    loadProducts();
   }, []);
 
   const addItem = (productId: string) => {
@@ -44,6 +68,14 @@ const QuoteNew = () => {
   };
 
   const total = useMemo(() => items.reduce((s, i) => s + i.quantity * i.unit_price, 0), [items]);
+
+  const filteredProducts = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return [];
+    return products.filter((p) =>
+      p.name.toLowerCase().includes(q) || (p.description ?? "").toLowerCase().includes(q)
+    );
+  }, [products, search]);
 
   const save = async () => {
     if (items.length === 0) { toast.error("Adicione ao menos 1 item"); return; }
@@ -102,9 +134,7 @@ const QuoteNew = () => {
           </div>
           {search.trim() && (
             <div className="border rounded-lg max-h-72 overflow-auto divide-y">
-              {products
-                .filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
-                .map((p) => (
+              {filteredProducts.map((p) => (
                   <button
                     key={p.id}
                     type="button"
@@ -115,7 +145,7 @@ const QuoteNew = () => {
                     <span className="text-xs text-muted-foreground font-mono">R$ {Number(p.price).toFixed(2)}</span>
                   </button>
                 ))}
-              {products.filter((p) => p.name.toLowerCase().includes(search.toLowerCase())).length === 0 && (
+              {filteredProducts.length === 0 && (
                 <div className="px-3 py-6 text-center text-sm text-muted-foreground">
                   <Package className="w-8 h-8 mx-auto mb-1 opacity-40" />
                   Nenhum produto encontrado para "{search}"
