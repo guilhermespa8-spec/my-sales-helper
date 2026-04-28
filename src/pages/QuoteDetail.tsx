@@ -91,7 +91,7 @@ const QuoteDetail = () => {
               Orçamento Nº
             </div>
             <div className="text-3xl font-extrabold text-primary print:text-black font-mono leading-tight">#{num}</div>
-            <div className="text-xs font-medium text-slate-700 print:text-black mt-1">{date}</div>
+            <div className="text-xs font-medium text-slate-700 print:text-black mt-1">{date} às {time}</div>
           </div>
         </div>
 
