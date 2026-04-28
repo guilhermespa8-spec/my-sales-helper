@@ -84,6 +84,14 @@ const QuoteDetail = () => {
             <div>
               <div className="text-2xl font-extrabold tracking-tight text-primary print:text-black">Abrantes Auto Peças</div>
               <div className="text-xs font-medium text-slate-600 print:text-black">Orçamento de venda</div>
+              <div className="mt-1.5 flex flex-col gap-0.5 text-[11px] font-medium text-slate-700 print:text-black">
+                <span className="flex items-center gap-1">
+                  <MapPin className="w-3 h-3" /> Endereço não informado
+                </span>
+                <span className="flex items-center gap-1">
+                  <Phone className="w-3 h-3" /> (22) 99955-4939
+                </span>
+              </div>
             </div>
           </div>
           <div className="text-right">
