@@ -69,7 +69,7 @@ const QuoteDetail = () => {
         </div>
       </div>
 
-      <Card className="print-area p-10 shadow-[var(--shadow-elevated)] print:shadow-none print:border-0 print:p-6 text-foreground print:text-black">
+      <Card className="print-area p-10 shadow-[var(--shadow-elevated)] print:shadow-none print:border-0 print:p-6 bg-white text-slate-900 [&_*]:!text-slate-900">
         {/* Cabeçalho */}
         <div className="flex items-start justify-between border-b-4 border-primary print:border-black pb-5 mb-6">
           <div className="flex items-center gap-3">
