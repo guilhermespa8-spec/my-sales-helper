@@ -115,13 +115,14 @@
     border: 0 !important;
     border-radius: 0 !important;
     box-shadow: none !important;
-    font-size: 11px !important;
-    line-height: 1.35 !important;
+    font-size: 13px !important;
+    line-height: 1.4 !important;
   }
   /* Compactar elementos para caber em 80mm */
   .print-area > *:not(.rounded-lg) { padding-left: 1.5mm !important; padding-right: 1.5mm !important; }
-  .print-area table { width: 100% !important; font-size: 10.5px !important; }
-  .print-area th, .print-area td { padding: 3px 4px !important; }
+  .print-area table { width: 100% !important; font-size: 14px !important; font-weight: 600 !important; }
+  .print-area th, .print-area td { padding: 5px 4px !important; font-size: 14px !important; }
+  .print-area tbody td { font-weight: 700 !important; }
   .print-area h1, .print-area h2, .print-area h3 { margin: 0 !important; }
   .no-print { display: none !important; }
 }
