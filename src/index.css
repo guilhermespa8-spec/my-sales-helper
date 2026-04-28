@@ -82,12 +82,17 @@
 }
 
 @page {
-  size: A4;
+  size: 80mm auto;
   margin: 0;
 }
 
 @media print {
-  html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; }
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    width: 80mm !important;
+  }
   body * { visibility: hidden; }
   .print-area, .print-area * {
     visibility: visible;
@@ -99,16 +104,22 @@
     position: absolute;
     left: 0;
     top: 0;
-    width: 100vw;
-    min-height: 100vh;
+    width: 80mm !important;
+    max-width: 80mm !important;
     margin: 0 !important;
-    padding: 12mm 14mm !important;
+    padding: 3mm !important;
     box-sizing: border-box;
     color: #000 !important;
+    background: #fff !important;
     border: 0 !important;
     border-radius: 0 !important;
     box-shadow: none !important;
-    max-width: none !important;
+    font-size: 11px !important;
+    line-height: 1.35 !important;
   }
+  /* Compactar elementos para caber em 80mm */
+  .print-area table { font-size: 10.5px !important; }
+  .print-area th, .print-area td { padding: 3px 4px !important; }
+  .print-area h1, .print-area h2, .print-area h3 { margin: 0 !important; }
   .no-print { display: none !important; }
 }
