@@ -81,7 +81,13 @@
   body { @apply text-foreground; font-family: 'Inter', system-ui, sans-serif; background-color: transparent; }
 }
 
+@page {
+  size: A4;
+  margin: 0;
+}
+
 @media print {
+  html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; }
   body * { visibility: hidden; }
   .print-area, .print-area * {
     visibility: visible;
@@ -89,6 +95,20 @@
     print-color-adjust: exact !important;
     color-adjust: exact !important;
   }
-  .print-area { position: absolute; left: 0; top: 0; width: 100%; color: #000 !important; }
+  .print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    min-height: 100vh;
+    margin: 0 !important;
+    padding: 12mm 14mm !important;
+    box-sizing: border-box;
+    color: #000 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    max-width: none !important;
+  }
   .no-print { display: none !important; }
 }
