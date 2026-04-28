@@ -101,7 +101,7 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
       <div className="flex-1 flex flex-col min-w-0">
         <header className="no-print border-b bg-card sticky top-0 z-20">
           <div className="flex items-center justify-between h-16 px-4 md:px-6">
-            <span className="font-bold text-lg text-primary">VendaPro</span>
+            <span className="font-bold text-lg text-primary">Abrantes Auto Peças</span>
             <div className="flex items-center gap-3">
               <span className="hidden sm:block text-sm text-muted-foreground truncate max-w-[180px]">
                 {user?.email}
