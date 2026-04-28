@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Printer, ArrowLeft, Receipt, Wrench } from "lucide-react";
+import { Printer, ArrowLeft, Receipt, Wrench, User, UserCircle2, Car as CarIcon } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -95,33 +95,55 @@ const QuoteDetail = () => {
           </div>
         </div>
 
-        {/* Dados do cliente / vendedor */}
+        {/* Dados do cliente / vendedor / veículo */}
         {(quote.customer_name || quote.seller || quote.car) && (
-          <div className="mb-6 grid grid-cols-2 gap-3 bg-slate-50 print:bg-transparent print:border print:border-black/40 rounded-lg p-4">
-            {quote.customer_name && (
-              <div>
-                <div className="text-[10px] font-bold uppercase tracking-widest text-slate-600 print:text-black mb-0.5">
-                  Cliente
-                </div>
-                <div className="font-bold text-slate-900 print:text-black">{quote.customer_name}</div>
+          <div className="mb-6 rounded-xl overflow-hidden border border-slate-200 print:border-black">
+            <div className="bg-slate-100 print:bg-transparent print:border-b print:border-black px-4 py-2">
+              <div className="text-[10px] font-bold uppercase tracking-widest text-slate-600 print:text-black">
+                Informações da venda
               </div>
-            )}
-            {quote.seller && (
-              <div>
-                <div className="text-[10px] font-bold uppercase tracking-widest text-slate-600 print:text-black mb-0.5">
-                  Vendedor
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 print:divide-black/40 bg-white">
+              {quote.customer_name && (
+                <div className="flex items-start gap-3 p-4">
+                  <div className="w-9 h-9 rounded-lg bg-primary/10 print:bg-transparent print:border print:border-black flex items-center justify-center shrink-0">
+                    <User className="w-4 h-4 text-primary print:text-black" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500 print:text-black">
+                      Cliente
+                    </div>
+                    <div className="font-bold text-slate-900 print:text-black truncate">{quote.customer_name}</div>
+                  </div>
                 </div>
-                <div className="font-bold text-slate-900 print:text-black">{quote.seller}</div>
-              </div>
-            )}
-            {quote.car && (
-              <div className="col-span-2">
-                <div className="text-[10px] font-bold uppercase tracking-widest text-slate-600 print:text-black mb-0.5">
-                  Veículo
+              )}
+              {quote.seller && (
+                <div className="flex items-start gap-3 p-4">
+                  <div className="w-9 h-9 rounded-lg bg-accent/10 print:bg-transparent print:border print:border-black flex items-center justify-center shrink-0">
+                    <UserCircle2 className="w-4 h-4 text-accent print:text-black" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500 print:text-black">
+                      Vendedor
+                    </div>
+                    <div className="font-bold text-slate-900 print:text-black truncate">{quote.seller}</div>
+                  </div>
                 </div>
-                <div className="font-bold text-slate-900 print:text-black">{quote.car}</div>
-              </div>
-            )}
+              )}
+              {quote.car && (
+                <div className="flex items-start gap-3 p-4 sm:col-span-2 border-t border-slate-200 print:border-black/40">
+                  <div className="w-9 h-9 rounded-lg bg-slate-200 print:bg-transparent print:border print:border-black flex items-center justify-center shrink-0">
+                    <CarIcon className="w-4 h-4 text-slate-700 print:text-black" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500 print:text-black">
+                      Veículo
+                    </div>
+                    <div className="font-bold text-slate-900 print:text-black truncate">{quote.car}</div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
