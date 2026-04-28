@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Printer, ArrowLeft, Receipt, Wrench, User, UserCircle2, Car as CarIcon } from "lucide-react";
+import { Printer, ArrowLeft, Receipt, Wrench, User, UserCircle2, Car as CarIcon, Phone, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -84,6 +84,14 @@ const QuoteDetail = () => {
             <div>
               <div className="text-2xl font-extrabold tracking-tight text-primary print:text-black">Abrantes Auto Peças</div>
               <div className="text-xs font-medium text-slate-600 print:text-black">Orçamento de venda</div>
+              <div className="mt-1.5 flex flex-col gap-0.5 text-[11px] font-medium text-slate-700 print:text-black">
+                <span className="flex items-center gap-1">
+                  <MapPin className="w-3 h-3" /> Endereço não informado
+                </span>
+                <span className="flex items-center gap-1">
+                  <Phone className="w-3 h-3" /> (22) 99955-4939
+                </span>
+              </div>
             </div>
           </div>
           <div className="text-right">
