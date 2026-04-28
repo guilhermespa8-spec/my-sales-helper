@@ -69,75 +69,131 @@ const QuoteDetail = () => {
         </div>
       </div>
 
-      <Card className="print-area p-8 shadow-[var(--shadow-soft)]">
-        <div className="flex items-start justify-between border-b-2 border-primary pb-4 mb-6">
+      <Card className="print-area p-10 shadow-[var(--shadow-elevated)] print:shadow-none print:border-0 print:p-6 text-foreground print:text-black">
+        {/* Cabeçalho */}
+        <div className="flex items-start justify-between border-b-4 border-primary print:border-black pb-5 mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ background: "var(--gradient-accent)" }}>
-              <Receipt className="w-6 h-6 text-accent-foreground" />
+            <div
+              className="w-14 h-14 rounded-xl flex items-center justify-center print:bg-black print:rounded-md"
+              style={{ background: "var(--gradient-brand)" }}
+            >
+              <Receipt className="w-7 h-7 text-white" />
             </div>
             <div>
-              <div className="text-xl font-bold text-primary">VendaPro</div>
-              <div className="text-xs text-muted-foreground">Orçamento de venda</div>
+              <div className="text-2xl font-extrabold tracking-tight text-primary print:text-black">VendaPro</div>
+              <div className="text-xs font-medium text-foreground/70 print:text-black">Orçamento de venda</div>
             </div>
           </div>
           <div className="text-right">
-            <div className="text-xs text-muted-foreground uppercase tracking-wide">Orçamento Nº</div>
-            <div className="text-2xl font-bold text-primary font-mono">#{num}</div>
-            <div className="text-xs text-muted-foreground mt-1">{date}</div>
+            <div className="text-[11px] font-semibold uppercase tracking-widest text-foreground/70 print:text-black">
+              Orçamento Nº
+            </div>
+            <div className="text-3xl font-extrabold text-primary print:text-black font-mono leading-tight">#{num}</div>
+            <div className="text-xs font-medium text-foreground/80 print:text-black mt-1">{date}</div>
           </div>
         </div>
 
-        <div className="mb-4 grid grid-cols-2 gap-4">
-          {quote.customer_name && (
-            <div>
-              <div className="text-xs uppercase text-muted-foreground tracking-wide">Cliente</div>
-              <div className="font-semibold">{quote.customer_name}</div>
-            </div>
-          )}
-          {quote.seller && (
-            <div>
-              <div className="text-xs uppercase text-muted-foreground tracking-wide">Vendedor</div>
-              <div className="font-semibold">{quote.seller}</div>
-            </div>
-          )}
-        </div>
-
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b text-left text-muted-foreground">
-              <th className="py-2">Produto</th>
-              <th className="py-2 text-center w-16">Qtd</th>
-              <th className="py-2 text-right w-28">Preço un.</th>
-              <th className="py-2 text-right w-28">Subtotal</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((i) => (
-              <tr key={i.id} className="border-b">
-                <td className="py-2">{i.product_name}</td>
-                <td className="py-2 text-center">{i.quantity}</td>
-                <td className="py-2 text-right font-mono">R$ {Number(i.unit_price).toFixed(2)}</td>
-                <td className="py-2 text-right font-mono">R$ {Number(i.subtotal).toFixed(2)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        <div className="flex justify-end mt-6">
-          <div className="bg-secondary px-6 py-3 rounded-lg text-right">
-            <div className="text-xs uppercase text-muted-foreground tracking-wide">Total geral</div>
-            <div className="text-3xl font-bold text-primary font-mono">R$ {Number(quote.total).toFixed(2)}</div>
-          </div>
-        </div>
-
-        {quote.notes && (
-          <div className="mt-6 pt-4 border-t">
-            <div className="text-xs uppercase text-muted-foreground tracking-wide mb-1">Observações</div>
-            <div className="text-sm whitespace-pre-wrap">{quote.notes}</div>
+        {/* Dados do cliente / vendedor */}
+        {(quote.customer_name || quote.seller || quote.car) && (
+          <div className="mb-6 grid grid-cols-2 gap-3 bg-secondary/60 print:bg-transparent print:border print:border-black/40 rounded-lg p-4">
+            {quote.customer_name && (
+              <div>
+                <div className="text-[10px] font-bold uppercase tracking-widest text-foreground/70 print:text-black mb-0.5">
+                  Cliente
+                </div>
+                <div className="font-bold text-foreground print:text-black">{quote.customer_name}</div>
+              </div>
+            )}
+            {quote.seller && (
+              <div>
+                <div className="text-[10px] font-bold uppercase tracking-widest text-foreground/70 print:text-black mb-0.5">
+                  Vendedor
+                </div>
+                <div className="font-bold text-foreground print:text-black">{quote.seller}</div>
+              </div>
+            )}
+            {quote.car && (
+              <div className="col-span-2">
+                <div className="text-[10px] font-bold uppercase tracking-widest text-foreground/70 print:text-black mb-0.5">
+                  Veículo
+                </div>
+                <div className="font-bold text-foreground print:text-black">{quote.car}</div>
+              </div>
+            )}
           </div>
         )}
 
-        <div className="mt-10 pt-4 border-t text-center text-xs text-muted-foreground">
+        {/* Tabela de itens */}
+        <div className="rounded-lg overflow-hidden border border-border print:border-black">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-primary text-primary-foreground print:bg-black print:text-white text-left">
+                <th className="py-2.5 px-3 font-bold uppercase text-xs tracking-wider">Produto</th>
+                <th className="py-2.5 px-3 font-bold uppercase text-xs tracking-wider text-center w-16">Qtd</th>
+                <th className="py-2.5 px-3 font-bold uppercase text-xs tracking-wider text-right w-28">Preço un.</th>
+                <th className="py-2.5 px-3 font-bold uppercase text-xs tracking-wider text-right w-28">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((i, idx) => (
+                <tr
+                  key={i.id}
+                  className={`border-t border-border print:border-black/60 ${
+                    idx % 2 === 1 ? "bg-secondary/40 print:bg-transparent" : ""
+                  }`}
+                >
+                  <td className="py-2.5 px-3 font-semibold text-foreground print:text-black">{i.product_name}</td>
+                  <td className="py-2.5 px-3 text-center font-bold text-foreground print:text-black">{i.quantity}</td>
+                  <td className="py-2.5 px-3 text-right font-mono font-semibold text-foreground print:text-black">
+                    R$ {Number(i.unit_price).toFixed(2)}
+                  </td>
+                  <td className="py-2.5 px-3 text-right font-mono font-bold text-foreground print:text-black">
+                    R$ {Number(i.subtotal).toFixed(2)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Total */}
+        <div className="flex justify-end mt-6">
+          <div
+            className="px-7 py-4 rounded-xl text-right text-primary-foreground print:bg-transparent print:text-black print:border-2 print:border-black"
+            style={{ background: "var(--gradient-brand)" }}
+          >
+            <div className="text-[10px] font-bold uppercase tracking-widest opacity-90 print:opacity-100">
+              Total geral
+            </div>
+            <div className="text-3xl font-extrabold font-mono leading-tight">
+              R$ {Number(quote.total).toFixed(2)}
+            </div>
+          </div>
+        </div>
+
+        {/* Observações */}
+        {quote.notes && (
+          <div className="mt-6 pt-4 border-t-2 border-dashed border-border print:border-black/60">
+            <div className="text-[10px] font-bold uppercase tracking-widest text-foreground/70 print:text-black mb-1">
+              Observações
+            </div>
+            <div className="text-sm font-medium text-foreground print:text-black whitespace-pre-wrap">
+              {quote.notes}
+            </div>
+          </div>
+        )}
+
+        {/* Assinaturas (apenas impressão) */}
+        <div className="hidden print:grid grid-cols-2 gap-10 mt-16">
+          <div className="text-center">
+            <div className="border-t-2 border-black pt-1 text-xs font-semibold text-black">Assinatura do cliente</div>
+          </div>
+          <div className="text-center">
+            <div className="border-t-2 border-black pt-1 text-xs font-semibold text-black">Assinatura do vendedor</div>
+          </div>
+        </div>
+
+        <div className="mt-10 pt-4 border-t border-border print:border-black text-center text-[11px] font-semibold text-foreground/70 print:text-black">
           Documento de orçamento — não possui valor fiscal
         </div>
       </Card>
