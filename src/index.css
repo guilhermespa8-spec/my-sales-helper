@@ -104,10 +104,11 @@
     position: absolute;
     left: 0;
     top: 0;
-    width: 80mm !important;
-    max-width: 80mm !important;
+    width: 100% !important;
+    min-width: 80mm !important;
+    max-width: none !important;
     margin: 0 !important;
-    padding: 3mm !important;
+    padding: 2mm 0 !important;
     box-sizing: border-box;
     color: #000 !important;
     background: #fff !important;
@@ -118,7 +119,8 @@
     line-height: 1.35 !important;
   }
   /* Compactar elementos para caber em 80mm */
-  .print-area table { font-size: 10.5px !important; }
+  .print-area > *:not(.rounded-lg) { padding-left: 1.5mm !important; padding-right: 1.5mm !important; }
+  .print-area table { width: 100% !important; font-size: 10.5px !important; }
   .print-area th, .print-area td { padding: 3px 4px !important; }
   .print-area h1, .print-area h2, .print-area h3 { margin: 0 !important; }
   .no-print { display: none !important; }
