@@ -83,7 +83,12 @@
 
 @media print {
   body * { visibility: hidden; }
-  .print-area, .print-area * { visibility: visible; }
-  .print-area { position: absolute; left: 0; top: 0; width: 100%; }
+  .print-area, .print-area * {
+    visibility: visible;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+  .print-area { position: absolute; left: 0; top: 0; width: 100%; color: #000 !important; }
   .no-print { display: none !important; }
 }
