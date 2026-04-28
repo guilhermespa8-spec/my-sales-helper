@@ -38,14 +38,9 @@ const menu: Item[] = [
   { to: "/produtos", label: "Produtos", icon: Package },
   { to: "/orcamentos/novo", label: "Orçamento Rápido", icon: Zap },
   { to: "/carros", label: "Carros", icon: Car },
-  { to: "#cadastros", label: "Cadastros", icon: ClipboardList, disabled: true },
   { to: "/mecanicos", label: "Mecânicos", icon: Wrench },
   { to: "/fiado", label: "Fiado", icon: Wallet },
   { to: "/fiados-pagos", label: "Fiados Pagos", icon: CheckCircle2 },
-  { to: "#servicos", label: "Serviços", icon: Wrench, disabled: true },
-  { to: "#relatorios", label: "Relatórios", icon: BarChart3, disabled: true },
-  { to: "#financeiro", label: "Financeiro", icon: Wallet, disabled: true },
-  { to: "#notas", label: "Notas Fiscais", icon: FileSpreadsheet, disabled: true },
 ];
 
 const AppLayout = ({ children }: { children: ReactNode }) => {
