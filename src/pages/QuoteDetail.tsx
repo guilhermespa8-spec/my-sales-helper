@@ -80,7 +80,7 @@ const QuoteDetail = () => {
               <Receipt className="w-7 h-7 text-white" />
             </div>
             <div>
-              <div className="text-2xl font-extrabold tracking-tight text-primary print:text-black">VendaPro</div>
+              <div className="text-2xl font-extrabold tracking-tight text-primary print:text-black">Abrantes Auto Peças</div>
               <div className="text-xs font-medium text-slate-600 print:text-black">Orçamento de venda</div>
             </div>
           </div>

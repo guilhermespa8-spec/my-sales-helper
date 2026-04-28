@@ -20,8 +20,8 @@ export default defineConfig(({ mode }) => ({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'placeholder.svg'],
       manifest: {
-        name: 'VendaPro - Sistema de Vendas',
-        short_name: 'VendaPro',
+        name: 'Abrantes Auto Peças - Sistema de Vendas',
+        short_name: 'Abrantes Auto Peças',
         description: 'Sistema profissional de vendas e orçamentos',
         theme_color: '#ffffff',
         icons: [

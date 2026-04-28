@@ -54,7 +54,7 @@ const Auth = () => {
           <div className="mx-auto w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: "var(--gradient-accent)" }}>
             <Receipt className="w-7 h-7 text-accent-foreground" />
           </div>
-          <CardTitle className="text-2xl">VendaPro</CardTitle>
+          <CardTitle className="text-2xl">Abrantes Auto Peças</CardTitle>
           <CardDescription>Sistema de vendas e orçamentos</CardDescription>
         </CardHeader>
         <CardContent>
