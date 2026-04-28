@@ -81,50 +81,50 @@ const QuoteDetail = () => {
             </div>
             <div>
               <div className="text-2xl font-extrabold tracking-tight text-primary print:text-black">VendaPro</div>
-              <div className="text-xs font-medium text-foreground/70 print:text-black">Orçamento de venda</div>
+              <div className="text-xs font-medium text-slate-600 print:text-black">Orçamento de venda</div>
             </div>
           </div>
           <div className="text-right">
-            <div className="text-[11px] font-semibold uppercase tracking-widest text-foreground/70 print:text-black">
+            <div className="text-[11px] font-semibold uppercase tracking-widest text-slate-600 print:text-black">
               Orçamento Nº
             </div>
             <div className="text-3xl font-extrabold text-primary print:text-black font-mono leading-tight">#{num}</div>
-            <div className="text-xs font-medium text-foreground/80 print:text-black mt-1">{date}</div>
+            <div className="text-xs font-medium text-slate-700 print:text-black mt-1">{date}</div>
           </div>
         </div>
 
         {/* Dados do cliente / vendedor */}
         {(quote.customer_name || quote.seller || quote.car) && (
-          <div className="mb-6 grid grid-cols-2 gap-3 bg-secondary/60 print:bg-transparent print:border print:border-black/40 rounded-lg p-4">
+          <div className="mb-6 grid grid-cols-2 gap-3 bg-slate-50 print:bg-transparent print:border print:border-black/40 rounded-lg p-4">
             {quote.customer_name && (
               <div>
-                <div className="text-[10px] font-bold uppercase tracking-widest text-foreground/70 print:text-black mb-0.5">
+                <div className="text-[10px] font-bold uppercase tracking-widest text-slate-600 print:text-black mb-0.5">
                   Cliente
                 </div>
-                <div className="font-bold text-foreground print:text-black">{quote.customer_name}</div>
+                <div className="font-bold text-slate-900 print:text-black">{quote.customer_name}</div>
               </div>
             )}
             {quote.seller && (
               <div>
-                <div className="text-[10px] font-bold uppercase tracking-widest text-foreground/70 print:text-black mb-0.5">
+                <div className="text-[10px] font-bold uppercase tracking-widest text-slate-600 print:text-black mb-0.5">
                   Vendedor
                 </div>
-                <div className="font-bold text-foreground print:text-black">{quote.seller}</div>
+                <div className="font-bold text-slate-900 print:text-black">{quote.seller}</div>
               </div>
             )}
             {quote.car && (
               <div className="col-span-2">
-                <div className="text-[10px] font-bold uppercase tracking-widest text-foreground/70 print:text-black mb-0.5">
+                <div className="text-[10px] font-bold uppercase tracking-widest text-slate-600 print:text-black mb-0.5">
                   Veículo
                 </div>
-                <div className="font-bold text-foreground print:text-black">{quote.car}</div>
+                <div className="font-bold text-slate-900 print:text-black">{quote.car}</div>
               </div>
             )}
           </div>
         )}
 
         {/* Tabela de itens */}
-        <div className="rounded-lg overflow-hidden border border-border print:border-black">
+        <div className="rounded-lg overflow-hidden border border-slate-200 print:border-black">
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-primary text-primary-foreground print:bg-black print:text-white text-left">
@@ -138,16 +138,16 @@ const QuoteDetail = () => {
               {items.map((i, idx) => (
                 <tr
                   key={i.id}
-                  className={`border-t border-border print:border-black/60 ${
-                    idx % 2 === 1 ? "bg-secondary/40 print:bg-transparent" : ""
+                  className={`border-t border-slate-200 print:border-black/60 ${
+                    idx % 2 === 1 ? "bg-slate-50 print:bg-transparent" : ""
                   }`}
                 >
-                  <td className="py-2.5 px-3 font-semibold text-foreground print:text-black">{i.product_name}</td>
-                  <td className="py-2.5 px-3 text-center font-bold text-foreground print:text-black">{i.quantity}</td>
-                  <td className="py-2.5 px-3 text-right font-mono font-semibold text-foreground print:text-black">
+                  <td className="py-2.5 px-3 font-semibold text-slate-900 print:text-black">{i.product_name}</td>
+                  <td className="py-2.5 px-3 text-center font-bold text-slate-900 print:text-black">{i.quantity}</td>
+                  <td className="py-2.5 px-3 text-right font-mono font-semibold text-slate-900 print:text-black">
                     R$ {Number(i.unit_price).toFixed(2)}
                   </td>
-                  <td className="py-2.5 px-3 text-right font-mono font-bold text-foreground print:text-black">
+                  <td className="py-2.5 px-3 text-right font-mono font-bold text-slate-900 print:text-black">
                     R$ {Number(i.subtotal).toFixed(2)}
                   </td>
                 </tr>
@@ -173,11 +173,11 @@ const QuoteDetail = () => {
 
         {/* Observações */}
         {quote.notes && (
-          <div className="mt-6 pt-4 border-t-2 border-dashed border-border print:border-black/60">
-            <div className="text-[10px] font-bold uppercase tracking-widest text-foreground/70 print:text-black mb-1">
+          <div className="mt-6 pt-4 border-t-2 border-dashed border-slate-200 print:border-black/60">
+            <div className="text-[10px] font-bold uppercase tracking-widest text-slate-600 print:text-black mb-1">
               Observações
             </div>
-            <div className="text-sm font-medium text-foreground print:text-black whitespace-pre-wrap">
+            <div className="text-sm font-medium text-slate-900 print:text-black whitespace-pre-wrap">
               {quote.notes}
             </div>
           </div>
@@ -193,7 +193,7 @@ const QuoteDetail = () => {
           </div>
         </div>
 
-        <div className="mt-10 pt-4 border-t border-border print:border-black text-center text-[11px] font-semibold text-foreground/70 print:text-black">
+        <div className="mt-10 pt-4 border-t border-slate-200 print:border-black text-center text-[11px] font-semibold text-slate-600 print:text-black">
           Documento de orçamento — não possui valor fiscal
         </div>
       </Card>
