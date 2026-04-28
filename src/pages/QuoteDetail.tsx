@@ -55,7 +55,9 @@ const QuoteDetail = () => {
   if (!quote) return <div className="text-center py-12 text-muted-foreground">Carregando...</div>;
 
   const num = String(quote.quote_number).padStart(4, "0");
-  const date = new Date(quote.created_at).toLocaleDateString("pt-BR");
+  const dateObj = new Date(quote.created_at);
+  const date = dateObj.toLocaleDateString("pt-BR");
+  const time = dateObj.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 
   return (
     <div className="max-w-3xl mx-auto space-y-4">
@@ -89,7 +91,7 @@ const QuoteDetail = () => {
               Orçamento Nº
             </div>
             <div className="text-3xl font-extrabold text-primary print:text-black font-mono leading-tight">#{num}</div>
-            <div className="text-xs font-medium text-slate-700 print:text-black mt-1">{date}</div>
+            <div className="text-xs font-medium text-slate-700 print:text-black mt-1">{date} às {time}</div>
           </div>
         </div>
 
