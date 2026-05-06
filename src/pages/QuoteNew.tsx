@@ -202,12 +202,12 @@ const QuoteNew = () => {
   );
 
   return (
-    <div className="-mx-4 sm:-mx-6 -my-6 min-h-[calc(100vh-4rem)] bg-[#d4d0c8] text-black font-[Tahoma,Geneva,sans-serif] text-[12px]">
-      <div className="max-w-[1100px] mx-auto bg-[#ece9d8] border border-[#7a7a7a] shadow-md">
+    <div className="-mx-4 sm:-mx-6 -my-6 min-h-[calc(100vh-4rem)] bg-[#020617] text-slate-100 font-[Tahoma,Geneva,sans-serif] text-[12px]">
+      <div className="max-w-[1100px] mx-auto bg-[#0f172a] border border-[#334155] shadow-[0_10px_40px_-10px_rgba(56,189,248,0.25)]">
         {/* Title bar */}
-        <div className="h-7 bg-gradient-to-b from-[#0a64b6] to-[#0050a4] text-white flex items-center justify-between px-2 select-none">
+        <div className="h-7 bg-gradient-to-b from-[#0c4a6e] to-[#082f49] text-white flex items-center justify-between px-2 select-none border-b border-[#334155]">
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-[#f0a020] rounded-sm border border-[#a06010]" />
+            <div className="w-4 h-4 bg-[#22d3ee] rounded-sm border border-[#0891b2]" />
             <span className="text-[12px] font-semibold">
               {isEdit ? "Editar Orçamento" : "Pedidos de venda"}
             </span>
@@ -220,7 +220,7 @@ const QuoteNew = () => {
         </div>
 
         {/* Menu / Toolbar */}
-        <div className="bg-[#ece9d8] border-b border-[#9a9a9a] flex items-center justify-between px-1">
+        <div className="bg-[#1e293b] border-b border-[#334155] flex items-center justify-between px-1">
           <div className="flex items-center">
             <ToolBtn label="Vínculos" />
             <ToolBtn label="Confere" disabled />
@@ -230,29 +230,29 @@ const QuoteNew = () => {
             <ToolBtn label="Pagamentos" disabled />
           </div>
           <div className="flex items-center gap-1 px-2">
-            <button onClick={() => nav("/")} className="text-[#1a1a1a] hover:text-black px-1">«</button>
-            <button onClick={() => nav("/")} className="text-[#1a1a1a] hover:text-black px-1">‹</button>
-            <button onClick={() => nav("/")} className="text-[#1a1a1a] hover:text-black px-1">›</button>
-            <button onClick={() => nav("/")} className="text-[#1a1a1a] hover:text-black px-1">»</button>
-            <div className="w-3 h-4 bg-[#c83232] ml-2" />
+            <button onClick={() => nav("/")} className="text-slate-300 hover:text-white px-1">«</button>
+            <button onClick={() => nav("/")} className="text-slate-300 hover:text-white px-1">‹</button>
+            <button onClick={() => nav("/")} className="text-slate-300 hover:text-white px-1">›</button>
+            <button onClick={() => nav("/")} className="text-slate-300 hover:text-white px-1">»</button>
+            <div className="w-3 h-4 bg-[#22d3ee] ml-2" />
           </div>
         </div>
 
         {/* Número do pedido */}
-        <div className="bg-white border border-[#9a9a9a] mx-2 mt-2 px-2 py-1 flex items-center gap-2">
-          <span className="text-[#0a5d2a] font-semibold text-[12px]">Número do Pedido:</span>
-          <span className="text-[#0a5d2a] font-mono text-[13px]">{numFmt}</span>
+        <div className="bg-[#0f172a] border border-[#334155] mx-2 mt-2 px-2 py-1 flex items-center gap-2">
+          <span className="text-[#22d3ee] font-semibold text-[12px]">Número do Pedido:</span>
+          <span className="text-[#22d3ee] font-mono text-[13px]">{numFmt}</span>
         </div>
 
         {/* Tabs cliente */}
         <div className="mx-2 mt-2 flex items-end gap-0">
-          <div className="px-3 py-1 bg-[#ece9d8] border border-[#9a9a9a] border-b-0 text-[12px] font-semibold">Cliente</div>
-          <div className="px-3 py-1 bg-[#d4d0c8] border border-[#9a9a9a] border-b-0 text-[12px] text-[#555]">Endereço de Entrega</div>
-          <div className="flex-1 border-b border-[#9a9a9a]" />
+          <div className="px-3 py-1 bg-[#1e293b] border border-[#334155] border-b-0 text-[12px] font-semibold text-slate-100">Cliente</div>
+          <div className="px-3 py-1 bg-[#0f172a] border border-[#334155] border-b-0 text-[12px] text-slate-500">Endereço de Entrega</div>
+          <div className="flex-1 border-b border-[#334155]" />
         </div>
 
         {/* Bloco cliente */}
-        <div className="mx-2 border border-[#9a9a9a] border-t-0 bg-[#ece9d8] p-2 space-y-2">
+        <div className="mx-2 border border-[#334155] border-t-0 bg-[#1e293b] p-2 space-y-2">
           <div className="grid grid-cols-12 gap-2">
             <div className="col-span-6">
               <RetroField label="Cliente / Mecânico:">
@@ -288,13 +288,13 @@ const QuoteNew = () => {
             </div>
           </div>
 
-          <RetroField label="Informações complementares:" color="text-[#a0431a]">
+          <RetroField label="Informações complementares:" color="text-[#fb923c]">
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               maxLength={500}
               rows={3}
-              className="w-full px-2 py-1 text-[12px] rounded-none bg-white border border-[#9a9a9a] resize-none focus:outline-none focus:border-[#316ac5] text-black"
+              className="w-full px-2 py-1 text-[12px] rounded-none bg-[#0f172a] border border-[#334155] resize-none focus:outline-none focus:border-[#38bdf8] text-slate-100"
             />
           </RetroField>
         </div>
