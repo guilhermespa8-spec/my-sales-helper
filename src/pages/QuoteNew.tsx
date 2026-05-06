@@ -142,6 +142,35 @@ const QuoteNew = () => {
     }).slice(0, 50);
   }, [products, search]);
 
+  const consultaResults = useMemo(() => {
+    const q = consultaSearch.trim().toLowerCase().replace(/^%/, "");
+    if (!q) return products.slice(0, 200);
+    const normalize = (str: string) => str.toLowerCase().replace(/[\s\.\-]/g, "");
+    const terms = q.split(/\s+/).filter(Boolean);
+    const qn = normalize(q);
+    return products.filter((p) => {
+      const n = p.name.toLowerCase();
+      const d = (p.description ?? "").toLowerCase();
+      return terms.every(t => n.includes(t) || d.includes(t)) ||
+        normalize(p.name).includes(qn) || normalize(p.description ?? "").includes(qn);
+    }).slice(0, 200);
+  }, [products, consultaSearch]);
+
+  const openConsulta = () => {
+    setShowConsulta(true);
+    setConsultaSelected(null);
+    setTimeout(() => consultaRef.current?.focus(), 50);
+  };
+
+  const confirmConsulta = () => {
+    if (consultaSelected) {
+      addItem(consultaSelected);
+      setShowConsulta(false);
+      setConsultaSearch("");
+      setConsultaSelected(null);
+    }
+  };
+
   const save = async () => {
     if (items.length === 0) { toast.error("Adicione ao menos 1 item"); return; }
     setSaving(true);
