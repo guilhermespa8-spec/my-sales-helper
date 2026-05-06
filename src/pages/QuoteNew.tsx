@@ -14,7 +14,7 @@ interface Mechanic { id: string; name: string; }
 interface CarRecord { id: string; name: string; notes: string | null; }
 
 // ---------- Retro UI primitives ----------
-const RetroField = ({ label, color = "text-[#0a5d2a]", children }: { label: string; color?: string; children: React.ReactNode }) => (
+const RetroField = ({ label, color = "text-[#38bdf8]", children }: { label: string; color?: string; children: React.ReactNode }) => (
   <div className="flex flex-col gap-0.5 min-w-0">
     <span className={`text-[11px] font-semibold ${color}`}>{label}</span>
     <div className="min-w-0">{children}</div>
