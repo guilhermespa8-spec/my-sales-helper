@@ -195,7 +195,7 @@ const QuoteNew = () => {
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`px-3 h-8 text-[12px] border border-transparent hover:border-[#9a9a9a] hover:bg-[#e8e8e8] active:bg-[#d0d0d0] disabled:opacity-40 disabled:cursor-not-allowed text-[#1a1a1a] transition-colors ${accent ? "font-semibold" : ""}`}
+      className={`px-3 h-8 text-[12px] border border-transparent hover:border-[#334155] hover:bg-[#1e293b] active:bg-[#0f172a] disabled:opacity-40 disabled:cursor-not-allowed text-slate-200 transition-colors ${accent ? "font-semibold" : ""}`}
     >
       {label}
     </button>
