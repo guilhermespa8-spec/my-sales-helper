@@ -44,7 +44,11 @@ const QuoteNew = () => {
   const [saving, setSaving] = useState(false);
   const [quoteNumber, setQuoteNumber] = useState<number | null>(null);
   const [showSearch, setShowSearch] = useState(false);
+  const [showConsulta, setShowConsulta] = useState(false);
+  const [consultaSearch, setConsultaSearch] = useState("");
+  const [consultaSelected, setConsultaSelected] = useState<string | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
+  const consultaRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
