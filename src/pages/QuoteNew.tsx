@@ -475,6 +475,113 @@ const QuoteNew = () => {
           <ActionIcon label="Réplica" disabled />
         </div>
       </div>
+
+      {/* Modal Consulta de produtos */}
+      {showConsulta && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={() => setShowConsulta(false)}>
+          <div
+            className="bg-[#0f172a] border border-[#334155] shadow-[0_20px_60px_-10px_rgba(0,0,0,0.6)] w-full max-w-[1100px] max-h-[80vh] flex flex-col font-[Tahoma,Geneva,sans-serif] text-[12px] text-slate-100"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Title bar */}
+            <div className="h-7 bg-gradient-to-b from-[#0c4a6e] to-[#082f49] flex items-center justify-between px-2 select-none border-b border-[#334155]">
+              <span className="text-[12px] font-semibold">Consulta de produtos</span>
+              <button onClick={() => setShowConsulta(false)} className="w-5 h-5 hover:bg-red-600 leading-none">×</button>
+            </div>
+
+            {/* Search box */}
+            <div className="p-3 border-b border-[#334155] bg-[#1e293b] flex items-start gap-3">
+              <div className="flex-1 border border-[#334155] rounded-sm px-3 py-2 bg-[#0f172a]">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[#fb923c] font-semibold text-[11px]">Pesquisar:</span>
+                  <label className="flex items-center gap-1 text-[11px] text-slate-300">
+                    <input type="checkbox" defaultChecked className="accent-[#22d3ee]" />
+                    Busca Dinâmica
+                  </label>
+                </div>
+                <div className="text-[#38bdf8] text-[11px] mb-1">Código, Cód. Barras ou Descrição:</div>
+                <input
+                  ref={consultaRef}
+                  value={consultaSearch}
+                  onChange={(e) => { setConsultaSearch(e.target.value); setConsultaSelected(null); }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Escape") setShowConsulta(false);
+                    if (e.key === "Enter") confirmConsulta();
+                  }}
+                  placeholder="%PRODUTO"
+                  className="w-full h-8 px-2 text-[13px] bg-[#020617] border border-[#334155] text-[#22d3ee] font-mono outline-none focus:border-[#38bdf8]"
+                />
+              </div>
+              <div className="w-24 h-24 border border-[#334155] bg-[#020617] flex items-center justify-center text-[10px] text-slate-500 text-center">
+                SEM<br/>FOTO
+              </div>
+            </div>
+
+            {/* Tabela */}
+            <div className="flex-1 overflow-auto">
+              <table className="w-full text-[12px]">
+                <thead className="sticky top-0 bg-[#1e293b] border-b border-[#334155] text-slate-200">
+                  <tr>
+                    <th className="px-2 py-1 text-left border-r border-[#334155] font-semibold w-20">Código</th>
+                    <th className="px-2 py-1 text-left border-r border-[#334155] font-semibold w-16">Cód.</th>
+                    <th className="px-2 py-1 text-left border-r border-[#334155] font-semibold w-32">Cód. Fabricante</th>
+                    <th className="px-2 py-1 text-left border-r border-[#334155] font-semibold">Descrição</th>
+                    <th className="px-2 py-1 text-center border-r border-[#334155] font-semibold w-16">Qtd.</th>
+                    <th className="px-2 py-1 text-right font-semibold w-28">Valor Unitário</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {consultaResults.length === 0 ? (
+                    <tr><td colSpan={6} className="px-3 py-8 text-center text-slate-500 italic">Nenhum produto encontrado</td></tr>
+                  ) : consultaResults.map((p, idx) => {
+                    const selected = consultaSelected === p.id;
+                    return (
+                      <tr
+                        key={p.id}
+                        onClick={() => setConsultaSelected(p.id)}
+                        onDoubleClick={() => { addItem(p.id); setShowConsulta(false); setConsultaSearch(""); }}
+                        className={`cursor-pointer border-b border-[#1e293b] ${selected ? "bg-[#0c4a6e] text-white" : "hover:bg-[#1e293b]"}`}
+                      >
+                        <td className="px-2 py-1 border-r border-[#1e293b] font-mono">{String(idx + 1).padStart(5, "0")}</td>
+                        <td className="px-2 py-1 border-r border-[#1e293b] font-mono text-slate-400">{p.id.slice(0, 4).toUpperCase()}</td>
+                        <td className="px-2 py-1 border-r border-[#1e293b] font-mono text-slate-400">—</td>
+                        <td className="px-2 py-1 border-r border-[#1e293b] truncate">{p.name}{p.description ? ` — ${p.description}` : ""}</td>
+                        <td className="px-2 py-1 border-r border-[#1e293b] text-center font-mono">1</td>
+                        <td className="px-2 py-1 text-right font-mono text-[#22d3ee]">R$ {Number(p.price).toFixed(2)}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Footer */}
+            <div className="border-t border-[#334155] bg-[#1e293b] px-3 py-2 flex items-center justify-between text-[11px] text-slate-300">
+              <div className="flex items-center gap-4">
+                <span><b className="text-[#22d3ee]">ENTER</b>= Selecionar</span>
+                <span><b className="text-[#22d3ee]">Duplo Click</b>= Vender Item</span>
+                <span><b className="text-[#22d3ee]">F11</b>= Ver ficha</span>
+                <span><b className="text-[#22d3ee]">ESC</b>= Sair</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={confirmConsulta}
+                  disabled={!consultaSelected}
+                  className="px-4 h-7 bg-gradient-to-b from-[#22d3ee] to-[#0891b2] text-[#020617] font-semibold border border-[#0891b2] disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-110"
+                >
+                  Selecionar
+                </button>
+                <button
+                  onClick={() => setShowConsulta(false)}
+                  className="px-4 h-7 bg-[#0f172a] border border-[#334155] hover:bg-[#1e293b] text-slate-200"
+                >
+                  Sair (ESC)
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
