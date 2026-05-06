@@ -408,25 +408,25 @@ const QuoteNew = () => {
         {/* Rodapé totais */}
         <div className="mx-2 mt-2 grid grid-cols-4 gap-3 text-[12px]">
           <div>
-            <div className="text-[#a0431a] font-semibold">Frete:</div>
-            <div className="font-mono text-black">R$0,00</div>
+            <div className="text-[#fb923c] font-semibold">Frete:</div>
+            <div className="font-mono text-slate-100">R$0,00</div>
           </div>
           <div>
-            <div className="text-[#a0431a] font-semibold">Produtos:</div>
-            <div className="font-mono text-black">R${totalProdutos.toFixed(2)}</div>
+            <div className="text-[#fb923c] font-semibold">Produtos:</div>
+            <div className="font-mono text-slate-100">R${totalProdutos.toFixed(2)}</div>
           </div>
           <div>
-            <div className="text-[#a0431a] font-semibold">Descontos:</div>
-            <div className="font-mono text-black">R$0,00</div>
+            <div className="text-[#fb923c] font-semibold">Descontos:</div>
+            <div className="font-mono text-slate-100">R$0,00</div>
           </div>
           <div className="text-right">
-            <div className="text-[#a0431a] font-semibold">Total do Pedido:</div>
-            <div className="font-mono font-bold text-[15px] text-black">R${total.toFixed(2)}</div>
+            <div className="text-[#fb923c] font-semibold">Total do Pedido:</div>
+            <div className="font-mono font-bold text-[15px] text-[#22d3ee]">R${total.toFixed(2)}</div>
           </div>
         </div>
 
         {/* Barra inferior de ações */}
-        <div className="mt-3 border-t border-[#9a9a9a] bg-[#ece9d8] flex items-center justify-around px-2 py-2 text-[11px]">
+        <div className="mt-3 border-t border-[#334155] bg-[#1e293b] flex items-center justify-around px-2 py-2 text-[11px]">
           <ActionIcon label="Listagem" onClick={() => nav("/")} />
           <ActionIcon label="Ficha" disabled />
           <ActionIcon label="Novo" onClick={() => nav("/orcamentos/novo")} highlight />
@@ -450,10 +450,10 @@ const ActionIcon = ({ label, onClick, disabled, highlight }: { label: string; on
     type="button"
     onClick={onClick}
     disabled={disabled}
-    className="flex flex-col items-center gap-0.5 px-2 py-1 hover:bg-[#d4d0c8] active:bg-[#bfbab0] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+    className="flex flex-col items-center gap-0.5 px-2 py-1 hover:bg-[#0f172a] active:bg-[#020617] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
   >
-    <div className={`w-6 h-6 border border-[#9a9a9a] ${highlight ? "bg-[#f0c060]" : "bg-[#e8e4d4]"}`} />
-    <span className="text-[#1a1a1a]">{label}</span>
+    <div className={`w-6 h-6 border border-[#334155] ${highlight ? "bg-gradient-to-b from-[#22d3ee] to-[#0891b2]" : "bg-[#0f172a]"}`} />
+    <span className="text-slate-200">{label}</span>
   </button>
 );
 
