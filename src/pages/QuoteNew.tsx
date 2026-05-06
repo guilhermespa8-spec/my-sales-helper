@@ -300,63 +300,63 @@ const QuoteNew = () => {
         </div>
 
         {/* Tabela de itens */}
-        <div className="mx-2 mt-2 border border-[#9a9a9a] bg-white">
+        <div className="mx-2 mt-2 border border-[#334155] bg-[#0f172a]">
           {/* Header */}
-          <div className="grid grid-cols-[1fr_60px_80px_80px_60px_100px_100px_100px] bg-[#ece9d8] border-b border-[#9a9a9a] text-[11px] font-semibold text-black">
-            <div className="px-2 py-1 border-r border-[#9a9a9a]">Nome do produto</div>
-            <div className="px-2 py-1 border-r border-[#9a9a9a] text-center">…</div>
-            <div className="px-2 py-1 border-r border-[#9a9a9a] text-center">Und.</div>
-            <div className="px-2 py-1 border-r border-[#9a9a9a] text-center">Q.Ped</div>
-            <div className="px-2 py-1 border-r border-[#9a9a9a] text-center">Q.Sal</div>
-            <div className="px-2 py-1 border-r border-[#9a9a9a] text-right">Unitário</div>
-            <div className="px-2 py-1 border-r border-[#9a9a9a] text-right">Desconto %</div>
+          <div className="grid grid-cols-[1fr_60px_80px_80px_60px_100px_100px_100px] bg-[#1e293b] border-b border-[#334155] text-[11px] font-semibold text-slate-200">
+            <div className="px-2 py-1 border-r border-[#334155]">Nome do produto</div>
+            <div className="px-2 py-1 border-r border-[#334155] text-center">…</div>
+            <div className="px-2 py-1 border-r border-[#334155] text-center">Und.</div>
+            <div className="px-2 py-1 border-r border-[#334155] text-center">Q.Ped</div>
+            <div className="px-2 py-1 border-r border-[#334155] text-center">Q.Sal</div>
+            <div className="px-2 py-1 border-r border-[#334155] text-right">Unitário</div>
+            <div className="px-2 py-1 border-r border-[#334155] text-right">Desconto %</div>
             <div className="px-2 py-1 text-right">Total</div>
           </div>
 
           {/* Add row */}
-          <div className="grid grid-cols-[1fr_60px_80px_80px_60px_100px_100px_100px] border-b border-[#9a9a9a] relative">
+          <div className="grid grid-cols-[1fr_60px_80px_80px_60px_100px_100px_100px] border-b border-[#334155] relative">
             <div className="col-span-8 relative">
               {!showSearch ? (
                 <button
                   type="button"
                   onClick={() => { setShowSearch(true); setTimeout(() => searchRef.current?.focus(), 50); }}
-                  className="w-full text-left px-2 py-1.5 text-[12px] text-[#316ac5] hover:bg-[#e8e8e8]"
+                  className="w-full text-left px-2 py-1.5 text-[12px] text-[#38bdf8] hover:bg-[#1e293b]"
                 >
                   Incluir (Ctrl+Insert) — clique para pesquisar produto
                 </button>
               ) : (
-                <div className="flex items-center gap-1 px-1 py-1 bg-white">
-                  <Search className="w-3.5 h-3.5 text-[#666]" />
+                <div className="flex items-center gap-1 px-1 py-1 bg-[#0f172a]">
+                  <Search className="w-3.5 h-3.5 text-slate-400" />
                   <input
                     ref={searchRef}
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Pesquisar produto..."
-                    className="flex-1 h-6 px-1 text-[12px] outline-none border-0 bg-transparent text-black"
+                    className="flex-1 h-6 px-1 text-[12px] outline-none border-0 bg-transparent text-slate-100 placeholder:text-slate-500"
                   />
-                  <button onClick={() => { setShowSearch(false); setSearch(""); }} className="text-[#666] hover:text-black">
+                  <button onClick={() => { setShowSearch(false); setSearch(""); }} className="text-slate-400 hover:text-white">
                     <X className="w-3.5 h-3.5" />
                   </button>
                 </div>
               )}
 
               {showSearch && search && (
-                <div className="absolute left-0 right-0 top-full z-30 bg-white border border-[#9a9a9a] shadow-lg max-h-[280px] overflow-y-auto">
+                <div className="absolute left-0 right-0 top-full z-30 bg-[#0f172a] border border-[#334155] shadow-lg max-h-[280px] overflow-y-auto">
                   {filteredProducts.length === 0 ? (
-                    <div className="px-3 py-3 text-[12px] text-[#666] italic">Nenhum produto encontrado</div>
+                    <div className="px-3 py-3 text-[12px] text-slate-500 italic">Nenhum produto encontrado</div>
                   ) : (
                     filteredProducts.map((p) => (
                       <button
                         key={p.id}
                         type="button"
                         onClick={() => addItem(p.id)}
-                        className="w-full text-left px-3 py-1.5 text-[12px] hover:bg-[#316ac5] hover:text-white border-b border-[#eee] flex items-center justify-between gap-3"
+                        className="w-full text-left px-3 py-1.5 text-[12px] text-slate-100 hover:bg-[#0c4a6e] hover:text-white border-b border-[#1e293b] flex items-center justify-between gap-3"
                       >
                         <div className="min-w-0">
                           <div className="font-semibold truncate">{p.name}</div>
                           {p.description && <div className="text-[11px] opacity-70 truncate">{p.description}</div>}
                         </div>
-                        <div className="font-mono shrink-0">R$ {Number(p.price).toFixed(2)}</div>
+                        <div className="font-mono shrink-0 text-[#22d3ee]">R$ {Number(p.price).toFixed(2)}</div>
                       </button>
                     ))
                   )}
@@ -367,26 +367,26 @@ const QuoteNew = () => {
 
           {/* Item rows */}
           {items.length === 0 ? (
-            <div className="h-32 flex items-center justify-center text-[12px] text-[#888] italic">
+            <div className="h-32 flex items-center justify-center text-[12px] text-slate-500 italic">
               Nenhum item adicionado
             </div>
           ) : (
             items.map((i, idx) => (
-              <div key={idx} className="grid grid-cols-[1fr_60px_80px_80px_60px_100px_100px_100px] border-b border-[#e0e0e0] hover:bg-[#f4f4f4] text-[12px]">
-                <div className="px-2 py-1 border-r border-[#e0e0e0] truncate text-black">{i.product_name}</div>
-                <div className="px-1 py-1 border-r border-[#e0e0e0] flex items-center justify-center">
-                  <button onClick={() => setItems(items.filter((_, k) => k !== idx))} className="text-[#a02020] hover:text-[#d00]">
+              <div key={idx} className="grid grid-cols-[1fr_60px_80px_80px_60px_100px_100px_100px] border-b border-[#1e293b] hover:bg-[#1e293b] text-[12px] text-slate-100">
+                <div className="px-2 py-1 border-r border-[#1e293b] truncate">{i.product_name}</div>
+                <div className="px-1 py-1 border-r border-[#1e293b] flex items-center justify-center">
+                  <button onClick={() => setItems(items.filter((_, k) => k !== idx))} className="text-red-400 hover:text-red-300">
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
-                <div className="px-2 py-1 border-r border-[#e0e0e0] text-center text-[#555]">UN</div>
-                <div className="px-1 py-1 border-r border-[#e0e0e0] flex items-center justify-center gap-0.5">
-                  <button onClick={() => updateItem(idx, { quantity: Math.max(1, i.quantity - 1) })} className="px-1 hover:bg-[#ddd]"><Minus className="w-3 h-3" /></button>
+                <div className="px-2 py-1 border-r border-[#1e293b] text-center text-slate-400">UN</div>
+                <div className="px-1 py-1 border-r border-[#1e293b] flex items-center justify-center gap-0.5">
+                  <button onClick={() => updateItem(idx, { quantity: Math.max(1, i.quantity - 1) })} className="px-1 hover:bg-[#334155]"><Minus className="w-3 h-3" /></button>
                   <span className="font-mono w-6 text-center">{i.quantity}</span>
-                  <button onClick={() => updateItem(idx, { quantity: i.quantity + 1 })} className="px-1 hover:bg-[#ddd]"><Plus className="w-3 h-3" /></button>
+                  <button onClick={() => updateItem(idx, { quantity: i.quantity + 1 })} className="px-1 hover:bg-[#334155]"><Plus className="w-3 h-3" /></button>
                 </div>
-                <div className="px-2 py-1 border-r border-[#e0e0e0] text-center font-mono text-[#555]">{i.quantity}</div>
-                <div className="px-1 py-0.5 border-r border-[#e0e0e0]">
+                <div className="px-2 py-1 border-r border-[#1e293b] text-center font-mono text-slate-400">{i.quantity}</div>
+                <div className="px-1 py-0.5 border-r border-[#1e293b]">
                   <Input
                     type="number"
                     step="0.01"
@@ -396,8 +396,8 @@ const QuoteNew = () => {
                     className={`${retroInputCls} text-right font-mono`}
                   />
                 </div>
-                <div className="px-2 py-1 border-r border-[#e0e0e0] text-right font-mono text-[#888]">0,00</div>
-                <div className="px-2 py-1 text-right font-mono font-semibold text-black">
+                <div className="px-2 py-1 border-r border-[#1e293b] text-right font-mono text-slate-500">0,00</div>
+                <div className="px-2 py-1 text-right font-mono font-semibold text-[#22d3ee]">
                   {(i.quantity * i.unit_price).toFixed(2)}
                 </div>
               </div>
