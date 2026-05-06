@@ -2,14 +2,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Trash2, Save, Search, Package, ShoppingCart, X, Sparkles, Minus, Command, FileText, User, Car as CarIcon, Wrench, Receipt, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
+import { Search, X, Plus, Minus, Trash2 } from "lucide-react";
 
 const SELLERS = ["André", "João Victor", "Mateus", "Loja"] as const;
 
@@ -17,6 +12,20 @@ interface Product { id: string; name: string; description: string | null; price:
 interface Item { product_id: string; product_name: string; quantity: number; unit_price: number; }
 interface Mechanic { id: string; name: string; }
 interface CarRecord { id: string; name: string; notes: string | null; }
+
+// ---------- Retro UI primitives ----------
+const RetroField = ({ label, color = "text-[#0a5d2a]", children }: { label: string; color?: string; children: React.ReactNode }) => (
+  <div className="flex flex-col gap-0.5 min-w-0">
+    <span className={`text-[11px] font-semibold ${color}`}>{label}</span>
+    <div className="min-w-0">{children}</div>
+  </div>
+);
+
+const retroInputCls =
+  "h-7 px-2 py-0 text-[12px] rounded-none bg-white border border-[#9a9a9a] focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-[#316ac5] shadow-none text-black";
+
+const retroSelectCls =
+  "h-7 px-2 py-0 text-[12px] rounded-none bg-white border border-[#9a9a9a] text-black w-full focus:outline-none focus:border-[#316ac5]";
 
 const QuoteNew = () => {
   const { user } = useAuth();
@@ -34,20 +43,13 @@ const QuoteNew = () => {
   const [search, setSearch] = useState("");
   const [saving, setSaving] = useState(false);
   const [quoteNumber, setQuoteNumber] = useState<number | null>(null);
-  const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
-  const toggleGroup = (name: string) => {
-    setOpenGroups(prev => {
-      const next = new Set(prev);
-      if (next.has(name)) next.delete(name); else next.add(name);
-      return next;
-    });
-  };
+  const [showSearch, setShowSearch] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === "k") { e.preventDefault(); searchRef.current?.focus(); }
-      if (e.key === "Escape" && document.activeElement === searchRef.current) { setSearch(""); }
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") { e.preventDefault(); setShowSearch(true); setTimeout(() => searchRef.current?.focus(), 50); }
+      if (e.key === "Escape") { setShowSearch(false); setSearch(""); }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -74,41 +76,30 @@ const QuoteNew = () => {
 
   useEffect(() => {
     const loadData = async () => {
-      // Use Promise.all to load mechanics and cars in parallel
       const [mecsRes, carsRes] = await Promise.all([
         supabase.from("mechanics").select("id,name").order("name"),
         supabase.from("cars").select("id,name,notes").order("name")
       ]);
-
       if (mecsRes.data) setMechanics(mecsRes.data as Mechanic[]);
       if (carsRes.data) setCarsList(carsRes.data as CarRecord[]);
 
-      // Load Products with optimized pagination
       const pageSize = 1000;
       let from = 0;
       const all: Product[] = [];
-      
       while (true) {
         const { data, error } = await supabase
           .from("products")
           .select("id,name,description,price,car_filter")
           .order("name")
           .range(from, from + pageSize - 1);
-        
-        if (error) {
-          toast.error("Erro ao carregar produtos");
-          break;
-        }
-        
+        if (error) { toast.error("Erro ao carregar produtos"); break; }
         const batch = (data ?? []) as Product[];
         all.push(...batch);
-        
         if (batch.length < pageSize) break;
         from += pageSize;
       }
       setProducts(all);
     };
-
     loadData();
   }, []);
 
@@ -120,6 +111,8 @@ const QuoteNew = () => {
     } else {
       setItems([...items, { product_id: p.id, product_name: p.name, quantity: 1, unit_price: Number(p.price) }]);
     }
+    setSearch("");
+    setShowSearch(false);
   };
 
   const updateItem = (idx: number, patch: Partial<Item>) => {
@@ -131,46 +124,19 @@ const QuoteNew = () => {
   const filteredProducts = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return [];
-    
-    // Normalize string: remove spaces, dots and hyphens
     const normalize = (str: string) => str.toLowerCase().replace(/[\s\.\-]/g, "");
-    
-    const searchTerms = q.split(/\s+/).filter(term => term.length > 0);
+    const searchTerms = q.split(/\s+/).filter(t => t.length > 0);
     const searchNormalized = normalize(q);
-    
     return products.filter((p) => {
       const pName = p.name.toLowerCase();
       const pDesc = (p.description ?? "").toLowerCase();
       const pNameNormalized = normalize(p.name);
       const pDescNormalized = normalize(p.description ?? "");
-      
-      // Match 1: All individual terms are present (standard flexible search)
-      const allTermsMatch = searchTerms.every(term => 
-        pName.includes(term) || pDesc.includes(term)
-      );
-
-      // Match 2: Normalized search matches normalized name or description
-      // This handles "n 6017" matching "n-6017" or "oc 259" matching "oc259"
-      const normalizedMatch = pNameNormalized.includes(searchNormalized) || 
-                             pDescNormalized.includes(searchNormalized);
-      
+      const allTermsMatch = searchTerms.every(t => pName.includes(t) || pDesc.includes(t));
+      const normalizedMatch = pNameNormalized.includes(searchNormalized) || pDescNormalized.includes(searchNormalized);
       return allTermsMatch || normalizedMatch;
-    });
+    }).slice(0, 50);
   }, [products, search]);
-
-  const suggestedParts = useMemo(() => {
-    if (!car) return [];
-    const selectedCar = carsList.find(c => c.name === car);
-    const filter = selectedCar?.notes?.trim().toLowerCase();
-    if (!filter) return [];
-    
-    return products.filter((p) => {
-      const pDesc = (p.description ?? "").toLowerCase();
-      
-      // Filter ONLY by the product's description
-      return pDesc.includes(filter);
-    });
-  }, [products, car, carsList]);
 
   const save = async () => {
     if (items.length === 0) { toast.error("Adicione ao menos 1 item"); return; }
@@ -220,365 +186,275 @@ const QuoteNew = () => {
     } finally { setSaving(false); }
   };
 
-  const catalog = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (q) return filteredProducts;
-    if (car) return suggestedParts;
-    return products;
-  }, [search, filteredProducts, car, suggestedParts, products]);
+  const totalProdutos = total;
+  const numFmt = `0${String(quoteNumber ?? 0).padStart(5, "0")}`;
+
+  // Toolbar button
+  const ToolBtn = ({ label, onClick, disabled, accent }: { label: string; onClick?: () => void; disabled?: boolean; accent?: boolean }) => (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={`px-3 h-8 text-[12px] border border-transparent hover:border-[#9a9a9a] hover:bg-[#e8e8e8] active:bg-[#d0d0d0] disabled:opacity-40 disabled:cursor-not-allowed text-[#1a1a1a] transition-colors ${accent ? "font-semibold" : ""}`}
+    >
+      {label}
+    </button>
+  );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/30">
-      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 space-y-8">
-        {/* Cabeçalho Premium com Gradiente */}
-        <div className="relative overflow-hidden rounded-2xl border border-border/50 shadow-elevated">
-          <div className="absolute inset-0" style={{ background: "var(--gradient-brand)" }} />
-          <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/20" />
-          <div className="relative px-6 sm:px-10 py-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6 text-primary-foreground">
-            <div className="flex items-center gap-5">
-              <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center shadow-lg ring-1 ring-white/20">
-                <Receipt className="w-7 h-7" />
-              </div>
-              <div>
-                <div className="flex items-center gap-3 mb-1 flex-wrap">
-                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-                    {isEdit ? "Editar Orçamento" : "Novo Orçamento"}
-                  </h1>
-                  {quoteNumber && (
-                    <span className="px-3 py-1 rounded-full bg-white/15 backdrop-blur-sm text-xs font-mono font-bold ring-1 ring-white/20">
-                      #{String(quoteNumber).padStart(4, "0")}
-                    </span>
-                  )}
-                </div>
-                <p className="text-sm text-primary-foreground/80">
-                  Preencha os dados e adicione os itens para gerar o orçamento
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" onClick={() => nav("/")}
-                className="text-primary-foreground hover:bg-white/15 hover:text-primary-foreground">
-                <X className="w-4 h-4 mr-2" /> Cancelar
-              </Button>
-              <Button onClick={save} disabled={saving || items.length === 0} size="sm"
-                className="bg-white text-primary hover:bg-white/90 shadow-lg font-semibold">
-                <Save className="w-4 h-4 mr-2" /> {saving ? "Salvando..." : "Finalizar"}
-              </Button>
-            </div>
+    <div className="-mx-4 sm:-mx-6 -my-6 min-h-[calc(100vh-4rem)] bg-[#d4d0c8] text-black font-[Tahoma,Geneva,sans-serif] text-[12px]">
+      <div className="max-w-[1100px] mx-auto bg-[#ece9d8] border border-[#7a7a7a] shadow-md">
+        {/* Title bar */}
+        <div className="h-7 bg-gradient-to-b from-[#0a64b6] to-[#0050a4] text-white flex items-center justify-between px-2 select-none">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-[#f0a020] rounded-sm border border-[#a06010]" />
+            <span className="text-[12px] font-semibold">
+              {isEdit ? "Editar Orçamento" : "Pedidos de venda"}
+            </span>
+          </div>
+          <div className="flex items-center gap-1 text-[12px]">
+            <button onClick={() => nav("/")} className="w-5 h-5 hover:bg-white/20 leading-none">_</button>
+            <button onClick={() => nav("/")} className="w-5 h-5 hover:bg-white/20 leading-none">▢</button>
+            <button onClick={() => nav("/")} className="w-5 h-5 hover:bg-red-600 leading-none">×</button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* Lado Esquerdo: Dados e Busca */}
-          <div className="lg:col-span-7 space-y-6">
-            {/* Card de Dados */}
-            <Card className="border border-border/50 shadow-soft bg-card overflow-hidden">
-              <CardHeader className="pb-4 border-b bg-muted/30">
-                <CardTitle className="text-base font-semibold flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-primary" />
-                  Informações Gerais
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-6">
-                <div className="space-y-2">
-                  <Label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
-                    <Wrench className="w-3 h-3" /> Mecânico
-                  </Label>
-                  <Select value={customer || "__none__"} onValueChange={(v) => setCustomer(v === "__none__" ? "" : v)}>
-                    <SelectTrigger className="h-11 bg-background">
-                      <SelectValue placeholder={mechanics.length ? "Selecione" : "Cadastre em Mecânicos"} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="__none__">Nenhum</SelectItem>
-                      {mechanics.map((m) => (<SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
-                    <User className="w-3 h-3" /> Vendedor
-                  </Label>
-                  <Select value={seller} onValueChange={setSeller}>
-                    <SelectTrigger className="h-11 bg-background">
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {SELLERS.map((s) => (<SelectItem key={s} value={s}>{s}</SelectItem>))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
-                    <CarIcon className="w-3 h-3" /> Carro
-                  </Label>
-                  <Select value={car || "__none__"} onValueChange={(v) => setCar(v === "__none__" ? "" : v)}>
-                    <SelectTrigger className="h-11 bg-background">
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="__none__">Nenhum</SelectItem>
-                      {carsList.map((c) => (<SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
-                    <FileText className="w-3 h-3" /> Observações
-                  </Label>
-                  <Input value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={500}
-                    placeholder="Notas do orçamento" className="h-11 bg-background" />
-                </div>
-              </CardContent>
-            </Card>
+        {/* Menu / Toolbar */}
+        <div className="bg-[#ece9d8] border-b border-[#9a9a9a] flex items-center justify-between px-1">
+          <div className="flex items-center">
+            <ToolBtn label="Vínculos" />
+            <ToolBtn label="Confere" disabled />
+            <ToolBtn label="Filtros" />
+            <ToolBtn label="Movimentar Estoque" disabled />
+            <ToolBtn label="Gerar Financeiro" disabled />
+            <ToolBtn label="Pagamentos" disabled />
+          </div>
+          <div className="flex items-center gap-1 px-2">
+            <button onClick={() => nav("/")} className="text-[#1a1a1a] hover:text-black px-1">«</button>
+            <button onClick={() => nav("/")} className="text-[#1a1a1a] hover:text-black px-1">‹</button>
+            <button onClick={() => nav("/")} className="text-[#1a1a1a] hover:text-black px-1">›</button>
+            <button onClick={() => nav("/")} className="text-[#1a1a1a] hover:text-black px-1">»</button>
+            <div className="w-3 h-4 bg-[#c83232] ml-2" />
+          </div>
+        </div>
 
-            {/* Busca de Produtos */}
-            <Card className="border border-border/50 shadow-soft bg-card overflow-hidden">
-              <CardHeader className="pb-4 border-b bg-muted/30">
-                <CardTitle className="text-base font-semibold flex items-center gap-2">
-                  <Package className="w-4 h-4 text-primary" />
-                  Adicionar Produtos
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-5 space-y-4">
-                <div className="relative group">
-                  <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                  <Input
+        {/* Número do pedido */}
+        <div className="bg-white border border-[#9a9a9a] mx-2 mt-2 px-2 py-1 flex items-center gap-2">
+          <span className="text-[#0a5d2a] font-semibold text-[12px]">Número do Pedido:</span>
+          <span className="text-[#0a5d2a] font-mono text-[13px]">{numFmt}</span>
+        </div>
+
+        {/* Tabs cliente */}
+        <div className="mx-2 mt-2 flex items-end gap-0">
+          <div className="px-3 py-1 bg-[#ece9d8] border border-[#9a9a9a] border-b-0 text-[12px] font-semibold">Cliente</div>
+          <div className="px-3 py-1 bg-[#d4d0c8] border border-[#9a9a9a] border-b-0 text-[12px] text-[#555]">Endereço de Entrega</div>
+          <div className="flex-1 border-b border-[#9a9a9a]" />
+        </div>
+
+        {/* Bloco cliente */}
+        <div className="mx-2 border border-[#9a9a9a] border-t-0 bg-[#ece9d8] p-2 space-y-2">
+          <div className="grid grid-cols-12 gap-2">
+            <div className="col-span-6">
+              <RetroField label="Cliente / Mecânico:">
+                <select
+                  value={customer || "__none__"}
+                  onChange={(e) => setCustomer(e.target.value === "__none__" ? "" : e.target.value)}
+                  className={retroSelectCls}
+                >
+                  <option value="__none__">000000  Consumidor</option>
+                  {mechanics.map((m) => (<option key={m.id} value={m.name}>{m.name}</option>))}
+                </select>
+              </RetroField>
+            </div>
+            <div className="col-span-3">
+              <RetroField label="Vendedor:">
+                <select value={seller} onChange={(e) => setSeller(e.target.value)} className={retroSelectCls}>
+                  <option value="">Selecione</option>
+                  {SELLERS.map((s) => (<option key={s} value={s}>{s}</option>))}
+                </select>
+              </RetroField>
+            </div>
+            <div className="col-span-3">
+              <RetroField label="Carro:">
+                <select
+                  value={car || "__none__"}
+                  onChange={(e) => setCar(e.target.value === "__none__" ? "" : e.target.value)}
+                  className={retroSelectCls}
+                >
+                  <option value="__none__">Nenhum</option>
+                  {carsList.map((c) => (<option key={c.id} value={c.name}>{c.name}</option>))}
+                </select>
+              </RetroField>
+            </div>
+          </div>
+
+          <RetroField label="Informações complementares:" color="text-[#a0431a]">
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              maxLength={500}
+              rows={3}
+              className="w-full px-2 py-1 text-[12px] rounded-none bg-white border border-[#9a9a9a] resize-none focus:outline-none focus:border-[#316ac5] text-black"
+            />
+          </RetroField>
+        </div>
+
+        {/* Tabela de itens */}
+        <div className="mx-2 mt-2 border border-[#9a9a9a] bg-white">
+          {/* Header */}
+          <div className="grid grid-cols-[1fr_60px_80px_80px_60px_100px_100px_100px] bg-[#ece9d8] border-b border-[#9a9a9a] text-[11px] font-semibold text-black">
+            <div className="px-2 py-1 border-r border-[#9a9a9a]">Nome do produto</div>
+            <div className="px-2 py-1 border-r border-[#9a9a9a] text-center">…</div>
+            <div className="px-2 py-1 border-r border-[#9a9a9a] text-center">Und.</div>
+            <div className="px-2 py-1 border-r border-[#9a9a9a] text-center">Q.Ped</div>
+            <div className="px-2 py-1 border-r border-[#9a9a9a] text-center">Q.Sal</div>
+            <div className="px-2 py-1 border-r border-[#9a9a9a] text-right">Unitário</div>
+            <div className="px-2 py-1 border-r border-[#9a9a9a] text-right">Desconto %</div>
+            <div className="px-2 py-1 text-right">Total</div>
+          </div>
+
+          {/* Add row */}
+          <div className="grid grid-cols-[1fr_60px_80px_80px_60px_100px_100px_100px] border-b border-[#9a9a9a] relative">
+            <div className="col-span-8 relative">
+              {!showSearch ? (
+                <button
+                  type="button"
+                  onClick={() => { setShowSearch(true); setTimeout(() => searchRef.current?.focus(), 50); }}
+                  className="w-full text-left px-2 py-1.5 text-[12px] text-[#316ac5] hover:bg-[#e8e8e8]"
+                >
+                  Incluir (Ctrl+Insert) — clique para pesquisar produto
+                </button>
+              ) : (
+                <div className="flex items-center gap-1 px-1 py-1 bg-white">
+                  <Search className="w-3.5 h-3.5 text-[#666]" />
+                  <input
                     ref={searchRef}
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Pesquisar produtos..."
-                    className="pl-12 pr-20 h-12 text-base bg-background rounded-xl shadow-sm focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:border-primary transition-all"
-                    autoFocus
+                    placeholder="Pesquisar produto..."
+                    className="flex-1 h-6 px-1 text-[12px] outline-none border-0 bg-transparent text-black"
                   />
-                  {search ? (
-                    <button onClick={() => setSearch("")} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                      <X className="w-5 h-5" />
-                    </button>
+                  <button onClick={() => { setShowSearch(false); setSearch(""); }} className="text-[#666] hover:text-black">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+
+              {showSearch && search && (
+                <div className="absolute left-0 right-0 top-full z-30 bg-white border border-[#9a9a9a] shadow-lg max-h-[280px] overflow-y-auto">
+                  {filteredProducts.length === 0 ? (
+                    <div className="px-3 py-3 text-[12px] text-[#666] italic">Nenhum produto encontrado</div>
                   ) : (
-                    <kbd className="hidden sm:inline-flex absolute right-3 top-1/2 -translate-y-1/2 items-center gap-1 px-2 py-1 rounded-md bg-muted text-[10px] font-mono text-muted-foreground border">
-                      <Command className="w-3 h-3" />K
-                    </kbd>
+                    filteredProducts.map((p) => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => addItem(p.id)}
+                        className="w-full text-left px-3 py-1.5 text-[12px] hover:bg-[#316ac5] hover:text-white border-b border-[#eee] flex items-center justify-between gap-3"
+                      >
+                        <div className="min-w-0">
+                          <div className="font-semibold truncate">{p.name}</div>
+                          {p.description && <div className="text-[11px] opacity-70 truncate">{p.description}</div>}
+                        </div>
+                        <div className="font-mono shrink-0">R$ {Number(p.price).toFixed(2)}</div>
+                      </button>
+                    ))
                   )}
                 </div>
-
-                <div className="rounded-xl border border-border overflow-hidden bg-background">
-                  <div className="px-4 py-2.5 bg-muted/50 flex items-center justify-between text-[11px] uppercase tracking-wider text-muted-foreground font-bold border-b">
-                    <span className="flex items-center gap-1.5">
-                      {search.trim() ? <Search className="w-3 h-3" /> : car ? <Sparkles className="w-3 h-3 text-accent" /> : <Package className="w-3 h-3" />}
-                      {search.trim() ? "Resultados" : car ? `Sugeridos · ${car}` : "Catálogo"}
-                    </span>
-                    <span className="font-mono">{catalog.length}</span>
-                  </div>
-                  <div className="max-h-[700px] overflow-y-auto divide-y divide-border/50 scrollbar-thin">
-                {catalog.length === 0 ? (
-                  <div className="text-center py-12 text-sm text-muted-foreground italic">Nenhum produto encontrado</div>
-                ) : (
-                  (() => {
-                    const isRecommended = Boolean(car && !search.trim());
-                    
-                    if (!isRecommended) {
-                      return catalog.map((p) => {
-                        const added = items.find((i) => i.product_id === p.id);
-                        return (
-                          <button
-                            key={p.id}
-                            type="button"
-                            onClick={() => addItem(p.id)}
-                            className="w-full text-left flex items-center gap-4 px-5 py-4 transition-colors hover:bg-primary/5 group"
-                          >
-                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-all ${
-                              added ? "bg-primary text-primary-foreground shadow-md" : "bg-muted text-muted-foreground group-hover:bg-primary/10"
-                            }`}>
-                              {added ? <span className="text-xs font-bold">{added.quantity}</span> : <Plus className="w-4 h-4" />}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="text-sm font-medium text-foreground whitespace-normal">{p.name}</div>
-                              <div className="text-xs text-muted-foreground whitespace-normal">{p.description || "Sem descrição"}</div>
-                            </div>
-                            <div className="text-base font-mono font-bold text-primary">
-                              R$ {Number(p.price).toFixed(2)}
-                            </div>
-                          </button>
-                        );
-                      });
-                    }
-
-                    // Group products ONLY for recommended parts (when car is selected and no search)
-                    const groups = new Map<string, Product[]>();
-                    catalog.forEach(p => {
-                      const baseName = p.name.split(/[\-\.\s\d]/)[0] || p.name;
-                      if (!groups.has(baseName)) groups.set(baseName, []);
-                      groups.get(baseName)!.push(p);
-                    });
-
-                    return Array.from(groups.entries()).map(([groupName, prods]) => {
-                      const isOpen = openGroups.has(groupName);
-                      const hasMultiple = prods.length > 1;
-
-                      if (!hasMultiple) {
-                        const p = prods[0];
-                        const added = items.find((i) => i.product_id === p.id);
-                        return (
-                          <button
-                            key={p.id}
-                            type="button"
-                            onClick={() => addItem(p.id)}
-                            className="w-full text-left flex items-center gap-4 px-5 py-4 transition-colors hover:bg-primary/5 group"
-                          >
-                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-all ${
-                              added ? "bg-primary text-primary-foreground shadow-md" : "bg-muted text-muted-foreground group-hover:bg-primary/10"
-                            }`}>
-                              {added ? <span className="text-xs font-bold">{added.quantity}</span> : <Plus className="w-4 h-4" />}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="text-sm font-medium text-foreground whitespace-normal">{p.name}</div>
-                              <div className="text-xs text-muted-foreground whitespace-normal">{p.description || "Sem descrição"}</div>
-                            </div>
-                            <div className="text-base font-mono font-bold text-primary">
-                              R$ {Number(p.price).toFixed(2)}
-                            </div>
-                          </button>
-                        );
-                      }
-
-                      return (
-                        <div key={groupName} className="flex flex-col">
-                          <button
-                            type="button"
-                            onClick={() => toggleGroup(groupName)}
-                            className="w-full text-left flex items-center justify-between px-5 py-4 transition-colors hover:bg-primary/5 bg-primary/5 border-l-4 border-primary"
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                                <Package className="w-5 h-5" />
-                              </div>
-                              <div>
-                                <div className="text-sm font-bold text-primary uppercase tracking-tight">{groupName}s</div>
-                                <div className="text-[10px] text-muted-foreground font-medium">{prods.length} variações disponíveis</div>
-                              </div>
-                            </div>
-                            {isOpen ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-                          </button>
-                          
-                          {isOpen && (
-                            <div className="bg-muted/20 divide-y divide-muted-foreground/5">
-                              {prods.map((p) => {
-                                const added = items.find((i) => i.product_id === p.id);
-                                return (
-                                  <button
-                                    key={p.id}
-                                    type="button"
-                                    onClick={() => addItem(p.id)}
-                                    className="w-full text-left flex items-center gap-4 px-8 py-3 transition-colors hover:bg-primary/5 group border-l-4 border-transparent hover:border-primary/30"
-                                  >
-                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all ${
-                                      added ? "bg-primary text-primary-foreground shadow-md" : "bg-muted text-muted-foreground group-hover:bg-primary/10"
-                                    }`}>
-                                      {added ? <span className="text-xs font-bold">{added.quantity}</span> : <Plus className="w-3 h-3" />}
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                      <div className="text-xs font-medium text-foreground">{p.name}</div>
-                                      <div className="text-[10px] text-muted-foreground">{p.description}</div>
-                                    </div>
-                                    <div className="text-sm font-mono font-bold text-primary">
-                                      R$ {Number(p.price).toFixed(2)}
-                                    </div>
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    });
-                  })()
-                )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+              )}
+            </div>
           </div>
 
-        {/* Lado Direito: Carrinho */}
-        <div className="lg:col-span-5 lg:sticky lg:top-8">
-          <Card className="border-none shadow-lg bg-card overflow-hidden">
-            <CardHeader className="bg-primary/5 border-b border-primary/10 flex flex-row items-center justify-between py-5">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <ShoppingCart className="w-5 h-5 text-primary" />
-                Resumo do Pedido
-              </CardTitle>
-              <div className="px-2 py-1 rounded-full border bg-background/50 text-[10px] font-bold uppercase tracking-wider">{items.length} itens</div>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="max-h-[500px] overflow-y-auto divide-y divide-muted-foreground/5 scrollbar-thin">
-                {items.length === 0 ? (
-                  <div className="py-20 flex flex-col items-center justify-center text-muted-foreground text-sm gap-3 italic">
-                    <Package className="w-10 h-10 opacity-20" />
-                    Adicione itens ao carrinho
-                  </div>
-                ) : (
-                  items.map((i, idx) => (
-                    <div key={idx} className="px-6 py-4 space-y-3 group">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="text-sm font-semibold text-foreground leading-tight flex-1">{i.product_name}</div>
-                        <button onClick={() => setItems(items.filter((_, k) => k !== idx))}
-                          className="text-muted-foreground/50 hover:text-destructive transition-colors">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                      <div className="flex items-center justify-between gap-4">
-                        <div className="flex items-center bg-muted/50 rounded-lg p-1 border border-muted-foreground/5">
-                          <button onClick={() => updateItem(idx, { quantity: Math.max(1, i.quantity - 1) })}
-                            className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-background transition-colors">
-                            <Minus className="w-3 h-3 text-muted-foreground" />
-                          </button>
-                          <span className="w-10 text-center text-sm font-bold">{i.quantity}</span>
-                          <button onClick={() => updateItem(idx, { quantity: i.quantity + 1 })}
-                            className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-background transition-colors">
-                            <Plus className="w-3 h-3 text-muted-foreground" />
-                          </button>
-                        </div>
-                        <div className="flex-1 max-w-[120px]">
-                          <div className="relative">
-                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">R$</span>
-                            <Input type="number" step="0.01" min="0" value={i.unit_price}
-                              onChange={(e) => updateItem(idx, { unit_price: Math.max(0, Number(e.target.value)) })}
-                              className="h-9 pl-6 font-mono text-xs bg-background/50 border-muted-foreground/10" />
-                          </div>
-                        </div>
-                        <div className="text-sm font-mono font-bold text-foreground text-right min-w-[90px]">
-                          R$ {(i.quantity * i.unit_price).toFixed(2)}
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-
-              {/* Totais */}
-              <div className="p-6 bg-primary/5 space-y-6 border-t border-primary/10">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Total Geral</span>
-                  <div className="text-right">
-                    <span className="text-3xl font-bold text-primary font-mono tracking-tighter">
-                      R$ {total.toFixed(2)}
-                    </span>
-                    <p className="text-[10px] text-muted-foreground mt-1">
-                      {items.reduce((s, i) => s + i.quantity, 0)} volumes selecionados
-                    </p>
-                  </div>
+          {/* Item rows */}
+          {items.length === 0 ? (
+            <div className="h-32 flex items-center justify-center text-[12px] text-[#888] italic">
+              Nenhum item adicionado
+            </div>
+          ) : (
+            items.map((i, idx) => (
+              <div key={idx} className="grid grid-cols-[1fr_60px_80px_80px_60px_100px_100px_100px] border-b border-[#e0e0e0] hover:bg-[#f4f4f4] text-[12px]">
+                <div className="px-2 py-1 border-r border-[#e0e0e0] truncate text-black">{i.product_name}</div>
+                <div className="px-1 py-1 border-r border-[#e0e0e0] flex items-center justify-center">
+                  <button onClick={() => setItems(items.filter((_, k) => k !== idx))} className="text-[#a02020] hover:text-[#d00]">
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
                 </div>
-                <Button onClick={save} disabled={saving || items.length === 0} size="lg" className="w-full shadow-lg shadow-primary/20 h-14 text-lg font-bold">
-                  {saving ? "Salvando Orçamento..." : "Confirmar Venda"}
-                </Button>
+                <div className="px-2 py-1 border-r border-[#e0e0e0] text-center text-[#555]">UN</div>
+                <div className="px-1 py-1 border-r border-[#e0e0e0] flex items-center justify-center gap-0.5">
+                  <button onClick={() => updateItem(idx, { quantity: Math.max(1, i.quantity - 1) })} className="px-1 hover:bg-[#ddd]"><Minus className="w-3 h-3" /></button>
+                  <span className="font-mono w-6 text-center">{i.quantity}</span>
+                  <button onClick={() => updateItem(idx, { quantity: i.quantity + 1 })} className="px-1 hover:bg-[#ddd]"><Plus className="w-3 h-3" /></button>
+                </div>
+                <div className="px-2 py-1 border-r border-[#e0e0e0] text-center font-mono text-[#555]">{i.quantity}</div>
+                <div className="px-1 py-0.5 border-r border-[#e0e0e0]">
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={i.unit_price}
+                    onChange={(e) => updateItem(idx, { unit_price: Math.max(0, Number(e.target.value)) })}
+                    className={`${retroInputCls} text-right font-mono`}
+                  />
+                </div>
+                <div className="px-2 py-1 border-r border-[#e0e0e0] text-right font-mono text-[#888]">0,00</div>
+                <div className="px-2 py-1 text-right font-mono font-semibold text-black">
+                  {(i.quantity * i.unit_price).toFixed(2)}
+                </div>
               </div>
-            </CardContent>
-          </Card>
+            ))
+          )}
+        </div>
+
+        {/* Rodapé totais */}
+        <div className="mx-2 mt-2 grid grid-cols-4 gap-3 text-[12px]">
+          <div>
+            <div className="text-[#a0431a] font-semibold">Frete:</div>
+            <div className="font-mono text-black">R$0,00</div>
+          </div>
+          <div>
+            <div className="text-[#a0431a] font-semibold">Produtos:</div>
+            <div className="font-mono text-black">R${totalProdutos.toFixed(2)}</div>
+          </div>
+          <div>
+            <div className="text-[#a0431a] font-semibold">Descontos:</div>
+            <div className="font-mono text-black">R$0,00</div>
+          </div>
+          <div className="text-right">
+            <div className="text-[#a0431a] font-semibold">Total do Pedido:</div>
+            <div className="font-mono font-bold text-[15px] text-black">R${total.toFixed(2)}</div>
+          </div>
+        </div>
+
+        {/* Barra inferior de ações */}
+        <div className="mt-3 border-t border-[#9a9a9a] bg-[#ece9d8] flex items-center justify-around px-2 py-2 text-[11px]">
+          <ActionIcon label="Listagem" onClick={() => nav("/")} />
+          <ActionIcon label="Ficha" disabled />
+          <ActionIcon label="Novo" onClick={() => nav("/orcamentos/novo")} highlight />
+          <ActionIcon label="Desfaz" onClick={() => { setItems([]); setNotes(""); }} />
+          <ActionIcon label="Salvar" onClick={save} disabled={saving || items.length === 0} highlight />
+          <ActionIcon label="Apaga" onClick={() => setItems([])} />
+          <ActionIcon label="Cancelar" onClick={() => nav("/")} />
+          <ActionIcon label="Agrupa" disabled />
+          <ActionIcon label="Campos" disabled />
+          <ActionIcon label="Imprime" disabled />
+          <ActionIcon label="Impresso" disabled />
+          <ActionIcon label="Réplica" disabled />
         </div>
       </div>
     </div>
-   </div>
   );
 };
+
+const ActionIcon = ({ label, onClick, disabled, highlight }: { label: string; onClick?: () => void; disabled?: boolean; highlight?: boolean }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    disabled={disabled}
+    className="flex flex-col items-center gap-0.5 px-2 py-1 hover:bg-[#d4d0c8] active:bg-[#bfbab0] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+  >
+    <div className={`w-6 h-6 border border-[#9a9a9a] ${highlight ? "bg-[#f0c060]" : "bg-[#e8e4d4]"}`} />
+    <span className="text-[#1a1a1a]">{label}</span>
+  </button>
+);
 
 export default QuoteNew;
