@@ -22,10 +22,10 @@ const RetroField = ({ label, color = "text-[#0a5d2a]", children }: { label: stri
 );
 
 const retroInputCls =
-  "h-7 px-2 py-0 text-[12px] rounded-none bg-white border border-[#9a9a9a] focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-[#316ac5] shadow-none text-black";
+  "h-7 px-2 py-0 text-[12px] rounded-none bg-[#0f172a] border border-[#334155] focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-[#38bdf8] shadow-none text-slate-100";
 
 const retroSelectCls =
-  "h-7 px-2 py-0 text-[12px] rounded-none bg-white border border-[#9a9a9a] text-black w-full focus:outline-none focus:border-[#316ac5]";
+  "h-7 px-2 py-0 text-[12px] rounded-none bg-[#0f172a] border border-[#334155] text-slate-100 w-full focus:outline-none focus:border-[#38bdf8]";
 
 const QuoteNew = () => {
   const { user } = useAuth();
