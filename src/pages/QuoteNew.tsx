@@ -258,6 +258,7 @@ const QuoteNew = () => {
             <ToolBtn label="Vínculos" />
             <ToolBtn label="Confere" disabled />
             <ToolBtn label="Filtros" />
+            <ToolBtn label="Adicionar produto" onClick={openConsulta} accent />
             <ToolBtn label="Movimentar Estoque" disabled />
             <ToolBtn label="Gerar Financeiro" disabled />
             <ToolBtn label="Pagamentos" disabled />
