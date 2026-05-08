@@ -41,6 +41,8 @@ const Products = () => {
   const [importing, setImporting] = useState(false);
   const [removeMissing, setRemoveMissing] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const gproRef = useRef<HTMLInputElement>(null);
+  const [isGpro, setIsGpro] = useState(false);
   const [query, setQuery] = useState("");
   const q = query.trim().toLowerCase();
   
