@@ -409,6 +409,9 @@ const Products = () => {
           />
         </div>
 
+        <Button variant="outline" onClick={() => setGproSettingsOpen(true)}>
+          <RefreshCw className="w-4 h-4 mr-1" /> Configurar Auto-Sync
+        </Button>
         <Button variant="outline" onClick={downloadTemplate}>
           <Download className="w-4 h-4 mr-1" /> Modelo
         </Button>
