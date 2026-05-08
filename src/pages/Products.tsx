@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Copy, RefreshCw, ShieldCheck, Key } from "lucide-react";
 import { z } from "zod";
 import * as XLSX from "xlsx";
 import { supabase } from "@/integrations/supabase/client";
@@ -44,6 +45,9 @@ const Products = () => {
   const gproRef = useRef<HTMLInputElement>(null);
   const [isGpro, setIsGpro] = useState(false);
   const [query, setQuery] = useState("");
+  const [gproSettingsOpen, setGproSettingsOpen] = useState(false);
+  const [gproKey, setGproKey] = useState("");
+  const [loadingGpro, setLoadingGpro] = useState(false);
   const q = query.trim().toLowerCase();
   
   const matched = items.filter(p => {
@@ -114,7 +118,48 @@ const Products = () => {
     setItems(all);
   };
 
-  useEffect(() => { load(); }, []);
+  const fetchGproKey = async () => {
+    if (!user) return;
+    setLoadingGpro(true);
+    try {
+      const { data, error } = await supabase
+        .from('gpro_settings')
+        .select('api_key')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      
+      if (error) throw error;
+      if (data) setGproKey(data.api_key);
+    } catch (e: any) {
+      console.error(e);
+    } finally {
+      setLoadingGpro(false);
+    }
+  };
+
+  const generateGproKey = async () => {
+    if (!user) return;
+    setLoadingGpro(true);
+    const newKey = 'lovc_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    try {
+      const { error } = await supabase
+        .from('gpro_settings')
+        .upsert({ user_id: user.id, api_key: newKey, is_active: true }, { onConflict: 'user_id' });
+      
+      if (error) throw error;
+      setGproKey(newKey);
+      toast.success("Nova chave GPRO gerada!");
+    } catch (e: any) {
+      toast.error("Erro ao gerar chave: " + e.message);
+    } finally {
+      setLoadingGpro(false);
+    }
+  };
+
+  useEffect(() => { 
+    load(); 
+    if (user) fetchGproKey();
+  }, [user]);
 
   const openNew = () => { setEditing(null); setForm(empty); setOpen(true); };
   const openEdit = (p: Product) => {
@@ -364,6 +409,9 @@ const Products = () => {
           />
         </div>
 
+        <Button variant="outline" onClick={() => setGproSettingsOpen(true)}>
+          <RefreshCw className="w-4 h-4 mr-1" /> Configurar Auto-Sync
+        </Button>
         <Button variant="outline" onClick={downloadTemplate}>
           <Download className="w-4 h-4 mr-1" /> Modelo
         </Button>
@@ -552,6 +600,77 @@ const Products = () => {
             >
               {importing ? "Sincronizando..." : "Aplicar mudanças"}
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={gproSettingsOpen} onOpenChange={setGproSettingsOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <RefreshCw className="w-5 h-5 text-orange-600" />
+              Sincronização Automática GPRO
+            </DialogTitle>
+            <DialogDescription>
+              Use esta chave no seu Sincronizador Local para atualizar preços e estoque automaticamente.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Sua Chave de API (GPRO)</Label>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Input 
+                    value={gproKey} 
+                    readOnly 
+                    placeholder="Nenhuma chave gerada"
+                    className="pr-10 bg-muted/50 font-mono text-xs"
+                  />
+                  <Key className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground opacity-50" />
+                </div>
+                <Button 
+                  size="icon" 
+                  variant="outline" 
+                  onClick={() => {
+                    navigator.clipboard.writeText(gproKey);
+                    toast.success("Chave copiada!");
+                  }}
+                  disabled={!gproKey}
+                >
+                  <Copy className="w-4 h-4" />
+                </Button>
+                <Button 
+                  size="sm" 
+                  className="bg-orange-600 hover:bg-orange-700"
+                  onClick={generateGproKey}
+                  disabled={loadingGpro}
+                >
+                  {gproKey ? "Regerar" : "Gerar"}
+                </Button>
+              </div>
+            </div>
+
+            <div className="bg-muted p-4 rounded-lg space-y-3">
+              <h4 className="text-sm font-semibold flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-green-600" />
+                Como configurar no seu PC:
+              </h4>
+              <ol className="text-xs space-y-2 list-decimal pl-4 text-muted-foreground">
+                <li>Instale o Python no computador onde o GPRO está instalado.</li>
+                <li>Baixe o script de sincronização (ponte) para Firebird.</li>
+                <li>Insira sua <strong>Chave de API</strong> e a <strong>URL do seu site</strong> no script.</li>
+                <li>Configure o Agendador de Tarefas do Windows para rodar o script a cada 5 minutos.</li>
+              </ol>
+            </div>
+            
+            <div className="text-[10px] text-muted-foreground bg-orange-50 p-2 border border-orange-100 rounded">
+              <strong>Endpoint da API:</strong><br />
+              <code>{window.location.origin}/functions/v1/gpro-sync</code>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button onClick={() => setGproSettingsOpen(false)}>Fechar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
