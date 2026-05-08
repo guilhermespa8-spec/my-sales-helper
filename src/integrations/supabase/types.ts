@@ -41,6 +41,33 @@ export type Database = {
         }
         Relationships: []
       }
+      gpro_settings: {
+        Row: {
+          api_key: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          last_sync: string | null
+          user_id: string
+        }
+        Insert: {
+          api_key: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_sync?: string | null
+          user_id: string
+        }
+        Update: {
+          api_key?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_sync?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       mechanics: {
         Row: {
           created_at: string
