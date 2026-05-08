@@ -239,8 +239,8 @@ const Products = () => {
     if (!user) return;
     setImporting(true);
     try {
-      // 1. Insert new
-      if (diff.toCreate.length > 0) {
+      // 1. Insert new (skip in GPRO mode — só atualiza)
+      if (!isGpro && diff.toCreate.length > 0) {
         const payload = diff.toCreate.map(p => ({
           name: p.name, price: p.price, stock: p.stock,
           description: p.description || null, user_id: user.id,
@@ -248,27 +248,30 @@ const Products = () => {
         const { error } = await supabase.from("products").insert(payload);
         if (error) throw error;
       }
-      // 2. Update changed
+      // 2. Update changed (em GPRO atualiza só preço e estoque)
       for (const { existing, next } of diff.toUpdate) {
-        const { error } = await supabase.from("products").update({
-          price: next.price, stock: next.stock,
-          description: next.description || null,
-        }).eq("id", existing.id);
+        const updatePayload: Record<string, any> = { price: next.price, stock: next.stock };
+        if (!isGpro) updatePayload.description = next.description || null;
+        const { error } = await supabase.from("products").update(updatePayload).eq("id", existing.id);
         if (error) throw error;
       }
-      // 3. Delete missing (optional)
-      if (removeMissing && diff.toDelete.length > 0) {
+      // 3. Delete missing (somente fora do modo GPRO)
+      if (!isGpro && removeMissing && diff.toDelete.length > 0) {
         const ids = diff.toDelete.map(p => p.id);
         const { error } = await supabase.from("products").delete().in("id", ids);
         if (error) throw error;
       }
       toast.success(
-        `Sincronizado: ${diff.toCreate.length} novo(s), ${diff.toUpdate.length} atualizado(s)` +
-        (removeMissing ? `, ${diff.toDelete.length} removido(s)` : "")
+        isGpro
+          ? `GPRO sincronizado: ${diff.toUpdate.length} produto(s) atualizado(s)` +
+            (diff.toCreate.length > 0 ? ` — ${diff.toCreate.length} não encontrado(s) no sistema` : "")
+          : `Sincronizado: ${diff.toCreate.length} novo(s), ${diff.toUpdate.length} atualizado(s)` +
+            (removeMissing ? `, ${diff.toDelete.length} removido(s)` : "")
       );
       setImportOpen(false);
       setImportPreview([]);
       setRemoveMissing(false);
+      setIsGpro(false);
       load();
     } catch (e: any) {
       toast.error(e.message ?? "Erro ao sincronizar");
