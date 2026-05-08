@@ -250,7 +250,8 @@ const Products = () => {
       }
       // 2. Update changed (em GPRO atualiza só preço e estoque)
       for (const { existing, next } of diff.toUpdate) {
-        const updatePayload: { price: number; stock: number; description?: string | null } = { price: next.price, stock: next.stock };
+        const updatePayload: { price: number; stock?: number; description?: string | null } = { price: next.price };
+        if (next.hasStock) updatePayload.stock = next.stock;
         if (!isGpro) updatePayload.description = next.description || null;
         const { error } = await supabase.from("products").update(updatePayload).eq("id", existing.id);
         if (error) throw error;
