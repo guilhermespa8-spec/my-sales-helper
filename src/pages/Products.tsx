@@ -603,6 +603,77 @@ const Products = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <Dialog open={gproSettingsOpen} onOpenChange={setGproSettingsOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <RefreshCw className="w-5 h-5 text-orange-600" />
+              Sincronização Automática GPRO
+            </DialogTitle>
+            <DialogDescription>
+              Use esta chave no seu Sincronizador Local para atualizar preços e estoque automaticamente.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Sua Chave de API (GPRO)</Label>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Input 
+                    value={gproKey} 
+                    readOnly 
+                    placeholder="Nenhuma chave gerada"
+                    className="pr-10 bg-muted/50 font-mono text-xs"
+                  />
+                  <Key className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground opacity-50" />
+                </div>
+                <Button 
+                  size="icon" 
+                  variant="outline" 
+                  onClick={() => {
+                    navigator.clipboard.writeText(gproKey);
+                    toast.success("Chave copiada!");
+                  }}
+                  disabled={!gproKey}
+                >
+                  <Copy className="w-4 h-4" />
+                </Button>
+                <Button 
+                  size="sm" 
+                  className="bg-orange-600 hover:bg-orange-700"
+                  onClick={generateGproKey}
+                  disabled={loadingGpro}
+                >
+                  {gproKey ? "Regerar" : "Gerar"}
+                </Button>
+              </div>
+            </div>
+
+            <div className="bg-muted p-4 rounded-lg space-y-3">
+              <h4 className="text-sm font-semibold flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-green-600" />
+                Como configurar no seu PC:
+              </h4>
+              <ol className="text-xs space-y-2 list-decimal pl-4 text-muted-foreground">
+                <li>Instale o Python no computador onde o GPRO está instalado.</li>
+                <li>Baixe o script de sincronização (ponte) para Firebird.</li>
+                <li>Insira sua <strong>Chave de API</strong> e a <strong>URL do seu site</strong> no script.</li>
+                <li>Configure o Agendador de Tarefas do Windows para rodar o script a cada 5 minutos.</li>
+              </ol>
+            </div>
+            
+            <div className="text-[10px] text-muted-foreground bg-orange-50 p-2 border border-orange-100 rounded">
+              <strong>Endpoint da API:</strong><br />
+              <code>{window.location.origin}/functions/v1/gpro-sync</code>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button onClick={() => setGproSettingsOpen(false)}>Fechar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
