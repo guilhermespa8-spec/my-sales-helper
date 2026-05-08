@@ -393,7 +393,7 @@ const Products = () => {
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Pesquisa por descrição, nome..."
+            placeholder={searching ? "Buscando..." : "Pesquisa por descrição, nome..."}
             className="pl-9"
           />
         </div>
