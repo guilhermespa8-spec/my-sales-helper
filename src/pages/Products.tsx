@@ -41,6 +41,8 @@ const Products = () => {
   const [importing, setImporting] = useState(false);
   const [removeMissing, setRemoveMissing] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const gproRef = useRef<HTMLInputElement>(null);
+  const [isGpro, setIsGpro] = useState(false);
   const [query, setQuery] = useState("");
   const q = query.trim().toLowerCase();
   
@@ -197,7 +199,7 @@ const Products = () => {
     return isNaN(n) ? 0 : n;
   };
 
-  const handleFile = async (file: File) => {
+  const handleFile = async (file: File, gpro = false) => {
     try {
       const buf = await file.arrayBuffer();
       const wb = XLSX.read(buf, { type: "array" });
@@ -206,19 +208,30 @@ const Products = () => {
       const parsed = rows.map((r) => {
         const obj: Record<string, any> = {};
         Object.keys(r).forEach((k) => { obj[normalizeKey(k)] = r[k]; });
-        const name = String(obj.nome ?? obj.name ?? obj.produto ?? "").trim();
-        const price = parseNumber(obj.preco ?? obj.price ?? obj.valor);
-        const stock = Math.floor(parseNumber(obj.estoque ?? obj.stock ?? obj.quantidade ?? 0));
-        const description = String(obj.descricao ?? obj.description ?? "").trim();
+        const name = String(
+          obj.nome ?? obj.name ?? obj.produto ??
+          obj.descricao ?? obj.descricaoproduto ?? obj.descproduto ?? obj.description ?? ""
+        ).trim();
+        const price = parseNumber(
+          obj.preco ?? obj.price ?? obj.valor ??
+          obj.precovenda ?? obj.vlrvenda ?? obj.valorvenda ?? obj.precovista
+        );
+        const stock = Math.floor(parseNumber(
+          obj.estoque ?? obj.stock ?? obj.quantidade ??
+          obj.qtdestoque ?? obj.saldoestoque ?? obj.estoqueatual ?? obj.saldo ?? 0
+        ));
+        const description = String(obj.descricaolonga ?? obj.observacao ?? obj.obs ?? "").trim();
         return { name, description, price, stock };
       }).filter(p => p.name.length > 0);
-      if (parsed.length === 0) { toast.error("Nenhuma linha válida. Verifique a coluna 'nome'."); return; }
+      if (parsed.length === 0) { toast.error("Nenhuma linha válida. Verifique as colunas do arquivo."); return; }
+      setIsGpro(gpro);
       setImportPreview(parsed);
       setImportOpen(true);
     } catch (e: any) {
       toast.error("Erro ao ler arquivo: " + e.message);
     } finally {
       if (fileRef.current) fileRef.current.value = "";
+      if (gproRef.current) gproRef.current.value = "";
     }
   };
 
@@ -226,8 +239,8 @@ const Products = () => {
     if (!user) return;
     setImporting(true);
     try {
-      // 1. Insert new
-      if (diff.toCreate.length > 0) {
+      // 1. Insert new (skip in GPRO mode — só atualiza)
+      if (!isGpro && diff.toCreate.length > 0) {
         const payload = diff.toCreate.map(p => ({
           name: p.name, price: p.price, stock: p.stock,
           description: p.description || null, user_id: user.id,
@@ -235,27 +248,30 @@ const Products = () => {
         const { error } = await supabase.from("products").insert(payload);
         if (error) throw error;
       }
-      // 2. Update changed
+      // 2. Update changed (em GPRO atualiza só preço e estoque)
       for (const { existing, next } of diff.toUpdate) {
-        const { error } = await supabase.from("products").update({
-          price: next.price, stock: next.stock,
-          description: next.description || null,
-        }).eq("id", existing.id);
+        const updatePayload: { price: number; stock: number; description?: string | null } = { price: next.price, stock: next.stock };
+        if (!isGpro) updatePayload.description = next.description || null;
+        const { error } = await supabase.from("products").update(updatePayload).eq("id", existing.id);
         if (error) throw error;
       }
-      // 3. Delete missing (optional)
-      if (removeMissing && diff.toDelete.length > 0) {
+      // 3. Delete missing (somente fora do modo GPRO)
+      if (!isGpro && removeMissing && diff.toDelete.length > 0) {
         const ids = diff.toDelete.map(p => p.id);
         const { error } = await supabase.from("products").delete().in("id", ids);
         if (error) throw error;
       }
       toast.success(
-        `Sincronizado: ${diff.toCreate.length} novo(s), ${diff.toUpdate.length} atualizado(s)` +
-        (removeMissing ? `, ${diff.toDelete.length} removido(s)` : "")
+        isGpro
+          ? `GPRO sincronizado: ${diff.toUpdate.length} produto(s) atualizado(s)` +
+            (diff.toCreate.length > 0 ? ` — ${diff.toCreate.length} não encontrado(s) no sistema` : "")
+          : `Sincronizado: ${diff.toCreate.length} novo(s), ${diff.toUpdate.length} atualizado(s)` +
+            (removeMissing ? `, ${diff.toDelete.length} removido(s)` : "")
       );
       setImportOpen(false);
       setImportPreview([]);
       setRemoveMissing(false);
+      setIsGpro(false);
       load();
     } catch (e: any) {
       toast.error(e.message ?? "Erro ao sincronizar");
@@ -279,6 +295,13 @@ const Products = () => {
           accept=".csv,.xlsx,.xls"
           className="hidden"
           onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
+        />
+        <input
+          ref={gproRef}
+          type="file"
+          accept=".csv,.xlsx,.xls"
+          className="hidden"
+          onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f, true); }}
         />
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
@@ -329,6 +352,9 @@ const Products = () => {
         </Button>
         <Button onClick={() => fileRef.current?.click()} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold">
           <Upload className="w-4 h-4 mr-1" /> Importar Produtos
+        </Button>
+        <Button onClick={() => gproRef.current?.click()} className="bg-orange-600 hover:bg-orange-700 text-white font-semibold">
+          <Upload className="w-4 h-4 mr-1" /> Sincronizar com GPRO
         </Button>
       </div>
 
@@ -418,9 +444,11 @@ const Products = () => {
       <Dialog open={importOpen} onOpenChange={(o) => { setImportOpen(o); if (!o) setRemoveMissing(false); }}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Sincronizar planilha</DialogTitle>
+            <DialogTitle>{isGpro ? "Sincronizar com GPRO" : "Sincronizar planilha"}</DialogTitle>
             <DialogDescription>
-              Resumo das mudanças que serão aplicadas no catálogo.
+              {isGpro
+                ? "Apenas preço e estoque serão atualizados nos produtos correspondentes (busca por descrição/nome). Itens novos não serão criados."
+                : "Resumo das mudanças que serão aplicadas no catálogo."}
             </DialogDescription>
           </DialogHeader>
 
