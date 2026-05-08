@@ -118,7 +118,48 @@ const Products = () => {
     setItems(all);
   };
 
-  useEffect(() => { load(); }, []);
+  const fetchGproKey = async () => {
+    if (!user) return;
+    setLoadingGpro(true);
+    try {
+      const { data, error } = await supabase
+        .from('gpro_settings')
+        .select('api_key')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      
+      if (error) throw error;
+      if (data) setGproKey(data.api_key);
+    } catch (e: any) {
+      console.error(e);
+    } finally {
+      setLoadingGpro(false);
+    }
+  };
+
+  const generateGproKey = async () => {
+    if (!user) return;
+    setLoadingGpro(true);
+    const newKey = 'lovc_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    try {
+      const { error } = await supabase
+        .from('gpro_settings')
+        .upsert({ user_id: user.id, api_key: newKey, is_active: true }, { onConflict: 'user_id' });
+      
+      if (error) throw error;
+      setGproKey(newKey);
+      toast.success("Nova chave GPRO gerada!");
+    } catch (e: any) {
+      toast.error("Erro ao gerar chave: " + e.message);
+    } finally {
+      setLoadingGpro(false);
+    }
+  };
+
+  useEffect(() => { 
+    load(); 
+    if (user) fetchGproKey();
+  }, [user]);
 
   const openNew = () => { setEditing(null); setForm(empty); setOpen(true); };
   const openEdit = (p: Product) => {
