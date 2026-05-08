@@ -1,0 +1,1 @@
+ALTER FUNCTION public.search_products(TEXT) SET search_path = public, extensions;
