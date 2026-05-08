@@ -255,8 +255,8 @@ const Products = () => {
     if (!user) return;
     setImporting(true);
     try {
-      // 1. Insert new (skip in GPRO mode — só atualiza)
-      if (!isGpro && diff.toCreate.length > 0) {
+      // 1. Insert new (Agora habilitado para GPRO também para permitir migração total)
+      if (diff.toCreate.length > 0) {
         const payload = diff.toCreate.map(p => ({
           name: p.name, price: p.price, stock: p.stock,
           description: p.description || null, user_id: user.id,
