@@ -467,67 +467,24 @@ const Products = () => {
         ))}
       </div>
 
-      {items.length === 0 && !searching && (
-          {items.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <Package className="w-12 h-12 mx-auto mb-2 opacity-40" />
-              Nenhum produto. Cadastre o primeiro!
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <Search className="w-10 h-10 mx-auto mb-2 opacity-40" />
-              Nenhum produto encontrado para "{query}"
-            </div>
+      {items.length === 0 && (
+        <div className="text-center py-12 text-muted-foreground border-2 border-dashed rounded-xl">
+          {query ? (
+            <>
+              <Search className="w-12 h-12 mx-auto mb-3 opacity-20" />
+              <p className="text-lg font-medium">Nenhum produto encontrado</p>
+              <p className="text-sm">Tente ajustar sua pesquisa para "{query}"</p>
+            </>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-16 text-center">Código</TableHead>
-                  <TableHead className="text-center">Descrição</TableHead>
-                  <TableHead className="text-center">Filtro Carro</TableHead>
-                  <TableHead className="text-center w-24">Estoque</TableHead>
-                  <TableHead className="text-center w-28">Valor</TableHead>
-                  <TableHead className="text-center w-24">Status</TableHead>
-                  <TableHead className="text-center w-28">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filtered.map((p, idx) => (
-                  <TableRow key={p.id}>
-                    <TableCell className="text-center font-mono text-muted-foreground">{idx + 1}</TableCell>
-                    <TableCell className="text-center">
-                      <div className="font-medium">{p.name}</div>
-                      {p.description && <div className="text-xs text-muted-foreground line-clamp-1">{p.description}</div>}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <span className="inline-block px-2 py-0.5 rounded border text-[10px] bg-muted/50">{p.car_filter || "—"}</span>
-                    </TableCell>
-                    <TableCell className="text-center">{p.stock}</TableCell>
-                    <TableCell className="text-center font-mono">R$ {Number(p.price).toFixed(2)}</TableCell>
-                    <TableCell className="text-center">
-                      <span className={`inline-block px-3 py-1 rounded text-xs font-semibold text-white ${p.stock > 0 ? "bg-green-600" : "bg-muted-foreground"}`}>
-                        {p.stock > 0 ? "Ativo" : "Sem estoque"}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-center text-xs text-muted-foreground">
-                      {p.updated_at && p.created_at && new Date(p.updated_at).getTime() - new Date(p.created_at).getTime() > 2000
-                        ? new Date(p.updated_at).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })
-                        : "—"}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-1 justify-center">
-                        <Button size="icon" variant="ghost" onClick={() => setViewing(p)} title="Ver observação"><Eye className="w-4 h-4" /></Button>
-                        <Button size="icon" variant="ghost" onClick={() => openEdit(p)} title="Editar"><Pencil className="w-4 h-4" /></Button>
-                        <Button size="icon" variant="ghost" onClick={() => remove(p.id)} title="Excluir"><Trash2 className="w-4 h-4 text-destructive" /></Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <>
+              <Package className="w-12 h-12 mx-auto mb-3 opacity-20" />
+              <p className="text-lg font-medium">Seu catálogo está vazio</p>
+              <p className="text-sm">Clique em "Novo Produto" ou importe uma planilha para começar.</p>
+            </>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      )}
+
 
       <Dialog open={!!viewing} onOpenChange={(o) => !o && setViewing(null)}>
         <DialogContent>
