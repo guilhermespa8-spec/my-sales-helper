@@ -37,7 +37,7 @@ const Products = () => {
   const [form, setForm] = useState(empty);
   const [viewing, setViewing] = useState<Product | null>(null);
   const [importOpen, setImportOpen] = useState(false);
-  const [importPreview, setImportPreview] = useState<Array<{ name: string; description: string; price: number; stock: number }>>([]);
+  const [importPreview, setImportPreview] = useState<Array<{ name: string; description: string; price: number; stock: number; hasStock: boolean }>>([]);
   const [importing, setImporting] = useState(false);
   const [removeMissing, setRemoveMissing] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -85,7 +85,7 @@ const Products = () => {
       seen.add(key);
       const existing = byName.get(key);
       if (existing) {
-        const changed = Number(existing.price) !== p.price || existing.stock !== p.stock || (existing.description ?? "") !== p.description;
+        const changed = Number(existing.price) !== p.price || (p.hasStock && existing.stock !== p.stock) || (existing.description ?? "") !== p.description;
         if (changed) toUpdate.push({ existing, next: p });
       } else {
         toCreate.push(p);
@@ -205,24 +205,24 @@ const Products = () => {
       const wb = XLSX.read(buf, { type: "array" });
       const ws = wb.Sheets[wb.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json<Record<string, any>>(ws, { defval: "", raw: true });
-      const parsed = rows.map((r) => {
-        const obj: Record<string, any> = {};
-        Object.keys(r).forEach((k) => { obj[normalizeKey(k)] = r[k]; });
-        const name = String(
-          obj.nome ?? obj.name ?? obj.produto ??
-          obj.descricao ?? obj.descricaoproduto ?? obj.descproduto ?? obj.description ?? ""
-        ).trim();
-        const price = parseNumber(
-          obj.preco ?? obj.price ?? obj.valor ??
-          obj.precovenda ?? obj.vlrvenda ?? obj.valorvenda ?? obj.precovista
-        );
-        const stock = Math.floor(parseNumber(
-          obj.estoque ?? obj.stock ?? obj.quantidade ??
-          obj.qtdestoque ?? obj.saldoestoque ?? obj.estoqueatual ?? obj.saldo ?? 0
-        ));
-        const description = String(obj.descricaolonga ?? obj.observacao ?? obj.obs ?? "").trim();
-        return { name, description, price, stock };
-      }).filter(p => p.name.length > 0);
+       const parsed = rows.map((r) => {
+         const obj: Record<string, any> = {};
+         Object.keys(r).forEach((k) => { obj[normalizeKey(k)] = r[k]; });
+         const name = String(
+           obj.nome ?? obj.name ?? obj.produto ??
+           obj.descricao ?? obj.descricaoproduto ?? obj.descproduto ?? obj.description ?? ""
+         ).trim();
+         const price = parseNumber(
+           obj.preco ?? obj.price ?? obj.valor ??
+           obj.precovenda ?? obj.vlrvenda ?? obj.valorvenda ?? obj.precovista ?? obj.altpreco
+         );
+         const rawStock = obj.estoque ?? obj.stock ?? obj.quantidade ??
+           obj.qtdestoque ?? obj.saldoestoque ?? obj.estoqueatual ?? obj.saldo;
+         const hasStock = rawStock !== undefined && rawStock !== "" && rawStock !== null;
+         const stock = hasStock ? Math.floor(parseNumber(rawStock)) : 0;
+         const description = String(obj.descricaolonga ?? obj.observacao ?? obj.obs ?? "").trim();
+         return { name, description, price, stock, hasStock };
+       }).filter(p => p.name.length > 0);
       if (parsed.length === 0) { toast.error("Nenhuma linha válida. Verifique as colunas do arquivo."); return; }
       setIsGpro(gpro);
       setImportPreview(parsed);
@@ -250,7 +250,8 @@ const Products = () => {
       }
       // 2. Update changed (em GPRO atualiza só preço e estoque)
       for (const { existing, next } of diff.toUpdate) {
-        const updatePayload: { price: number; stock: number; description?: string | null } = { price: next.price, stock: next.stock };
+        const updatePayload: { price: number; stock?: number; description?: string | null } = { price: next.price };
+        if (next.hasStock) updatePayload.stock = next.stock;
         if (!isGpro) updatePayload.description = next.description || null;
         const { error } = await supabase.from("products").update(updatePayload).eq("id", existing.id);
         if (error) throw error;
