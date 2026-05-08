@@ -255,8 +255,8 @@ const Products = () => {
     if (!user) return;
     setImporting(true);
     try {
-      // 1. Insert new (skip in GPRO mode — só atualiza)
-      if (!isGpro && diff.toCreate.length > 0) {
+      // 1. Insert new (Agora habilitado para GPRO também para permitir migração total)
+      if (diff.toCreate.length > 0) {
         const payload = diff.toCreate.map(p => ({
           name: p.name, price: p.price, stock: p.stock,
           description: p.description || null, user_id: user.id,
@@ -266,6 +266,7 @@ const Products = () => {
       }
       // 2. Update changed (em GPRO atualiza só preço e estoque)
       for (const { existing, next } of diff.toUpdate) {
+        // Para GPRO, mantemos a descrição original se já existir, para o resto atualizamos tudo
         const updatePayload: { price: number; stock?: number; description?: string | null } = { price: next.price };
         if (next.hasStock) updatePayload.stock = next.stock;
         if (!isGpro) updatePayload.description = next.description || null;
@@ -280,8 +281,7 @@ const Products = () => {
       }
       toast.success(
         isGpro
-          ? `GPRO sincronizado: ${diff.toUpdate.length} produto(s) atualizado(s)` +
-            (diff.toCreate.length > 0 ? ` — ${diff.toCreate.length} não encontrado(s) no sistema` : "")
+          ? `GPRO sincronizado: ${diff.toCreate.length} novo(s) e ${diff.toUpdate.length} atualizado(s)`
           : `Sincronizado: ${diff.toCreate.length} novo(s), ${diff.toUpdate.length} atualizado(s)` +
             (removeMissing ? `, ${diff.toDelete.length} removido(s)` : "")
       );
