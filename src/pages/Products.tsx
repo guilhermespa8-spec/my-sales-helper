@@ -53,28 +53,25 @@ const Products = () => {
   const load = async (searchQuery = "") => {
     setSearching(true);
     try {
-      let supabaseQuery = supabase
-        .from("products")
-        .select("*")
-        .order("name")
-        .limit(100);
-
       const q = searchQuery.trim();
-      if (q) {
-        // Use the trgm index expression for lightning fast results
-        supabaseQuery = supabaseQuery.filter('search_vector', 'placeholder', q); 
-        // Wait, I can't use .filter with custom SQL easily in PostgREST without a function or computed column
-        // Let's use the exact expression that matches the index
-        supabaseQuery = supabase.rpc('search_products', { search_term: q }).limit(100);
-      }
-
-      const { data, error } = await supabaseQuery;
+      let response;
       
-      if (error) {
-        toast.error(error.message);
+      if (q) {
+        // Use the specialized RPC function for optimized trgm search
+        response = await supabase.rpc('search_products', { search_term: q });
+      } else {
+        response = await supabase
+          .from("products")
+          .select("*")
+          .order("name")
+          .limit(100);
+      }
+      
+      if (response.error) {
+        toast.error(response.error.message);
         return;
       }
-      setItems((data ?? []) as Product[]);
+      setItems((response.data ?? []) as Product[]);
     } finally {
       setSearching(false);
     }
