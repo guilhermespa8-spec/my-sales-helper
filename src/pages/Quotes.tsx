@@ -31,55 +31,140 @@ const Quotes = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-3">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-primary">Orçamentos</h1>
-          <p className="text-sm text-muted-foreground">Crie e imprima notinhas de orçamento</p>
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Orçamentos</h1>
+          <p className="text-slate-500 mt-1">Gerencie e acompanhe todas as suas propostas de venda</p>
         </div>
-        <Button asChild><Link to="/orcamentos/novo"><Plus className="w-4 h-4 mr-1" /> Novo orçamento</Link></Button>
+        <Button asChild className="bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all active:scale-95">
+          <Link to="/orcamentos/novo" className="flex items-center gap-2">
+            <Plus className="w-5 h-5" /> 
+            <span className="font-bold">Novo Orçamento</span>
+          </Link>
+        </Button>
       </div>
 
-      <Card className="shadow-[var(--shadow-soft)]">
-        <CardHeader><CardTitle className="text-base">Histórico ({items.length})</CardTitle></CardHeader>
-        <CardContent>
-          {items.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <FileText className="w-12 h-12 mx-auto mb-2 opacity-40" />
-              Nenhum orçamento ainda. Crie o primeiro!
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <Card className="bg-white border-none shadow-sm ring-1 ring-slate-200">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-slate-500">Total de Orçamentos</p>
+                <h3 className="text-2xl font-bold text-slate-900 mt-1">{items.length}</h3>
+              </div>
+              <div className="h-10 w-10 bg-blue-50 rounded-full flex items-center justify-center">
+                <FileText className="h-5 w-5 text-blue-600" />
+              </div>
             </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-24">Nº</TableHead>
-                  <TableHead>Cliente</TableHead>
-                  <TableHead>Data</TableHead>
-                  <TableHead className="text-right">Total</TableHead>
-                  <TableHead className="w-24"></TableHead>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-white border-none shadow-sm ring-1 ring-slate-200">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-slate-500">Volume Total (Mês)</p>
+                <h3 className="text-2xl font-bold text-slate-900 mt-1">
+                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
+                    items.reduce((acc, curr) => acc + Number(curr.total), 0)
+                  )}
+                </h3>
+              </div>
+              <div className="h-10 w-10 bg-green-50 rounded-full flex items-center justify-center">
+                <span className="text-green-600 font-bold">$</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white border-none shadow-sm ring-1 ring-slate-200">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-slate-500">Última Atualização</p>
+                <h3 className="text-base font-bold text-slate-900 mt-1">
+                  {items.length > 0 ? new Date(items[0].created_at).toLocaleDateString('pt-BR') : 'Sem dados'}
+                </h3>
+              </div>
+              <div className="h-10 w-10 bg-orange-50 rounded-full flex items-center justify-center">
+                <Eye className="h-5 w-5 text-orange-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        {items.length === 0 ? (
+          <div className="text-center py-20 text-slate-400">
+            <FileText className="w-16 h-16 mx-auto mb-4 opacity-10" />
+            <p className="text-lg font-medium">Nenhum orçamento encontrado</p>
+            <p className="text-sm mb-6">Comece criando o seu primeiro orçamento de venda.</p>
+            <Button asChild variant="outline">
+              <Link to="/orcamentos/novo">Clique aqui para começar</Link>
+            </Button>
+          </div>
+        ) : (
+          <Table>
+            <TableHeader className="bg-slate-50/50">
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="w-[120px] py-4 pl-6 font-bold text-slate-900">Pedido</TableHead>
+                <TableHead className="font-bold text-slate-900">Cliente</TableHead>
+                <TableHead className="font-bold text-slate-900">Data e Hora</TableHead>
+                <TableHead className="text-right font-bold text-slate-900">Valor Total</TableHead>
+                <TableHead className="w-[160px] text-right py-4 pr-6 font-bold text-slate-900">Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {items.map((q) => (
+                <TableRow key={q.id} className="group hover:bg-slate-50/50 transition-colors">
+                  <TableCell className="py-4 pl-6">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-800 border border-slate-200">
+                      #{String(q.quote_number).padStart(5, "0")}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-col">
+                      <span className="font-bold text-slate-900">
+                        {q.customer_name || "Consumidor Final"}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-slate-500 font-medium">
+                    {new Date(q.created_at).toLocaleString("pt-BR", { 
+                      day: "2-digit", 
+                      month: "2-digit", 
+                      year: "2-digit", 
+                      hour: "2-digit", 
+                      minute: "2-digit" 
+                    })}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <span className="text-lg font-bold text-slate-900">
+                      {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(q.total)}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-right py-4 pr-6">
+                    <div className="flex justify-end gap-1">
+                      <Button variant="ghost" size="sm" asChild className="h-9 w-9 p-0 text-slate-400 hover:text-blue-600 hover:bg-blue-50">
+                        <Link to={`/orcamentos/${q.id}`} title="Visualizar"><Eye className="w-4 h-4" /></Link>
+                      </Button>
+                      <Button variant="ghost" size="sm" asChild className="h-9 w-9 p-0 text-slate-400 hover:text-blue-600 hover:bg-blue-50">
+                        <Link to={`/orcamentos/${q.id}/editar`} title="Editar"><Pencil className="w-4 h-4" /></Link>
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => remove(q.id)} className="h-9 w-9 p-0 text-slate-400 hover:text-red-600 hover:bg-red-50">
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {items.map((q) => (
-                  <TableRow key={q.id}>
-                    <TableCell className="font-mono font-semibold">#{String(q.quote_number).padStart(4, "0")}</TableCell>
-                    <TableCell>{q.customer_name || <span className="text-muted-foreground italic">Sem cliente</span>}</TableCell>
-                    <TableCell className="text-muted-foreground text-sm">{new Date(q.created_at).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}</TableCell>
-                    <TableCell className="text-right font-mono font-semibold">R$ {Number(q.total).toFixed(2)}</TableCell>
-                    <TableCell>
-                      <div className="flex gap-1 justify-end">
-                        <Button size="icon" variant="ghost" asChild><Link to={`/orcamentos/${q.id}`}><Eye className="w-4 h-4" /></Link></Button>
-                        <Button size="icon" variant="ghost" asChild><Link to={`/orcamentos/${q.id}/editar`}><Pencil className="w-4 h-4" /></Link></Button>
-                        <Button size="icon" variant="ghost" onClick={() => remove(q.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </div>
     </div>
+
   );
 };
 
