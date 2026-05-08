@@ -86,6 +86,27 @@ const Products = () => {
 
   const filtered = items; // Already filtered by database
 
+  // Computed diff for preview
+  const diff = (() => {
+    const byName = new Map(items.map(p => [p.name.trim().toLowerCase(), p]));
+    const seen = new Set<string>();
+    const toUpdate: Array<{ existing: Product; next: typeof importPreview[number] }> = [];
+    const toCreate: typeof importPreview = [];
+    importPreview.forEach(p => {
+      const key = p.name.trim().toLowerCase();
+      seen.add(key);
+      const existing = byName.get(key);
+      if (existing) {
+        const changed = Number(existing.price) !== p.price || (p.hasStock && existing.stock !== p.stock) || (existing.description ?? "") !== p.description;
+        if (changed) toUpdate.push({ existing, next: p });
+      } else {
+        toCreate.push(p);
+      }
+    });
+    const toDelete = items.filter(p => !seen.has(p.name.trim().toLowerCase()));
+    return { toUpdate, toCreate, toDelete };
+  })();
+
   const fetchGproKey = async () => {
     if (!user) return;
     setLoadingGpro(true);
