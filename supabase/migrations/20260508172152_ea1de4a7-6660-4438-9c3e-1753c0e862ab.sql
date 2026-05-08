@@ -1,0 +1,2 @@
+ALTER TABLE public.gpro_settings ADD CONSTRAINT gpro_settings_user_id_key UNIQUE (user_id);
+CREATE POLICY "Users can update their own gpro settings" ON public.gpro_settings FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
