@@ -412,13 +412,62 @@ const Products = () => {
         </Button>
       </div>
 
-      <Card className="shadow-[var(--shadow-soft)]">
-        <CardHeader className="py-3">
-          <CardTitle className="text-sm text-muted-foreground font-normal">
-            Catálogo ({filtered.length} itens {query ? `para "${query}"` : ""})
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {items.map((p) => (
+          <Card key={p.id} className="overflow-hidden hover:shadow-lg transition-shadow border-slate-200">
+            <CardHeader className="bg-slate-50/50 pb-3">
+              <div className="flex justify-between items-start gap-2">
+                <CardTitle className="text-base font-bold leading-tight line-clamp-2">
+                  {p.name}
+                </CardTitle>
+                <div className="flex gap-1 shrink-0">
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600" onClick={() => openEdit(p)}>
+                    <Pencil className="w-4 h-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-red-600" onClick={() => remove(p.id)}>
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-4 space-y-3">
+              {p.description && (
+                <p className="text-sm text-muted-foreground line-clamp-2 min-h-[2.5rem]">
+                  {p.description}
+                </p>
+              )}
+              
+              <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                <div className="flex flex-col">
+                  <span className="text-xs text-muted-foreground uppercase font-semibold tracking-wider">Preço</span>
+                  <span className="text-xl font-bold text-primary">
+                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(p.price)}
+                  </span>
+                </div>
+                <div className="flex flex-col items-end">
+                  <span className="text-xs text-muted-foreground uppercase font-semibold tracking-wider">Estoque</span>
+                  <div className="flex items-center gap-1.5">
+                    <Package className="w-3.5 h-3.5 text-slate-400" />
+                    <span className={`font-semibold ${p.stock <= 5 ? 'text-red-500' : 'text-slate-700'}`}>
+                      {p.stock} un
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {p.car_filter && (
+                <div className="flex items-center gap-1.5 pt-1">
+                  <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-medium">
+                    {p.car_filter}
+                  </span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {items.length === 0 && !searching && (
           {items.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <Package className="w-12 h-12 mx-auto mb-2 opacity-40" />
