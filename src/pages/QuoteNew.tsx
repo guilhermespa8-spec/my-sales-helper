@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import { Search, X, Plus, Minus, Trash2, ArrowLeft, Save, User, Car as CarIcon, FileText } from "lucide-react";
 
 const SELLERS = ["André", "João Victor", "Mateus", "Loja"] as const;
+const PAYMENT_METHODS = ["Dinheiro", "Cartão de Crédito", "Cartão de Débito", "PIX", "Boleto", "Fiado"] as const;
+const PIECE_TYPES = ["Nova", "Usada", "Recondicionada", "Outro"] as const;
 
 interface Product { id: string; name: string; description: string | null; price: number; car_filter?: string | null; }
 interface Item { product_id: string; product_name: string; quantity: number; unit_price: number; }
@@ -28,6 +30,8 @@ const QuoteNew = () => {
   const [seller, setSeller] = useState<string>("");
   const [car, setCar] = useState("");
   const [notes, setNotes] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<string>("Dinheiro");
+  const [pieceType, setPieceType] = useState<string>("Nova");
   const [items, setItems] = useState<Item[]>([]);
   const [search, setSearch] = useState("");
   const [saving, setSaving] = useState(false);
@@ -58,6 +62,8 @@ const QuoteNew = () => {
       setSeller((q as any).seller ?? "");
       setCar((q as any).car ?? "");
       setNotes(q.notes ?? "");
+      setPaymentMethod((q as any).payment_method ?? "Dinheiro");
+      setPieceType((q as any).piece_type ?? "Nova");
       setQuoteNumber(q.quote_number);
       const { data: its, error: e2 } = await supabase.from("quote_items").select("*").eq("quote_id", editId);
       if (e2) { toast.error(e2.message); return; }
@@ -147,6 +153,8 @@ const QuoteNew = () => {
           seller: seller || null,
           car: car.trim() || null,
           notes: notes.trim() || null,
+          payment_method: paymentMethod,
+          piece_type: pieceType,
           total,
         } as any).eq("id", editId);
         if (error) throw error;
@@ -160,6 +168,8 @@ const QuoteNew = () => {
           seller: seller || null,
           car: car.trim() || null,
           notes: notes.trim() || null,
+          payment_method: paymentMethod,
+          piece_type: pieceType,
           total,
         } as any).select().single();
         if (error) throw error;
@@ -222,6 +232,17 @@ const QuoteNew = () => {
             <CardContent className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
+                  <Label className="text-xs font-black uppercase text-slate-400 tracking-wider">Vendedor</Label>
+                  <select
+                    value={seller}
+                    onChange={(e) => setSeller(e.target.value)}
+                    className="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-bold text-slate-900"
+                  >
+                    <option value="">Selecione um Vendedor</option>
+                    {SELLERS.map((s) => (<option key={s} value={s}>{s}</option>))}
+                  </select>
+                </div>
+                <div className="space-y-2">
                   <Label className="text-xs font-black uppercase text-slate-400 tracking-wider">Cliente / Mecânico</Label>
                   <select
                     value={customer || "__none__"}
@@ -233,6 +254,26 @@ const QuoteNew = () => {
                   </select>
                 </div>
                 <div className="space-y-2">
+                  <Label className="text-xs font-black uppercase text-slate-400 tracking-wider">Forma de Pagamento</Label>
+                  <select
+                    value={paymentMethod}
+                    onChange={(e) => setPaymentMethod(e.target.value)}
+                    className="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-bold text-slate-900"
+                  >
+                    {PAYMENT_METHODS.map((m) => (<option key={m} value={m}>{m}</option>))}
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs font-black uppercase text-slate-400 tracking-wider">Tipo de Peça</Label>
+                  <select
+                    value={pieceType}
+                    onChange={(e) => setPieceType(e.target.value)}
+                    className="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-bold text-slate-900"
+                  >
+                    {PIECE_TYPES.map((t) => (<option key={t} value={t}>{t}</option>))}
+                  </select>
+                </div>
+                <div className="md:col-span-2 space-y-2">
                   <Label className="text-xs font-black uppercase text-slate-400 tracking-wider">Veículo (Opcional)</Label>
                   <select
                     value={car || "__none__"}

@@ -189,6 +189,8 @@ export type Database = {
           id: string
           notes: string | null
           pago_em: string | null
+          payment_method: string | null
+          piece_type: string | null
           quote_number: number
           seller: string | null
           total: number
@@ -203,6 +205,8 @@ export type Database = {
           id?: string
           notes?: string | null
           pago_em?: string | null
+          payment_method?: string | null
+          piece_type?: string | null
           quote_number: number
           seller?: string | null
           total?: number
@@ -217,9 +221,134 @@ export type Database = {
           id?: string
           notes?: string | null
           pago_em?: string | null
+          payment_method?: string | null
+          piece_type?: string | null
           quote_number?: number
           seller?: string | null
           total?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      sale_items: {
+        Row: {
+          id: string
+          product_id: string | null
+          product_name: string
+          quantity: number
+          sale_id: string
+          subtotal: number
+          unit_price: number
+        }
+        Insert: {
+          id?: string
+          product_id?: string | null
+          product_name: string
+          quantity?: number
+          sale_id: string
+          subtotal?: number
+          unit_price?: number
+        }
+        Update: {
+          id?: string
+          product_id?: string | null
+          product_name?: string
+          quantity?: number
+          sale_id?: string
+          subtotal?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sale_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sale_items_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales: {
+        Row: {
+          created_at: string | null
+          customer_name: string | null
+          id: string
+          notes: string | null
+          payment_method: string
+          piece_type: string
+          quote_id: string | null
+          seller_id: string | null
+          total: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          customer_name?: string | null
+          id?: string
+          notes?: string | null
+          payment_method: string
+          piece_type: string
+          quote_id?: string | null
+          seller_id?: string | null
+          total?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          customer_name?: string | null
+          id?: string
+          notes?: string | null
+          payment_method?: string
+          piece_type?: string
+          quote_id?: string | null
+          seller_id?: string | null
+          total?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "sellers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sellers: {
+        Row: {
+          active: boolean | null
+          created_at: string | null
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string | null
+          id?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string | null
+          id?: string
+          name?: string
           user_id?: string
         }
         Relationships: []
