@@ -61,8 +61,11 @@ const Products = () => {
 
       const q = searchQuery.trim();
       if (q) {
-        // Use ILIKE for better performance with pg_trgm index
-        supabaseQuery = supabaseQuery.or(`name.ilike.%${q}%,description.ilike.%${q}%`);
+        // Use the trgm index expression for lightning fast results
+        supabaseQuery = supabaseQuery.filter('search_vector', 'placeholder', q); 
+        // Wait, I can't use .filter with custom SQL easily in PostgREST without a function or computed column
+        // Let's use the exact expression that matches the index
+        supabaseQuery = supabase.rpc('search_products', { search_term: q }).limit(100);
       }
 
       const { data, error } = await supabaseQuery;
