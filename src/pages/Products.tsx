@@ -48,35 +48,43 @@ const Products = () => {
   const [gproSettingsOpen, setGproSettingsOpen] = useState(false);
   const [gproKey, setGproKey] = useState("");
   const [loadingGpro, setLoadingGpro] = useState(false);
-  const q = query.trim().toLowerCase();
+  const [searching, setSearching] = useState(false);
   
-  const matched = items.filter(p => {
-    if (!q) return true;
-    
-    // Normalize string: remove spaces, dots and hyphens
-    const normalize = (str: string) => str.toLowerCase().replace(/[\s\.\-]/g, "");
-    
-    const searchTerms = q.split(/\s+/).filter(term => term.length > 0);
-    const searchNormalized = normalize(q);
-    
-    const pName = p.name.toLowerCase();
-    const pDesc = (p.description ?? "").toLowerCase();
-    const pNameNormalized = normalize(p.name);
-    const pDescNormalized = normalize(p.description ?? "");
-    
-    // Match 1: All individual terms are present
-    const allTermsMatch = searchTerms.every(term => 
-      pName.includes(term) || pDesc.includes(term)
-    );
+  const load = async (searchQuery = "") => {
+    setSearching(true);
+    try {
+      let supabaseQuery = supabase
+        .from("products")
+        .select("*")
+        .order("name")
+        .limit(100);
 
-    // Match 2: Normalized search matches normalized name or description
-    const normalizedMatch = pNameNormalized.includes(searchNormalized) || 
-                           pDescNormalized.includes(searchNormalized);
-    
-    return allTermsMatch || normalizedMatch;
-  });
+      const q = searchQuery.trim();
+      if (q) {
+        // Use ILIKE for better performance with pg_trgm index
+        supabaseQuery = supabaseQuery.or(`name.ilike.%${q}%,description.ilike.%${q}%`);
+      }
 
-  const filtered = q ? matched : matched.slice(0, 50); // Increased initial view to 50 items
+      const { data, error } = await supabaseQuery;
+      
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+      setItems((data ?? []) as Product[]);
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      load(query);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [query]);
+
+  const filtered = items; // Already filtered by database
 
   // Computed diff for preview
   const diff = (() => {
@@ -98,25 +106,6 @@ const Products = () => {
     const toDelete = items.filter(p => !seen.has(p.name.trim().toLowerCase()));
     return { toUpdate, toCreate, toDelete };
   })();
-
-  const load = async () => {
-    const pageSize = 1000;
-    let from = 0;
-    const all: Product[] = [];
-    while (true) {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .order("name")
-        .range(from, from + pageSize - 1);
-      if (error) { toast.error(error.message); return; }
-      const batch = (data ?? []) as Product[];
-      all.push(...batch);
-      if (batch.length < pageSize) break;
-      from += pageSize;
-    }
-    setItems(all);
-  };
 
   const fetchGproKey = async () => {
     if (!user) return;
@@ -426,7 +415,7 @@ const Products = () => {
       <Card className="shadow-[var(--shadow-soft)]">
         <CardHeader className="py-3">
           <CardTitle className="text-sm text-muted-foreground font-normal">
-            Catálogo ({filtered.length} de {items.length}{!q && items.length > 10 ? " — exibindo 10" : ""})
+            Catálogo ({filtered.length} itens {query ? `para "${query}"` : ""})
           </CardTitle>
         </CardHeader>
         <CardContent>
