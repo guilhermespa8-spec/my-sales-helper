@@ -281,8 +281,7 @@ const Products = () => {
       }
       toast.success(
         isGpro
-          ? `GPRO sincronizado: ${diff.toUpdate.length} produto(s) atualizado(s)` +
-            (diff.toCreate.length > 0 ? ` — ${diff.toCreate.length} não encontrado(s) no sistema` : "")
+          ? `GPRO sincronizado: ${diff.toCreate.length} novo(s) e ${diff.toUpdate.length} atualizado(s)`
           : `Sincronizado: ${diff.toCreate.length} novo(s), ${diff.toUpdate.length} atualizado(s)` +
             (removeMissing ? `, ${diff.toDelete.length} removido(s)` : "")
       );
