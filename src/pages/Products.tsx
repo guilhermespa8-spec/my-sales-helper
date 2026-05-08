@@ -415,7 +415,7 @@ const Products = () => {
       <Card className="shadow-[var(--shadow-soft)]">
         <CardHeader className="py-3">
           <CardTitle className="text-sm text-muted-foreground font-normal">
-            Catálogo ({filtered.length} de {items.length}{!q && items.length > 10 ? " — exibindo 10" : ""})
+            Catálogo ({filtered.length} itens {query ? `para "${query}"` : ""})
           </CardTitle>
         </CardHeader>
         <CardContent>
