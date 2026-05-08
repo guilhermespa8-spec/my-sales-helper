@@ -47,6 +47,7 @@ const QuoteNew = () => {
   const [showConsulta, setShowConsulta] = useState(false);
   const [consultaSearch, setConsultaSearch] = useState("");
   const [consultaSelected, setConsultaSelected] = useState<string | null>(null);
+  const [searching, setSearching] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
   const consultaRef = useRef<HTMLInputElement>(null);
 
@@ -79,33 +80,48 @@ const QuoteNew = () => {
   }, [editId]);
 
   useEffect(() => {
-    const loadData = async () => {
+    const loadStaticData = async () => {
       const [mecsRes, carsRes] = await Promise.all([
         supabase.from("mechanics").select("id,name").order("name"),
         supabase.from("cars").select("id,name,notes").order("name")
       ]);
       if (mecsRes.data) setMechanics(mecsRes.data as Mechanic[]);
       if (carsRes.data) setCarsList(carsRes.data as CarRecord[]);
-
-      const pageSize = 1000;
-      let from = 0;
-      const all: Product[] = [];
-      while (true) {
-        const { data, error } = await supabase
-          .from("products")
-          .select("id,name,description,price,car_filter")
-          .order("name")
-          .range(from, from + pageSize - 1);
-        if (error) { toast.error("Erro ao carregar produtos"); break; }
-        const batch = (data ?? []) as Product[];
-        all.push(...batch);
-        if (batch.length < pageSize) break;
-        from += pageSize;
-      }
-      setProducts(all);
     };
-    loadData();
+    loadStaticData();
   }, []);
+
+  const fetchProducts = async (q: string) => {
+    setSearching(true);
+    try {
+      let query = supabase
+        .from("products")
+        .select("id,name,description,price,car_filter")
+        .order("name")
+        .limit(100);
+
+      const trimmedQ = q.trim();
+      if (trimmedQ) {
+        query = query.or(`name.ilike.%${trimmedQ}%,description.ilike.%${trimmedQ}%`);
+      }
+
+      const { data, error } = await query;
+      if (error) {
+        toast.error("Erro ao carregar produtos");
+        return;
+      }
+      setProducts((data ?? []) as Product[]);
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchProducts(search || consultaSearch);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search, consultaSearch]);
 
   const addItem = (productId: string) => {
     const p = products.find((x) => x.id === productId);
@@ -125,36 +141,8 @@ const QuoteNew = () => {
 
   const total = useMemo(() => items.reduce((s, i) => s + i.quantity * i.unit_price, 0), [items]);
 
-  const filteredProducts = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return [];
-    const normalize = (str: string) => str.toLowerCase().replace(/[\s\.\-]/g, "");
-    const searchTerms = q.split(/\s+/).filter(t => t.length > 0);
-    const searchNormalized = normalize(q);
-    return products.filter((p) => {
-      const pName = p.name.toLowerCase();
-      const pDesc = (p.description ?? "").toLowerCase();
-      const pNameNormalized = normalize(p.name);
-      const pDescNormalized = normalize(p.description ?? "");
-      const allTermsMatch = searchTerms.every(t => pName.includes(t) || pDesc.includes(t));
-      const normalizedMatch = pNameNormalized.includes(searchNormalized) || pDescNormalized.includes(searchNormalized);
-      return allTermsMatch || normalizedMatch;
-    }).slice(0, 50);
-  }, [products, search]);
-
-  const consultaResults = useMemo(() => {
-    const q = consultaSearch.trim().toLowerCase().replace(/^%/, "");
-    if (!q) return products.slice(0, 200);
-    const normalize = (str: string) => str.toLowerCase().replace(/[\s\.\-]/g, "");
-    const terms = q.split(/\s+/).filter(Boolean);
-    const qn = normalize(q);
-    return products.filter((p) => {
-      const n = p.name.toLowerCase();
-      const d = (p.description ?? "").toLowerCase();
-      return terms.every(t => n.includes(t) || d.includes(t)) ||
-        normalize(p.name).includes(qn) || normalize(p.description ?? "").includes(qn);
-    }).slice(0, 200);
-  }, [products, consultaSearch]);
+  const filteredProducts = products;
+  const consultaResults = products;
 
   const openConsulta = () => {
     setShowConsulta(true);

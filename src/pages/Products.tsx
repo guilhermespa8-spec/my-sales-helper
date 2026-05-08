@@ -48,75 +48,43 @@ const Products = () => {
   const [gproSettingsOpen, setGproSettingsOpen] = useState(false);
   const [gproKey, setGproKey] = useState("");
   const [loadingGpro, setLoadingGpro] = useState(false);
-  const q = query.trim().toLowerCase();
+  const [searching, setSearching] = useState(false);
   
-  const matched = items.filter(p => {
-    if (!q) return true;
-    
-    // Normalize string: remove spaces, dots and hyphens
-    const normalize = (str: string) => str.toLowerCase().replace(/[\s\.\-]/g, "");
-    
-    const searchTerms = q.split(/\s+/).filter(term => term.length > 0);
-    const searchNormalized = normalize(q);
-    
-    const pName = p.name.toLowerCase();
-    const pDesc = (p.description ?? "").toLowerCase();
-    const pNameNormalized = normalize(p.name);
-    const pDescNormalized = normalize(p.description ?? "");
-    
-    // Match 1: All individual terms are present
-    const allTermsMatch = searchTerms.every(term => 
-      pName.includes(term) || pDesc.includes(term)
-    );
-
-    // Match 2: Normalized search matches normalized name or description
-    const normalizedMatch = pNameNormalized.includes(searchNormalized) || 
-                           pDescNormalized.includes(searchNormalized);
-    
-    return allTermsMatch || normalizedMatch;
-  });
-
-  const filtered = q ? matched : matched.slice(0, 50); // Increased initial view to 50 items
-
-  // Computed diff for preview
-  const diff = (() => {
-    const byName = new Map(items.map(p => [p.name.trim().toLowerCase(), p]));
-    const seen = new Set<string>();
-    const toUpdate: Array<{ existing: Product; next: typeof importPreview[number] }> = [];
-    const toCreate: typeof importPreview = [];
-    importPreview.forEach(p => {
-      const key = p.name.trim().toLowerCase();
-      seen.add(key);
-      const existing = byName.get(key);
-      if (existing) {
-        const changed = Number(existing.price) !== p.price || (p.hasStock && existing.stock !== p.stock) || (existing.description ?? "") !== p.description;
-        if (changed) toUpdate.push({ existing, next: p });
-      } else {
-        toCreate.push(p);
-      }
-    });
-    const toDelete = items.filter(p => !seen.has(p.name.trim().toLowerCase()));
-    return { toUpdate, toCreate, toDelete };
-  })();
-
-  const load = async () => {
-    const pageSize = 1000;
-    let from = 0;
-    const all: Product[] = [];
-    while (true) {
-      const { data, error } = await supabase
+  const load = async (searchQuery = "") => {
+    setSearching(true);
+    try {
+      let supabaseQuery = supabase
         .from("products")
         .select("*")
         .order("name")
-        .range(from, from + pageSize - 1);
-      if (error) { toast.error(error.message); return; }
-      const batch = (data ?? []) as Product[];
-      all.push(...batch);
-      if (batch.length < pageSize) break;
-      from += pageSize;
+        .limit(100);
+
+      const q = searchQuery.trim();
+      if (q) {
+        // Use ILIKE for better performance with pg_trgm index
+        supabaseQuery = supabaseQuery.or(`name.ilike.%${q}%,description.ilike.%${q}%`);
+      }
+
+      const { data, error } = await supabaseQuery;
+      
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+      setItems((data ?? []) as Product[]);
+    } finally {
+      setSearching(false);
     }
-    setItems(all);
   };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      load(query);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [query]);
+
+  const filtered = items; // Already filtered by database
 
   const fetchGproKey = async () => {
     if (!user) return;
