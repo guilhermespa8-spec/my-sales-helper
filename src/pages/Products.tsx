@@ -45,6 +45,9 @@ const Products = () => {
   const gproRef = useRef<HTMLInputElement>(null);
   const [isGpro, setIsGpro] = useState(false);
   const [query, setQuery] = useState("");
+  const [gproSettingsOpen, setGproSettingsOpen] = useState(false);
+  const [gproKey, setGproKey] = useState("");
+  const [loadingGpro, setLoadingGpro] = useState(false);
   const q = query.trim().toLowerCase();
   
   const matched = items.filter(p => {
