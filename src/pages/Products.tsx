@@ -201,9 +201,25 @@ const Products = () => {
 
   const handleFile = async (file: File, gpro = false) => {
     try {
+      if (gpro && !file.name.toLowerCase().endsWith(".xlsx")) {
+        toast.error("Arquivo inválido. Envie um arquivo .xlsx exportado do GPRO.");
+        return;
+      }
       const buf = await file.arrayBuffer();
       const wb = XLSX.read(buf, { type: "array" });
       const ws = wb.Sheets[wb.SheetNames[0]];
+      if (gpro) {
+        const headerRow = XLSX.utils.sheet_to_json<any[]>(ws, { header: 1, defval: "" })[0] ?? [];
+        const headers = (headerRow as any[]).map((h) => normalizeKey(String(h ?? "")));
+        const missing: string[] = [];
+        if (!headers.some((h) => h === "codigo" || h === "cod" || h === "code")) missing.push("Código");
+        if (!headers.some((h) => h === "descricao" || h === "descricaoproduto" || h === "descproduto" || h === "description")) missing.push("Descrição");
+        if (!headers.some((h) => h === "precovenda" || h === "altpreco" || h === "vlrvenda" || h === "valorvenda" || h === "preco")) missing.push("Preço Venda/Alt.Preço");
+        if (missing.length > 0) {
+          toast.error("Colunas obrigatórias do GPRO ausentes: " + missing.join(", "));
+          return;
+        }
+      }
       const rows = XLSX.utils.sheet_to_json<Record<string, any>>(ws, { defval: "", raw: true });
        const parsed = rows.map((r) => {
          const obj: Record<string, any> = {};
