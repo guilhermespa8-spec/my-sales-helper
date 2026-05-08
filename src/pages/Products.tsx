@@ -412,60 +412,69 @@ const Products = () => {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {items.map((p) => (
-          <Card key={p.id} className="overflow-hidden hover:shadow-lg transition-shadow border-slate-200">
-            <CardHeader className="bg-slate-50/50 pb-3">
-              <div className="flex justify-between items-start gap-2">
-                <CardTitle className="text-base font-bold leading-tight line-clamp-2">
-                  {p.name}
-                </CardTitle>
-                <div className="flex gap-1 shrink-0">
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600" onClick={() => openEdit(p)}>
-                    <Pencil className="w-4 h-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-red-600" onClick={() => remove(p.id)}>
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-4 space-y-3">
-              {p.description && (
-                <p className="text-sm text-muted-foreground line-clamp-2 min-h-[2.5rem]">
-                  {p.description}
-                </p>
-              )}
-              
-              <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-                <div className="flex flex-col">
-                  <span className="text-xs text-muted-foreground uppercase font-semibold tracking-wider">Preço</span>
-                  <span className="text-xl font-bold text-primary">
-                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(p.price)}
-                  </span>
-                </div>
-                <div className="flex flex-col items-end">
-                  <span className="text-xs text-muted-foreground uppercase font-semibold tracking-wider">Estoque</span>
-                  <div className="flex items-center gap-1.5">
-                    <Package className="w-3.5 h-3.5 text-slate-400" />
-                    <span className={`font-semibold ${p.stock <= 5 ? 'text-red-500' : 'text-slate-700'}`}>
-                      {p.stock} un
+      <Card className="border-none shadow-none bg-transparent">
+        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+          <Table>
+            <TableHeader className="bg-slate-50/50">
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="w-[45%] py-4 font-semibold text-slate-900">Produto</TableHead>
+                <TableHead className="text-center font-semibold text-slate-900">Estoque</TableHead>
+                <TableHead className="text-center font-semibold text-slate-900">Preço Unitário</TableHead>
+                <TableHead className="text-right py-4 pr-6 font-semibold text-slate-900">Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {items.map((p) => (
+                <TableRow key={p.id} className="group hover:bg-slate-50/50 transition-colors">
+                  <TableCell className="py-4">
+                    <div className="flex flex-col">
+                      <span className="font-bold text-slate-800 text-sm md:text-base leading-tight">
+                        {p.name}
+                      </span>
+                      {p.description && (
+                        <span className="text-xs text-slate-500 mt-1 line-clamp-1 italic">
+                          {p.description}
+                        </span>
+                      )}
+                      {p.car_filter && (
+                        <div className="flex mt-1.5">
+                          <span className="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider border border-blue-100">
+                            {p.car_filter}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <div className="inline-flex flex-col items-center">
+                      <span className={`text-sm font-bold ${p.stock <= 5 ? 'text-red-600' : 'text-slate-700'}`}>
+                        {p.stock}
+                      </span>
+                      <span className="text-[10px] text-slate-400 uppercase font-medium">unidades</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <span className="font-mono font-bold text-slate-900 text-base">
+                      {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(p.price)}
                     </span>
-                  </div>
-                </div>
-              </div>
+                  </TableCell>
+                  <TableCell className="text-right py-4 pr-6">
+                    <div className="flex justify-end gap-1">
+                      <Button variant="ghost" size="sm" className="h-9 w-9 p-0 text-slate-400 hover:text-blue-600 hover:bg-blue-50" onClick={() => openEdit(p)}>
+                        <Pencil className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm" className="h-9 w-9 p-0 text-slate-400 hover:text-red-600 hover:bg-red-50" onClick={() => remove(p.id)}>
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </Card>
 
-              {p.car_filter && (
-                <div className="flex items-center gap-1.5 pt-1">
-                  <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-medium">
-                    {p.car_filter}
-                  </span>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
 
       {items.length === 0 && (
         <div className="text-center py-12 text-muted-foreground border-2 border-dashed rounded-xl">
