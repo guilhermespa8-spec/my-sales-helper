@@ -353,6 +353,9 @@ const Products = () => {
         <Button onClick={() => fileRef.current?.click()} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold">
           <Upload className="w-4 h-4 mr-1" /> Importar Produtos
         </Button>
+        <Button onClick={() => gproRef.current?.click()} className="bg-orange-600 hover:bg-orange-700 text-white font-semibold">
+          <Upload className="w-4 h-4 mr-1" /> Sincronizar com GPRO
+        </Button>
       </div>
 
       <Card className="shadow-[var(--shadow-soft)]">
