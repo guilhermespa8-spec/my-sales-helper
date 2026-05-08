@@ -266,6 +266,7 @@ const Products = () => {
       }
       // 2. Update changed (em GPRO atualiza só preço e estoque)
       for (const { existing, next } of diff.toUpdate) {
+        // Para GPRO, mantemos a descrição original se já existir, para o resto atualizamos tudo
         const updatePayload: { price: number; stock?: number; description?: string | null } = { price: next.price };
         if (next.hasStock) updatePayload.stock = next.stock;
         if (!isGpro) updatePayload.description = next.description || null;
