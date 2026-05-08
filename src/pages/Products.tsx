@@ -37,7 +37,7 @@ const Products = () => {
   const [form, setForm] = useState(empty);
   const [viewing, setViewing] = useState<Product | null>(null);
   const [importOpen, setImportOpen] = useState(false);
-  const [importPreview, setImportPreview] = useState<Array<{ name: string; description: string; price: number; stock: number }>>([]);
+  const [importPreview, setImportPreview] = useState<Array<{ name: string; description: string; price: number; stock: number; hasStock: boolean }>>([]);
   const [importing, setImporting] = useState(false);
   const [removeMissing, setRemoveMissing] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
