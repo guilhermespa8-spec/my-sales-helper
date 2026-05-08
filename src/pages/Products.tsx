@@ -205,24 +205,24 @@ const Products = () => {
       const wb = XLSX.read(buf, { type: "array" });
       const ws = wb.Sheets[wb.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json<Record<string, any>>(ws, { defval: "", raw: true });
-      const parsed = rows.map((r) => {
-        const obj: Record<string, any> = {};
-        Object.keys(r).forEach((k) => { obj[normalizeKey(k)] = r[k]; });
-        const name = String(
-          obj.nome ?? obj.name ?? obj.produto ??
-          obj.descricao ?? obj.descricaoproduto ?? obj.descproduto ?? obj.description ?? ""
-        ).trim();
-        const price = parseNumber(
-          obj.preco ?? obj.price ?? obj.valor ??
-          obj.precovenda ?? obj.vlrvenda ?? obj.valorvenda ?? obj.precovista
-        );
-        const stock = Math.floor(parseNumber(
-          obj.estoque ?? obj.stock ?? obj.quantidade ??
-          obj.qtdestoque ?? obj.saldoestoque ?? obj.estoqueatual ?? obj.saldo ?? 0
-        ));
-        const description = String(obj.descricaolonga ?? obj.observacao ?? obj.obs ?? "").trim();
-        return { name, description, price, stock };
-      }).filter(p => p.name.length > 0);
+       const parsed = rows.map((r) => {
+         const obj: Record<string, any> = {};
+         Object.keys(r).forEach((k) => { obj[normalizeKey(k)] = r[k]; });
+         const name = String(
+           obj.nome ?? obj.name ?? obj.produto ??
+           obj.descricao ?? obj.descricaoproduto ?? obj.descproduto ?? obj.description ?? ""
+         ).trim();
+         const price = parseNumber(
+           obj.preco ?? obj.price ?? obj.valor ??
+           obj.precovenda ?? obj.vlrvenda ?? obj.valorvenda ?? obj.precovista ?? obj.altpreco
+         );
+         const rawStock = obj.estoque ?? obj.stock ?? obj.quantidade ??
+           obj.qtdestoque ?? obj.saldoestoque ?? obj.estoqueatual ?? obj.saldo;
+         const hasStock = rawStock !== undefined && rawStock !== "" && rawStock !== null;
+         const stock = hasStock ? Math.floor(parseNumber(rawStock)) : 0;
+         const description = String(obj.descricaolonga ?? obj.observacao ?? obj.obs ?? "").trim();
+         return { name, description, price, stock, hasStock };
+       }).filter(p => p.name.length > 0);
       if (parsed.length === 0) { toast.error("Nenhuma linha válida. Verifique as colunas do arquivo."); return; }
       setIsGpro(gpro);
       setImportPreview(parsed);
