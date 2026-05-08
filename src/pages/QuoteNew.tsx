@@ -3,8 +3,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Search, X, Plus, Minus, Trash2 } from "lucide-react";
+import { Search, X, Plus, Minus, Trash2, ArrowLeft, Save, User, Car as CarIcon, FileText } from "lucide-react";
+
 
 const SELLERS = ["André", "João Victor", "Mateus", "Loja"] as const;
 
