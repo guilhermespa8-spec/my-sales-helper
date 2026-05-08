@@ -85,7 +85,7 @@ const Products = () => {
       seen.add(key);
       const existing = byName.get(key);
       if (existing) {
-        const changed = Number(existing.price) !== p.price || existing.stock !== p.stock || (existing.description ?? "") !== p.description;
+        const changed = Number(existing.price) !== p.price || (p.hasStock && existing.stock !== p.stock) || (existing.description ?? "") !== p.description;
         if (changed) toUpdate.push({ existing, next: p });
       } else {
         toCreate.push(p);
