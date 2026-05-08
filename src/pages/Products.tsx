@@ -199,7 +199,7 @@ const Products = () => {
     return isNaN(n) ? 0 : n;
   };
 
-  const handleFile = async (file: File) => {
+  const handleFile = async (file: File, gpro = false) => {
     try {
       const buf = await file.arrayBuffer();
       const wb = XLSX.read(buf, { type: "array" });
@@ -208,19 +208,30 @@ const Products = () => {
       const parsed = rows.map((r) => {
         const obj: Record<string, any> = {};
         Object.keys(r).forEach((k) => { obj[normalizeKey(k)] = r[k]; });
-        const name = String(obj.nome ?? obj.name ?? obj.produto ?? "").trim();
-        const price = parseNumber(obj.preco ?? obj.price ?? obj.valor);
-        const stock = Math.floor(parseNumber(obj.estoque ?? obj.stock ?? obj.quantidade ?? 0));
-        const description = String(obj.descricao ?? obj.description ?? "").trim();
+        const name = String(
+          obj.nome ?? obj.name ?? obj.produto ??
+          obj.descricao ?? obj.descricaoproduto ?? obj.descproduto ?? obj.description ?? ""
+        ).trim();
+        const price = parseNumber(
+          obj.preco ?? obj.price ?? obj.valor ??
+          obj.precovenda ?? obj.vlrvenda ?? obj.valorvenda ?? obj.precovista
+        );
+        const stock = Math.floor(parseNumber(
+          obj.estoque ?? obj.stock ?? obj.quantidade ??
+          obj.qtdestoque ?? obj.saldoestoque ?? obj.estoqueatual ?? obj.saldo ?? 0
+        ));
+        const description = String(obj.descricaolonga ?? obj.observacao ?? obj.obs ?? "").trim();
         return { name, description, price, stock };
       }).filter(p => p.name.length > 0);
-      if (parsed.length === 0) { toast.error("Nenhuma linha válida. Verifique a coluna 'nome'."); return; }
+      if (parsed.length === 0) { toast.error("Nenhuma linha válida. Verifique as colunas do arquivo."); return; }
+      setIsGpro(gpro);
       setImportPreview(parsed);
       setImportOpen(true);
     } catch (e: any) {
       toast.error("Erro ao ler arquivo: " + e.message);
     } finally {
       if (fileRef.current) fileRef.current.value = "";
+      if (gproRef.current) gproRef.current.value = "";
     }
   };
 
