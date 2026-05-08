@@ -9,27 +9,12 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Search, X, Plus, Minus, Trash2, ArrowLeft, Save, User, Car as CarIcon, FileText } from "lucide-react";
 
-
 const SELLERS = ["André", "João Victor", "Mateus", "Loja"] as const;
 
 interface Product { id: string; name: string; description: string | null; price: number; car_filter?: string | null; }
 interface Item { product_id: string; product_name: string; quantity: number; unit_price: number; }
 interface Mechanic { id: string; name: string; }
 interface CarRecord { id: string; name: string; notes: string | null; }
-
-// ---------- Retro UI primitives ----------
-const RetroField = ({ label, color = "text-[#38bdf8]", children }: { label: string; color?: string; children: React.ReactNode }) => (
-  <div className="flex flex-col gap-0.5 min-w-0">
-    <span className={`text-[11px] font-semibold ${color}`}>{label}</span>
-    <div className="min-w-0">{children}</div>
-  </div>
-);
-
-const retroInputCls =
-  "h-7 px-2 py-0 text-[12px] rounded-none bg-[#0f172a] border border-[#334155] focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-[#38bdf8] shadow-none text-slate-100";
-
-const retroSelectCls =
-  "h-7 px-2 py-0 text-[12px] rounded-none bg-[#0f172a] border border-[#334155] text-slate-100 w-full focus:outline-none focus:border-[#38bdf8]";
 
 const QuoteNew = () => {
   const { user } = useAuth();
@@ -102,7 +87,6 @@ const QuoteNew = () => {
       let response;
       
       if (trimmedQ) {
-        // RPC calls are much faster for indexed fuzzy search
         response = await supabase.rpc('search_products', { search_term: trimmedQ });
       } else {
         response = await supabase
@@ -147,7 +131,6 @@ const QuoteNew = () => {
 
   const total = useMemo(() => items.reduce((s, i) => s + i.quantity * i.unit_price, 0), [items]);
 
-  const filteredProducts = products;
   const consultaResults = products;
 
   const openConsulta = () => {
@@ -216,17 +199,6 @@ const QuoteNew = () => {
   const totalProdutos = total;
   const numFmt = `0${String(quoteNumber ?? 0).padStart(5, "0")}`;
 
-  // Toolbar button
-  const ToolBtn = ({ label, onClick, disabled, accent }: { label: string; onClick?: () => void; disabled?: boolean; accent?: boolean }) => (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className={`px-3 h-8 text-[12px] border border-transparent hover:border-[#334155] hover:bg-[#1e293b] active:bg-[#0f172a] disabled:opacity-40 disabled:cursor-not-allowed text-slate-200 transition-colors ${accent ? "font-semibold" : ""}`}
-    >
-      {label}
-    </button>
-  );
 
   return (
     <div className="-mx-4 sm:-mx-6 -my-6 min-h-[calc(100vh-4rem)] bg-[#020617] text-slate-100 font-[Tahoma,Geneva,sans-serif] text-[12px]">
