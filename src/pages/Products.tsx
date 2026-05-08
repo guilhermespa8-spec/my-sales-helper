@@ -444,9 +444,11 @@ const Products = () => {
       <Dialog open={importOpen} onOpenChange={(o) => { setImportOpen(o); if (!o) setRemoveMissing(false); }}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Sincronizar planilha</DialogTitle>
+            <DialogTitle>{isGpro ? "Sincronizar com GPRO" : "Sincronizar planilha"}</DialogTitle>
             <DialogDescription>
-              Resumo das mudanças que serão aplicadas no catálogo.
+              {isGpro
+                ? "Apenas preço e estoque serão atualizados nos produtos correspondentes (busca por descrição/nome). Itens novos não serão criados."
+                : "Resumo das mudanças que serão aplicadas no catálogo."}
             </DialogDescription>
           </DialogHeader>
 
