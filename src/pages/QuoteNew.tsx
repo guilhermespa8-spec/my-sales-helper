@@ -355,7 +355,7 @@ const QuoteNew = () => {
                     ref={searchRef}
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Pesquisar produto..."
+                    placeholder={searching ? "Buscando..." : "Pesquisar produto..."}
                     className="flex-1 h-6 px-1 text-[12px] outline-none border-0 bg-transparent text-slate-100 placeholder:text-slate-500"
                   />
                   <button onClick={() => { setShowSearch(false); setSearch(""); }} className="text-slate-400 hover:text-white">
