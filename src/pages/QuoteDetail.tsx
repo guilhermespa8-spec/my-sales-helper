@@ -60,175 +60,174 @@ const QuoteDetail = () => {
   const time = dateObj.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 
   return (
-    <div className="max-w-3xl mx-auto space-y-4">
-      <div className="no-print flex items-center justify-between gap-2 flex-wrap">
-        <Button variant="ghost" onClick={() => nav("/")}><ArrowLeft className="w-4 h-4 mr-1" /> Voltar</Button>
-        <div className="flex gap-2">
-          <Button variant="secondary" onClick={() => setDialogOpen(true)}>
-            <Wrench className="w-4 h-4 mr-1" /> ADICIONAR VENDA AO MECÂNICO
+    <div className="max-w-4xl mx-auto space-y-6 px-4 py-6 md:py-10">
+      <div className="no-print flex items-center justify-between gap-4 flex-wrap bg-white/50 backdrop-blur-sm p-4 rounded-xl border border-slate-200 shadow-sm">
+        <Button variant="ghost" onClick={() => nav("/orcamentos")} className="hover:bg-slate-100">
+          <ArrowLeft className="w-4 h-4 mr-2" /> Voltar para a lista
+        </Button>
+        <div className="flex gap-3">
+          <Button variant="outline" onClick={() => setDialogOpen(true)} className="border-blue-200 text-blue-700 hover:bg-blue-50">
+            <Wrench className="w-4 h-4 mr-2" /> Vincular ao Fiado
           </Button>
-          <Button onClick={() => window.print()}><Printer className="w-4 h-4 mr-1" /> Imprimir notinha</Button>
+          <Button onClick={() => window.print()} className="bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-200">
+            <Printer className="w-4 h-4 mr-2" /> Imprimir Documento
+          </Button>
         </div>
       </div>
 
-      <Card className="print-area p-10 shadow-[var(--shadow-elevated)] print:shadow-none print:border-0 print:p-6 bg-white text-slate-900">
-        {/* Cabeçalho */}
-        <div className="flex items-start justify-between border-b-4 border-primary print:border-black pb-5 mb-6">
-          <div className="flex items-center gap-3">
-            <div
-              className="w-14 h-14 rounded-xl flex items-center justify-center print:bg-black print:rounded-md"
-              style={{ background: "var(--gradient-brand)" }}
-            >
-              <Receipt className="w-7 h-7 text-white" />
+      <Card className="print-area shadow-2xl shadow-slate-200/50 print:shadow-none border-none print:border-0 rounded-3xl overflow-hidden bg-white text-slate-900">
+        {/* Decorative Top Bar */}
+        <div className="h-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-400 print:hidden" />
+        
+        <div className="p-8 md:p-12">
+          {/* Header Section */}
+          <div className="flex flex-col md:flex-row justify-between items-start gap-8 mb-12 border-b border-slate-100 pb-12">
+            <div className="flex items-center gap-5">
+              <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center shadow-xl shadow-blue-200 print:bg-black print:rounded-md">
+                <Receipt className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-black tracking-tight text-slate-900 print:text-black uppercase">
+                  Abrantes <span className="text-blue-600 print:text-black">Auto Peças</span>
+                </h1>
+                <p className="text-sm font-bold text-slate-400 print:text-black uppercase tracking-widest mt-0.5">
+                  Orçamento de Venda Profissional
+                </p>
+                <div className="mt-4 space-y-1 text-slate-500 print:text-black font-medium">
+                  <p className="flex items-center gap-2 text-sm">
+                    <MapPin className="w-4 h-4 text-blue-500 print:text-black" /> Rua das Peças, 123 - Centro
+                  </p>
+                  <p className="flex items-center gap-2 text-sm">
+                    <Phone className="w-4 h-4 text-blue-500 print:text-black" /> (22) 99955-4939
+                  </p>
+                </div>
+              </div>
             </div>
-            <div>
-              <div className="text-2xl font-extrabold tracking-tight text-primary print:text-black">Abrantes Auto Peças</div>
-              <div className="text-xs font-medium text-slate-600 print:text-black">Orçamento de venda</div>
-              <div className="mt-1.5 flex flex-col gap-0.5 text-[11px] font-medium text-slate-700 print:text-black">
-                <span className="flex items-center gap-1">
-                  <MapPin className="w-3 h-3" /> Endereço não informado
-                </span>
-                <span className="flex items-center gap-1">
-                  <Phone className="w-3 h-3" /> (22) 99955-4939
-                </span>
+            
+            <div className="text-left md:text-right bg-slate-50 print:bg-transparent p-6 rounded-2xl border border-slate-100 print:border-none min-w-[200px]">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 print:text-black mb-1">
+                Número do Pedido
+              </p>
+              <p className="text-4xl font-black text-slate-900 print:text-black font-mono tracking-tighter">
+                #{num}
+              </p>
+              <div className="mt-4 pt-4 border-t border-slate-200 print:border-black/10">
+                <p className="text-sm font-bold text-slate-900 print:text-black">{date}</p>
+                <p className="text-xs font-medium text-slate-500 print:text-black">{time}</p>
               </div>
             </div>
           </div>
-          <div className="text-right">
-            <div className="text-[11px] font-semibold uppercase tracking-widest text-slate-600 print:text-black">
-              Orçamento Nº
-            </div>
-            <div className="text-3xl font-extrabold text-primary print:text-black font-mono leading-tight">#{num}</div>
-            <div className="text-xs font-medium text-slate-700 print:text-black mt-1">{date} às {time}</div>
-          </div>
-        </div>
 
-        {/* Dados do cliente / vendedor / veículo */}
-        {(quote.customer_name || quote.seller || quote.car) && (
-          <div className="mb-6 rounded-xl overflow-hidden border border-slate-200 print:border-black">
-            <div className="bg-slate-100 print:bg-transparent print:border-b print:border-black px-4 py-2">
-              <div className="text-[10px] font-bold uppercase tracking-widest text-slate-600 print:text-black">
-                Informações da venda
+          {/* Info Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <div className="bg-slate-50/50 print:bg-white print:border print:border-black p-5 rounded-2xl border border-slate-100 flex items-center gap-4">
+              <div className="w-10 h-10 bg-blue-100 print:bg-transparent print:border print:border-black rounded-xl flex items-center justify-center shrink-0">
+                <User className="w-5 h-5 text-blue-600 print:text-black" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 print:text-black mb-0.5">Cliente</p>
+                <p className="font-bold text-slate-900 print:text-black truncate">{quote.customer_name || "Consumidor Final"}</p>
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 print:divide-black/40 bg-white">
-              {quote.customer_name && (
-                <div className="flex items-start gap-3 p-4">
-                  <div className="w-9 h-9 rounded-lg bg-primary/10 print:bg-transparent print:border print:border-black flex items-center justify-center shrink-0">
-                    <User className="w-4 h-4 text-primary print:text-black" />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500 print:text-black">
-                      Cliente
-                    </div>
-                    <div className="font-bold text-slate-900 print:text-black truncate">{quote.customer_name}</div>
-                  </div>
-                </div>
-              )}
-              {quote.seller && (
-                <div className="flex items-start gap-3 p-4">
-                  <div className="w-9 h-9 rounded-lg bg-accent/10 print:bg-transparent print:border print:border-black flex items-center justify-center shrink-0">
-                    <UserCircle2 className="w-4 h-4 text-accent print:text-black" />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500 print:text-black">
-                      Vendedor
-                    </div>
-                    <div className="font-bold text-slate-900 print:text-black truncate">{quote.seller}</div>
-                  </div>
-                </div>
-              )}
-              {quote.car && (
-                <div className="flex items-start gap-3 p-4 sm:col-span-2 border-t border-slate-200 print:border-black/40">
-                  <div className="w-9 h-9 rounded-lg bg-slate-200 print:bg-transparent print:border print:border-black flex items-center justify-center shrink-0">
-                    <CarIcon className="w-4 h-4 text-slate-700 print:text-black" />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500 print:text-black">
-                      Veículo
-                    </div>
-                    <div className="font-bold text-slate-900 print:text-black truncate">{quote.car}</div>
-                  </div>
-                </div>
-              )}
+
+            <div className="bg-slate-50/50 print:bg-white print:border print:border-black p-5 rounded-2xl border border-slate-100 flex items-center gap-4">
+              <div className="w-10 h-10 bg-indigo-100 print:bg-transparent print:border print:border-black rounded-xl flex items-center justify-center shrink-0">
+                <UserCircle2 className="w-5 h-5 text-indigo-600 print:text-black" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 print:text-black mb-0.5">Vendedor</p>
+                <p className="font-bold text-slate-900 print:text-black truncate">{quote.seller || "Loja"}</p>
+              </div>
+            </div>
+
+            <div className="bg-slate-50/50 print:bg-white print:border print:border-black p-5 rounded-2xl border border-slate-100 flex items-center gap-4">
+              <div className="w-10 h-10 bg-slate-200 print:bg-transparent print:border print:border-black rounded-xl flex items-center justify-center shrink-0">
+                <CarIcon className="w-5 h-5 text-slate-700 print:text-black" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 print:text-black mb-0.5">Veículo</p>
+                <p className="font-bold text-slate-900 print:text-black truncate">{quote.car || "—"}</p>
+              </div>
             </div>
           </div>
-        )}
 
-        {/* Tabela de itens */}
-        <div className="rounded-lg overflow-hidden border border-slate-200 print:border-black">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-primary text-primary-foreground print:bg-black print:text-white text-left">
-                <th className="py-2.5 px-3 font-bold uppercase text-xs tracking-wider">Produto</th>
-                <th className="py-2.5 px-3 font-bold uppercase text-xs tracking-wider text-center w-16">Qtd</th>
-                <th className="py-2.5 px-3 font-bold uppercase text-xs tracking-wider text-right w-28">Preço un.</th>
-                <th className="py-2.5 px-3 font-bold uppercase text-xs tracking-wider text-right w-28">Subtotal</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((i, idx) => (
-                <tr
-                  key={i.id}
-                  className={`border-t border-slate-200 print:border-black/60 ${
-                    idx % 2 === 1 ? "bg-slate-50 print:bg-transparent" : ""
-                  }`}
-                >
-                  <td className="py-2.5 px-3 font-semibold text-slate-900 print:text-black">{i.product_name}</td>
-                  <td className="py-2.5 px-3 text-center font-bold text-slate-900 print:text-black">{i.quantity}</td>
-                  <td className="py-2.5 px-3 text-right font-mono font-semibold text-slate-900 print:text-black">
-                    R$ {Number(i.unit_price).toFixed(2)}
-                  </td>
-                  <td className="py-2.5 px-3 text-right font-mono font-bold text-slate-900 print:text-black">
-                    R$ {Number(i.subtotal).toFixed(2)}
-                  </td>
+          {/* Items Table */}
+          <div className="rounded-2xl overflow-hidden border border-slate-100 print:border-black mb-10 shadow-sm">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-slate-900 text-white print:bg-black print:text-white text-left">
+                  <th className="py-4 px-6 font-bold uppercase text-[10px] tracking-widest">Descrição do Produto</th>
+                  <th className="py-4 px-6 font-bold uppercase text-[10px] tracking-widest text-center w-20">Qtd</th>
+                  <th className="py-4 px-6 font-bold uppercase text-[10px] tracking-widest text-right w-32">Unitário</th>
+                  <th className="py-4 px-6 font-bold uppercase text-[10px] tracking-widest text-right w-32">Subtotal</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-slate-100 print:divide-black/20">
+                {items.map((i, idx) => (
+                  <tr key={i.id} className={idx % 2 === 1 ? "bg-slate-50/30 print:bg-transparent" : ""}>
+                    <td className="py-4 px-6 font-bold text-slate-800 print:text-black">{i.product_name}</td>
+                    <td className="py-4 px-6 text-center">
+                      <span className="bg-slate-100 print:bg-transparent px-3 py-1 rounded-full font-bold text-slate-900 print:text-black border border-slate-200 print:border-none">
+                        {i.quantity}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6 text-right font-mono font-medium text-slate-500 print:text-black">
+                      {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(i.unit_price)}
+                    </td>
+                    <td className="py-4 px-6 text-right font-mono font-bold text-slate-900 print:text-black">
+                      {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(i.subtotal)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-        {/* Total */}
-        <div className="flex justify-end mt-6">
-          <div
-            className="px-7 py-4 rounded-xl text-right text-primary-foreground print:bg-transparent print:text-black print:border-2 print:border-black"
-            style={{ background: "var(--gradient-brand)" }}
-          >
-            <div className="text-[10px] font-bold uppercase tracking-widest opacity-90 print:opacity-100">
-              Total geral
+          {/* Footer Section */}
+          <div className="flex flex-col md:flex-row justify-between items-end md:items-start gap-10">
+            <div className="flex-1 w-full max-w-md">
+              {quote.notes && (
+                <div className="bg-orange-50/50 print:bg-transparent p-6 rounded-2xl border border-orange-100 print:border-black print:border-dashed">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-orange-600 print:text-black mb-2 flex items-center gap-2">
+                    <Receipt className="w-3 h-3" /> Observações do Pedido
+                  </p>
+                  <p className="text-sm font-medium text-slate-700 print:text-black leading-relaxed">
+                    {quote.notes}
+                  </p>
+                </div>
+              )}
             </div>
-            <div className="text-3xl font-extrabold font-mono leading-tight">
-              R$ {Number(quote.total).toFixed(2)}
+
+            <div className="bg-slate-900 text-white print:bg-white print:text-black print:border-4 print:border-black p-8 rounded-3xl text-right min-w-[280px] shadow-xl shadow-slate-200/50">
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60 print:opacity-100 mb-2">Total do Orçamento</p>
+              <p className="text-5xl font-black font-mono tracking-tighter">
+                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(quote.total)}
+              </p>
             </div>
           </div>
-        </div>
 
-        {/* Observações */}
-        {quote.notes && (
-          <div className="mt-6 pt-4 border-t-2 border-dashed border-slate-200 print:border-black/60">
-            <div className="text-[10px] font-bold uppercase tracking-widest text-slate-600 print:text-black mb-1">
-              Observações
+          {/* Signatures */}
+          <div className="hidden print:grid grid-cols-2 gap-20 mt-24">
+            <div className="text-center">
+              <div className="border-t border-slate-300 print:border-black pt-2 text-[10px] font-black uppercase tracking-widest text-slate-500 print:text-black">
+                Assinatura do Cliente
+              </div>
             </div>
-            <div className="text-sm font-medium text-slate-900 print:text-black whitespace-pre-wrap">
-              {quote.notes}
+            <div className="text-center">
+              <div className="border-t border-slate-300 print:border-black pt-2 text-[10px] font-black uppercase tracking-widest text-slate-500 print:text-black">
+                Abrantes Auto Peças
+              </div>
             </div>
           </div>
-        )}
 
-        {/* Assinaturas (apenas impressão) */}
-        <div className="hidden print:grid grid-cols-2 gap-10 mt-16">
-          <div className="text-center">
-            <div className="border-t-2 border-black pt-1 text-xs font-semibold text-black">Assinatura do cliente</div>
+          <div className="mt-16 pt-6 border-t border-slate-100 print:border-black text-center">
+            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 print:text-black italic">
+              Este documento não possui valor fiscal • Orçamento válido por 5 dias
+            </p>
           </div>
-          <div className="text-center">
-            <div className="border-t-2 border-black pt-1 text-xs font-semibold text-black">Assinatura do vendedor</div>
-          </div>
-        </div>
-
-        <div className="mt-10 pt-4 border-t border-slate-200 print:border-black text-center text-[11px] font-semibold text-slate-600 print:text-black">
-          Documento de orçamento — não possui valor fiscal
         </div>
       </Card>
+
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
