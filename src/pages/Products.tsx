@@ -53,25 +53,25 @@ const Products = () => {
   const load = async (searchQuery = "") => {
     setSearching(true);
     try {
-      let supabaseQuery = supabase
-        .from("products")
-        .select("*")
-        .order("name")
-        .limit(100);
-
       const q = searchQuery.trim();
-      if (q) {
-        // Use ILIKE for better performance with pg_trgm index
-        supabaseQuery = supabaseQuery.or(`name.ilike.%${q}%,description.ilike.%${q}%`);
-      }
-
-      const { data, error } = await supabaseQuery;
+      let response;
       
-      if (error) {
-        toast.error(error.message);
+      if (q) {
+        // Use the specialized RPC function for optimized trgm search
+        response = await supabase.rpc('search_products', { search_term: q });
+      } else {
+        response = await supabase
+          .from("products")
+          .select("*")
+          .order("name")
+          .limit(100);
+      }
+      
+      if (response.error) {
+        toast.error(response.error.message);
         return;
       }
-      setItems((data ?? []) as Product[]);
+      setItems((response.data ?? []) as Product[]);
     } finally {
       setSearching(false);
     }
@@ -393,7 +393,7 @@ const Products = () => {
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Pesquisa por descrição, nome..."
+            placeholder={searching ? "Buscando..." : "Pesquisa por descrição, nome..."}
             className="pl-9"
           />
         </div>

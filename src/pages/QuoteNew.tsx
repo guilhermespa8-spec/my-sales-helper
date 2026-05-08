@@ -94,23 +94,25 @@ const QuoteNew = () => {
   const fetchProducts = async (q: string) => {
     setSearching(true);
     try {
-      let query = supabase
-        .from("products")
-        .select("id,name,description,price,car_filter")
-        .order("name")
-        .limit(100);
-
       const trimmedQ = q.trim();
+      let response;
+      
       if (trimmedQ) {
-        query = query.or(`name.ilike.%${trimmedQ}%,description.ilike.%${trimmedQ}%`);
+        // RPC calls are much faster for indexed fuzzy search
+        response = await supabase.rpc('search_products', { search_term: trimmedQ });
+      } else {
+        response = await supabase
+          .from("products")
+          .select("id,name,description,price,car_filter")
+          .order("name")
+          .limit(100);
       }
-
-      const { data, error } = await query;
-      if (error) {
+      
+      if (response.error) {
         toast.error("Erro ao carregar produtos");
         return;
       }
-      setProducts((data ?? []) as Product[]);
+      setProducts((response.data ?? []) as Product[]);
     } finally {
       setSearching(false);
     }
@@ -353,7 +355,7 @@ const QuoteNew = () => {
                     ref={searchRef}
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Pesquisar produto..."
+                    placeholder={searching ? "Buscando..." : "Pesquisar produto..."}
                     className="flex-1 h-6 px-1 text-[12px] outline-none border-0 bg-transparent text-slate-100 placeholder:text-slate-500"
                   />
                   <button onClick={() => { setShowSearch(false); setSearch(""); }} className="text-slate-400 hover:text-white">
