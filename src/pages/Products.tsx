@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Copy, RefreshCw, ShieldCheck, Key } from "lucide-react";
 import { z } from "zod";
 import * as XLSX from "xlsx";
 import { supabase } from "@/integrations/supabase/client";
