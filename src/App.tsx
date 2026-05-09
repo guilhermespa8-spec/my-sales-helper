@@ -19,6 +19,7 @@ const Mechanics = lazy(() => import("./pages/Mechanics"));
 const Fiado = lazy(() => import("./pages/Fiado"));
 const FiadosPagos = lazy(() => import("./pages/FiadosPagos"));
 const Cars = lazy(() => import("./pages/Cars"));
+const Sellers = lazy(() => import("./pages/Sellers"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Loading fallback component
@@ -54,6 +55,7 @@ const App = () => (
               <Route path="/fiado" element={<Protected><Fiado /></Protected>} />
               <Route path="/fiados-pagos" element={<Protected><FiadosPagos /></Protected>} />
               <Route path="/carros" element={<Protected><Cars /></Protected>} />
+              <Route path="/vendedores" element={<Protected><Sellers /></Protected>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>

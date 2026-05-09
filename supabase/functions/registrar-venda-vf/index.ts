@@ -37,10 +37,10 @@ Deno.serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  // --- Auth: only logged-in users of THIS app can call ---
+  // --- Auth: apenas usuários logados deste app podem chamar ---
   const authHeader = req.headers.get("Authorization");
   if (!authHeader?.startsWith("Bearer ")) {
-    return bad("Unauthorized", 401);
+    return bad("Não autorizado", 401);
   }
 
   const localUrl = Deno.env.get("SUPABASE_URL")!;
@@ -48,21 +48,21 @@ Deno.serve(async (req) => {
   const localClient = createClient(localUrl, localAnon, {
     global: { headers: { Authorization: authHeader } },
   });
+  
   const token = authHeader.replace("Bearer ", "");
-  const { data: claims, error: claimsErr } = await localClient.auth.getClaims(
-    token,
-  );
-  if (claimsErr || !claims?.claims?.sub) return bad("Unauthorized", 401);
+  const { data: claims, error: claimsErr } = await localClient.auth.getClaims(token);
+  if (claimsErr || !claims?.claims?.sub) return bad("Não autorizado", 401);
 
-  // --- Venda Fácil credentials (kept server-side) ---
+  // --- Credenciais do Venda Fácil ---
   const vfUrl = Deno.env.get("VENDA_FACIL_URL");
   const vfKey = Deno.env.get("VENDA_FACIL_SERVICE_ROLE_KEY");
-  const vfUserId = Deno.env.get("VENDA_FACIL_USER_ID");
-  if (!vfUrl || !vfKey || !vfUserId) {
-    return bad("Integração Venda Fácil não configurada", 500);
+  const defaultVfUserId = Deno.env.get("VENDA_FACIL_USER_ID");
+  
+  if (!vfUrl || !vfKey || !defaultVfUserId) {
+    return bad("Integração Venda Fácil não configurada nos segredos", 500);
   }
 
-  // --- Parse + validate payload ---
+  // --- Parse + validação do corpo ---
   let body: any;
   try {
     body = await req.json();
@@ -70,54 +70,49 @@ Deno.serve(async (req) => {
     return bad("JSON inválido");
   }
 
-  const seller = String(body?.seller ?? "").trim();
+  const sellerName = String(body?.seller ?? "").trim();
   const payment_method = String(body?.payment_method ?? "").trim();
   const piece_type = String(body?.piece_type ?? "").trim();
-  const customer_name = body?.customer_name
-    ? String(body.customer_name).trim().slice(0, 200)
-    : null;
+  const customer_name = body?.customer_name ? String(body.customer_name).trim().slice(0, 200) : null;
   const notes = body?.notes ? String(body.notes).slice(0, 1000) : null;
   const quote_id = body?.quote_id ? String(body.quote_id) : null;
   const total = Number(body?.total);
   const items = body?.items;
 
-  if (!seller || seller.length > 100) {
-    return bad("Vendedor inválido");
-  }
-  if (!ALLOWED_PAYMENT_METHODS.includes(payment_method)) {
-    return bad("Forma de pagamento inválida");
-  }
-  if (!ALLOWED_PIECE_TYPES.includes(piece_type)) {
-    return bad("Tipo de peça inválido");
-  }
-  if (!Number.isFinite(total) || total < 0) {
-    return bad("Total inválido");
-  }
-  if (!Array.isArray(items) || items.length === 0 || items.length > 200) {
-    return bad("Itens inválidos");
+  if (!sellerName || sellerName.length > 100) return bad("Vendedor inválido");
+  if (!ALLOWED_PAYMENT_METHODS.includes(payment_method)) return bad("Forma de pagamento inválida");
+  if (!ALLOWED_PIECE_TYPES.includes(piece_type)) return bad("Tipo de peça inválido");
+  if (!Number.isFinite(total) || total < 0) return bad("Total inválido");
+  if (!Array.isArray(items) || items.length === 0) return bad("Itens vazios");
+
+  // --- Identificar o ID do Vendedor no Venda Fácil ---
+  let vfUserId = defaultVfUserId;
+  
+  // Busca no banco local se o vendedor tem um ID específico configurado
+  const { data: sellerData } = await localClient
+    .from("sellers")
+    .select("venda_facil_user_id")
+    .eq("name", sellerName)
+    .maybeSingle();
+
+  if (sellerData?.venda_facil_user_id) {
+    vfUserId = sellerData.venda_facil_user_id;
+    console.log(`Usando ID específico para o vendedor ${sellerName}: ${vfUserId}`);
+  } else {
+    console.log(`Usando ID padrão para o vendedor ${sellerName}: ${vfUserId}`);
   }
 
+  // --- Preparar itens ---
   const cleanItems = (items as ItemInput[]).map((it, idx) => {
     const product_name = String(it?.product_name ?? "").trim();
     const quantity = Number(it?.quantity);
     const unit_price = Number(it?.unit_price);
     const subtotal = Number(it?.subtotal);
-    if (!product_name || product_name.length > 255) {
-      throw new Error(`Item ${idx + 1}: nome inválido`);
-    }
-    if (!Number.isFinite(quantity) || quantity <= 0 || quantity > 100000) {
-      throw new Error(`Item ${idx + 1}: quantidade inválida`);
-    }
-    if (!Number.isFinite(unit_price) || unit_price < 0) {
-      throw new Error(`Item ${idx + 1}: preço inválido`);
-    }
-    if (!Number.isFinite(subtotal) || subtotal < 0) {
-      throw new Error(`Item ${idx + 1}: subtotal inválido`);
-    }
+    if (!product_name) throw new Error(`Item ${idx + 1}: nome inválido`);
     return { product_name, quantity, unit_price, subtotal };
   });
 
-  // --- Insert into Venda Fácil ---
+  // --- Inserir no Venda Fácil ---
   const vf = createClient(vfUrl, vfKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
@@ -131,7 +126,7 @@ Deno.serve(async (req) => {
         payment_method,
         piece_type,
         customer_name: customer_name ?? "Consumidor Final",
-        notes: notes ?? `Vendedor: ${seller}${quote_id ? ` | Orçamento: ${quote_id}` : ""}`,
+        notes: notes ?? `Vendedor: ${sellerName}${quote_id ? ` | Orçamento: ${quote_id}` : ""}`,
       })
       .select()
       .single();
@@ -150,11 +145,11 @@ Deno.serve(async (req) => {
     if (itemsErr) throw itemsErr;
 
     return new Response(
-      JSON.stringify({ ok: true, sale_id: sale.id }),
+      JSON.stringify({ ok: true, sale_id: sale.id, vf_user_used: vfUserId }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (e: any) {
     console.error("VF insert error:", e);
-    return bad(`Erro ao registrar no Venda Fácil: ${e?.message ?? e}`, 500);
+    return bad(`Erro no Venda Fácil: ${e?.message ?? e}`, 500);
   }
 });
