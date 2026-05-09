@@ -145,6 +145,9 @@ Deno.serve(async (req) => {
   });
 
   try {
+    console.log("URL do Venda Fácil:", vfUrl);
+    console.log("Tentando inserir venda...");
+    
     const { data: sale, error: saleErr } = await vf
       .from("sales")
       .insert({
@@ -168,6 +171,8 @@ Deno.serve(async (req) => {
       throw saleErr;
     }
 
+    console.log("Venda inserida com sucesso:", sale.id);
+
     const saleItems = cleanItems.map((it) => ({
       sale_id: sale.id,
       product_name: it.product_name,
@@ -185,6 +190,7 @@ Deno.serve(async (req) => {
     );
   } catch (e: any) {
     console.error("VF insert error:", e);
+    console.error("Error stack:", e?.stack || "sem stack");
     return bad(`Erro no Venda Fácil: ${e?.message ?? e}`, 500);
   }
 });
