@@ -336,6 +336,7 @@ export type Database = {
           id: string
           name: string
           user_id: string
+          venda_facil_user_id: string | null
         }
         Insert: {
           active?: boolean | null
@@ -343,6 +344,7 @@ export type Database = {
           id?: string
           name: string
           user_id: string
+          venda_facil_user_id?: string | null
         }
         Update: {
           active?: boolean | null
@@ -350,6 +352,7 @@ export type Database = {
           id?: string
           name?: string
           user_id?: string
+          venda_facil_user_id?: string | null
         }
         Relationships: []
       }
