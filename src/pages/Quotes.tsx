@@ -134,6 +134,21 @@ const Quotes = () => {
                       </span>
                     </div>
                   </TableCell>
+                  <TableCell>
+                    <span className="text-sm font-medium text-slate-600">
+                      {q.seller || "Loja"}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-sm font-medium text-slate-600">
+                      {q.payment_method || "—"}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-blue-50 text-blue-700">
+                      {q.piece_type || "—"}
+                    </span>
+                  </TableCell>
                   <TableCell className="text-slate-500 font-medium">
                     {new Date(q.created_at).toLocaleString("pt-BR", { 
                       day: "2-digit", 
