@@ -8,7 +8,6 @@ import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { createClient } from "@supabase/supabase-js";
 
 interface Quote {
   id: string; quote_number: number; customer_name: string | null;
@@ -57,56 +56,36 @@ const QuoteDetail = () => {
 
   const handleRegisterSale = async () => {
     if (!quote || items.length === 0) return;
-
-    const vfUrl = (import.meta as any).env.VITE_VENDA_FACIL_URL;
-    const vfKey = (import.meta as any).env.VITE_VENDA_FACIL_SERVICE_ROLE_KEY;
-    const vfUserId = (import.meta as any).env.VITE_VENDA_FACIL_USER_ID;
-
-    if (!vfUrl || !vfKey || !vfUserId) {
-      toast.error("Configurações do Venda Fácil não encontradas nas variáveis de ambiente.");
+    if (!quote.seller || !quote.payment_method || !quote.piece_type) {
+      toast.error("Preencha vendedor, forma de pagamento e tipo de peça antes de registrar.");
       return;
     }
 
     setRegistering(true);
     try {
-      const vfSupabase = createClient(vfUrl, vfKey);
-
-      // 1. Registrar a venda (sales)
-      const { data: saleData, error: saleError } = await vfSupabase
-        .from("sales")
-        .insert({
-          user_id: vfUserId,
-          total_amount: quote.total,
-          payment_method: quote.payment_method || "Dinheiro",
-          seller_name: quote.seller || "Não informado",
-          customer_name: quote.customer_name || "Consumidor Final",
-          status: "completed",
-        })
-        .select()
-        .single();
-
-      if (saleError) throw saleError;
-
-      // 2. Registrar os itens da venda (sale_items)
-      const saleItems = items.map(item => ({
-        sale_id: saleData.id,
-        product_name: item.product_name,
-        quantity: item.quantity,
-        unit_price: item.unit_price,
-        subtotal: item.subtotal,
-        piece_type: quote.piece_type || "Peça"
-      }));
-
-      const { error: itemsError } = await vfSupabase
-        .from("sale_items")
-        .insert(saleItems);
-
-      if (itemsError) throw itemsError;
-
-      toast.success("Venda registrada com sucesso no Venda Fácil!");
-    } catch (error: any) {
-      console.error("Erro ao registrar venda:", error);
-      toast.error(`Erro ao registrar no Venda Fácil: ${error.message}`);
+      const { data, error } = await supabase.functions.invoke("registrar-venda-vf", {
+        body: {
+          quote_id: quote.id,
+          seller: quote.seller,
+          payment_method: quote.payment_method,
+          piece_type: quote.piece_type,
+          customer_name: quote.customer_name,
+          notes: quote.notes,
+          total: quote.total,
+          items: items.map((i) => ({
+            product_name: i.product_name,
+            quantity: i.quantity,
+            unit_price: i.unit_price,
+            subtotal: i.subtotal,
+          })),
+        },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      toast.success("Venda registrada no Venda Fácil!");
+    } catch (err: any) {
+      console.error("Erro ao registrar venda:", err);
+      toast.error(err?.message ?? "Erro ao registrar venda");
     } finally {
       setRegistering(false);
     }
