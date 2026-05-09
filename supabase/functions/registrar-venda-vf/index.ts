@@ -8,6 +8,7 @@ const corsHeaders = {
 
 const ALLOWED_PAYMENT_METHODS = [
   "Dinheiro",
+  "PIX",
   "Pix",
   "Cartão de Crédito",
   "Cartão de Débito",
