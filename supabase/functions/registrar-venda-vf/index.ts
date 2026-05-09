@@ -44,14 +44,16 @@ Deno.serve(async (req) => {
   }
 
   const localUrl = Deno.env.get("SUPABASE_URL")!;
-  const localAnon = Deno.env.get("SUPABASE_ANON_KEY")!;
-  const localClient = createClient(localUrl, localAnon, {
-    global: { headers: { Authorization: authHeader } },
-  });
+  const localServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const localClient = createClient(localUrl, localServiceKey);
   
   const token = authHeader.replace("Bearer ", "");
-  const { data: claims, error: claimsErr } = await localClient.auth.getClaims(token);
-  if (claimsErr || !claims?.claims?.sub) return bad("Não autorizado", 401);
+  const { data: { user }, error: authErr } = await localClient.auth.getUser(token);
+  
+  if (authErr || !user) {
+    console.error("Auth error:", authErr);
+    return bad("Não autorizado", 401);
+  }
 
   // --- Credenciais do Venda Fácil ---
   const vfUrl = Deno.env.get("VENDA_FACIL_URL");
