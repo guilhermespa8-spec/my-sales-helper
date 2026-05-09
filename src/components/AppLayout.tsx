@@ -21,6 +21,7 @@ import {
   FileSpreadsheet,
   Car,
   CheckCircle2,
+  UserCheck,
 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 
@@ -41,6 +42,7 @@ const menu: Item[] = [
   { to: "/mecanicos", label: "Mecânicos", icon: Wrench },
   { to: "/fiado", label: "Fiado", icon: Wallet },
   { to: "/fiados-pagos", label: "Fiados Pagos", icon: CheckCircle2 },
+  { to: "/vendedores", label: "Vendedores", icon: UserCheck },
 ];
 
 const AppLayout = ({ children }: { children: ReactNode }) => {
