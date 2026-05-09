@@ -134,7 +134,15 @@ Deno.serve(async (req) => {
       .select()
       .single();
 
-    if (saleErr) throw saleErr;
+    if (saleErr) {
+      console.error("VF insert error details:", {
+        error: saleErr,
+        status: saleErr?.status,
+        code: saleErr?.code,
+        message: saleErr?.message,
+      });
+      throw saleErr;
+    }
 
     const saleItems = cleanItems.map((it) => ({
       sale_id: sale.id,
