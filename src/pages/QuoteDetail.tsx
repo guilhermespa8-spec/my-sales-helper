@@ -3,11 +3,12 @@ import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Printer, ArrowLeft, Receipt, Wrench, User, UserCircle2, Car as CarIcon, Phone, MapPin, FileText } from "lucide-react";
+import { Printer, ArrowLeft, Receipt, Wrench, User, UserCircle2, Car as CarIcon, Phone, MapPin, FileText, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { createClient } from "@supabase/supabase-js";
 
 interface Quote {
   id: string; quote_number: number; customer_name: string | null;
@@ -26,6 +27,7 @@ const QuoteDetail = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedMechanic, setSelectedMechanic] = useState<string>("");
   const [saving, setSaving] = useState(false);
+  const [registering, setRegistering] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -53,6 +55,63 @@ const QuoteDetail = () => {
     nav("/fiado");
   };
 
+  const handleRegisterSale = async () => {
+    if (!quote || items.length === 0) return;
+
+    const vfUrl = (import.meta as any).env.VITE_VENDA_FACIL_URL;
+    const vfKey = (import.meta as any).env.VITE_VENDA_FACIL_SERVICE_ROLE_KEY;
+    const vfUserId = (import.meta as any).env.VITE_VENDA_FACIL_USER_ID;
+
+    if (!vfUrl || !vfKey || !vfUserId) {
+      toast.error("Configurações do Venda Fácil não encontradas nas variáveis de ambiente.");
+      return;
+    }
+
+    setRegistering(true);
+    try {
+      const vfSupabase = createClient(vfUrl, vfKey);
+
+      // 1. Registrar a venda (sales)
+      const { data: saleData, error: saleError } = await vfSupabase
+        .from("sales")
+        .insert({
+          user_id: vfUserId,
+          total_amount: quote.total,
+          payment_method: quote.payment_method || "Dinheiro",
+          seller_name: quote.seller || "Não informado",
+          customer_name: quote.customer_name || "Consumidor Final",
+          status: "completed",
+        })
+        .select()
+        .single();
+
+      if (saleError) throw saleError;
+
+      // 2. Registrar os itens da venda (sale_items)
+      const saleItems = items.map(item => ({
+        sale_id: saleData.id,
+        product_name: item.product_name,
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+        subtotal: item.subtotal,
+        piece_type: quote.piece_type || "Peça"
+      }));
+
+      const { error: itemsError } = await vfSupabase
+        .from("sale_items")
+        .insert(saleItems);
+
+      if (itemsError) throw itemsError;
+
+      toast.success("Venda registrada com sucesso no Venda Fácil!");
+    } catch (error: any) {
+      console.error("Erro ao registrar venda:", error);
+      toast.error(`Erro ao registrar no Venda Fácil: ${error.message}`);
+    } finally {
+      setRegistering(false);
+    }
+  };
+
   if (!quote) return <div className="text-center py-12 text-muted-foreground">Carregando...</div>;
 
   const num = String(quote.quote_number).padStart(4, "0");
@@ -69,6 +128,14 @@ const QuoteDetail = () => {
         <div className="flex gap-3">
           <Button variant="outline" onClick={() => setDialogOpen(true)} className="border-blue-200 text-blue-700 hover:bg-blue-50">
             <Wrench className="w-4 h-4 mr-2" /> Vincular ao Fiado
+          </Button>
+          <Button 
+            onClick={handleRegisterSale} 
+            disabled={registering}
+            className="bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-100"
+          >
+            <CheckCircle2 className="w-4 h-4 mr-2" /> 
+            {registering ? "Registrando..." : "REGISTRAR VENDA"}
           </Button>
           <Button onClick={() => window.print()} className="bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-200">
             <Printer className="w-4 h-4 mr-2" /> Imprimir Documento
