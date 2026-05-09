@@ -11,7 +11,7 @@ import { Search, X, Plus, Minus, Trash2, ArrowLeft, Save, User, Car as CarIcon, 
 
 const SELLERS = ["André", "João Victor", "Mateus", "Loja"] as const;
 const PAYMENT_METHODS = ["Dinheiro", "Cartão de Crédito", "Cartão de Débito", "PIX", "Boleto", "Fiado"] as const;
-const PIECE_TYPES = ["Nova", "Usada", "Recondicionada", "Outro"] as const;
+const PIECE_TYPES = ["Peça", "Peça Separada", "LED", "Vonixx"] as const;
 
 interface Product { id: string; name: string; description: string | null; price: number; car_filter?: string | null; }
 interface Item { product_id: string; product_name: string; quantity: number; unit_price: number; }
@@ -31,7 +31,7 @@ const QuoteNew = () => {
   const [car, setCar] = useState("");
   const [notes, setNotes] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<string>("Dinheiro");
-  const [pieceType, setPieceType] = useState<string>("Nova");
+  const [pieceType, setPieceType] = useState<string>("Peça");
   const [items, setItems] = useState<Item[]>([]);
   const [search, setSearch] = useState("");
   const [saving, setSaving] = useState(false);
@@ -63,7 +63,7 @@ const QuoteNew = () => {
       setCar((q as any).car ?? "");
       setNotes(q.notes ?? "");
       setPaymentMethod((q as any).payment_method ?? "Dinheiro");
-      setPieceType((q as any).piece_type ?? "Nova");
+      setPieceType((q as any).piece_type ?? "Peça");
       setQuoteNumber(q.quote_number);
       const { data: its, error: e2 } = await supabase.from("quote_items").select("*").eq("quote_id", editId);
       if (e2) { toast.error(e2.message); return; }

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Printer, ArrowLeft, Receipt, Wrench, User, UserCircle2, Car as CarIcon, Phone, MapPin } from "lucide-react";
+import { Printer, ArrowLeft, Receipt, Wrench, User, UserCircle2, Car as CarIcon, Phone, MapPin, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -13,6 +13,7 @@ interface Quote {
   id: string; quote_number: number; customer_name: string | null;
   total: number; notes: string | null; created_at: string;
   seller: string | null; car: string | null;
+  payment_method: string | null; piece_type: string | null;
 }
 interface Item { id: string; product_name: string; quantity: number; unit_price: number; subtotal: number; }
 
@@ -119,34 +120,54 @@ const QuoteDetail = () => {
           </div>
 
           {/* Info Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-            <div className="bg-slate-50/50 print:bg-white print:border print:border-black p-5 rounded-2xl border border-slate-100 flex items-center gap-4">
-              <div className="w-10 h-10 bg-blue-100 print:bg-transparent print:border print:border-black rounded-xl flex items-center justify-center shrink-0">
-                <User className="w-5 h-5 text-blue-600 print:text-black" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-12">
+            <div className="bg-slate-50/50 print:bg-white print:border print:border-black p-4 rounded-2xl border border-slate-100 flex items-center gap-3">
+              <div className="w-9 h-9 bg-blue-100 print:bg-transparent print:border print:border-black rounded-xl flex items-center justify-center shrink-0">
+                <User className="w-4 h-4 text-blue-600 print:text-black" />
               </div>
               <div className="min-w-0">
                 <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 print:text-black mb-0.5">Cliente</p>
-                <p className="font-bold text-slate-900 print:text-black truncate">{quote.customer_name || "Consumidor Final"}</p>
+                <p className="font-bold text-slate-900 print:text-black truncate text-sm">{quote.customer_name || "Consumidor Final"}</p>
               </div>
             </div>
 
-            <div className="bg-slate-50/50 print:bg-white print:border print:border-black p-5 rounded-2xl border border-slate-100 flex items-center gap-4">
-              <div className="w-10 h-10 bg-indigo-100 print:bg-transparent print:border print:border-black rounded-xl flex items-center justify-center shrink-0">
-                <UserCircle2 className="w-5 h-5 text-indigo-600 print:text-black" />
+            <div className="bg-slate-50/50 print:bg-white print:border print:border-black p-4 rounded-2xl border border-slate-100 flex items-center gap-3">
+              <div className="w-9 h-9 bg-indigo-100 print:bg-transparent print:border print:border-black rounded-xl flex items-center justify-center shrink-0">
+                <UserCircle2 className="w-4 h-4 text-indigo-600 print:text-black" />
               </div>
               <div className="min-w-0">
                 <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 print:text-black mb-0.5">Vendedor</p>
-                <p className="font-bold text-slate-900 print:text-black truncate">{quote.seller || "Loja"}</p>
+                <p className="font-bold text-slate-900 print:text-black truncate text-sm">{quote.seller || "Loja"}</p>
               </div>
             </div>
 
-            <div className="bg-slate-50/50 print:bg-white print:border print:border-black p-5 rounded-2xl border border-slate-100 flex items-center gap-4">
-              <div className="w-10 h-10 bg-slate-200 print:bg-transparent print:border print:border-black rounded-xl flex items-center justify-center shrink-0">
-                <CarIcon className="w-5 h-5 text-slate-700 print:text-black" />
+            <div className="bg-slate-50/50 print:bg-white print:border print:border-black p-4 rounded-2xl border border-slate-100 flex items-center gap-3">
+              <div className="w-9 h-9 bg-slate-200 print:bg-transparent print:border print:border-black rounded-xl flex items-center justify-center shrink-0">
+                <CarIcon className="w-4 h-4 text-slate-700 print:text-black" />
               </div>
               <div className="min-w-0">
                 <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 print:text-black mb-0.5">Veículo</p>
-                <p className="font-bold text-slate-900 print:text-black truncate">{quote.car || "—"}</p>
+                <p className="font-bold text-slate-900 print:text-black truncate text-sm">{quote.car || "—"}</p>
+              </div>
+            </div>
+
+            <div className="bg-slate-50/50 print:bg-white print:border print:border-black p-4 rounded-2xl border border-slate-100 flex items-center gap-3">
+              <div className="w-9 h-9 bg-green-100 print:bg-transparent print:border print:border-black rounded-xl flex items-center justify-center shrink-0">
+                <Receipt className="w-4 h-4 text-green-600 print:text-black" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 print:text-black mb-0.5">Pagamento</p>
+                <p className="font-bold text-slate-900 print:text-black truncate text-sm">{quote.payment_method || "—"}</p>
+              </div>
+            </div>
+
+            <div className="bg-slate-50/50 print:bg-white print:border print:border-black p-4 rounded-2xl border border-slate-100 flex items-center gap-3">
+              <div className="w-9 h-9 bg-orange-100 print:bg-transparent print:border print:border-black rounded-xl flex items-center justify-center shrink-0">
+                <FileText className="w-4 h-4 text-orange-600 print:text-black" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 print:text-black mb-0.5">Tipo</p>
+                <p className="font-bold text-slate-900 print:text-black truncate text-sm">{quote.piece_type || "—"}</p>
               </div>
             </div>
           </div>

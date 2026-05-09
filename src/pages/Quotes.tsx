@@ -10,6 +10,7 @@ import { toast } from "sonner";
 interface Quote {
   id: string; quote_number: number; customer_name: string | null;
   total: number; created_at: string;
+  seller: string | null; payment_method: string | null; piece_type: string | null;
 }
 
 const Quotes = () => {
@@ -108,11 +109,14 @@ const Quotes = () => {
           <Table>
             <TableHeader className="bg-slate-50/50">
               <TableRow className="hover:bg-transparent">
-                <TableHead className="w-[120px] py-4 pl-6 font-bold text-slate-900">Pedido</TableHead>
+                <TableHead className="w-[100px] py-4 pl-6 font-bold text-slate-900">Pedido</TableHead>
                 <TableHead className="font-bold text-slate-900">Cliente</TableHead>
+                <TableHead className="font-bold text-slate-900">Vendedor</TableHead>
+                <TableHead className="font-bold text-slate-900">Pagamento</TableHead>
+                <TableHead className="font-bold text-slate-900">Tipo</TableHead>
                 <TableHead className="font-bold text-slate-900">Data e Hora</TableHead>
                 <TableHead className="text-right font-bold text-slate-900">Valor Total</TableHead>
-                <TableHead className="w-[160px] text-right py-4 pr-6 font-bold text-slate-900">Ações</TableHead>
+                <TableHead className="w-[140px] text-right py-4 pr-6 font-bold text-slate-900">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -129,6 +133,21 @@ const Quotes = () => {
                         {q.customer_name || "Consumidor Final"}
                       </span>
                     </div>
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-sm font-medium text-slate-600">
+                      {q.seller || "Loja"}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-sm font-medium text-slate-600">
+                      {q.payment_method || "—"}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-blue-50 text-blue-700">
+                      {q.piece_type || "—"}
+                    </span>
                   </TableCell>
                   <TableCell className="text-slate-500 font-medium">
                     {new Date(q.created_at).toLocaleString("pt-BR", { 
