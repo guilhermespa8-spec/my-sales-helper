@@ -88,6 +88,20 @@ Deno.serve(async (req) => {
   if (!Number.isFinite(total) || total < 0) return bad("Total inválido");
   if (!Array.isArray(items) || items.length === 0) return bad("Itens vazios");
 
+   // --- Validar itens antes de processar ---
+  for (let i = 0; i < items.length; i++) {
+    const it = items[i];
+    if (!it?.product_name || typeof it.product_name !== 'string' || it.product_name.trim() === '') {
+      return bad(`Item ${i + 1}: nome do produto é obrigatório`);
+    }
+    const qty = Number(it?.quantity);
+    const price = Number(it?.unit_price);
+    const sub = Number(it?.subtotal);
+    if (!Number.isFinite(qty) || qty <= 0) return bad(`Item ${i + 1}: quantidade inválida`);
+    if (!Number.isFinite(price) || price < 0) return bad(`Item ${i + 1}: preço inválido`);
+    if (!Number.isFinite(sub) || sub < 0) return bad(`Item ${i + 1}: subtotal inválido`);
+  }
+
   // --- Identificar o ID do Vendedor no Venda Fácil ---
   let vfUserId = defaultVfUserId;
   
@@ -104,6 +118,16 @@ Deno.serve(async (req) => {
   } else {
     console.log(`Usando ID padrão para o vendedor ${sellerName}: ${vfUserId}`);
   }
+
+  // --- Log de dados antes de enviar ---
+  console.log("Dados a inserir no Venda Fácil:", {
+    user_id: vfUserId,
+    total,
+    payment_method,
+    piece_type,
+    customer_name: customer_name ?? "Consumidor Final",
+    items_count: items.length,
+  });
 
   // --- Preparar itens ---
   const cleanItems = (items as ItemInput[]).map((it, idx) => {
@@ -134,7 +158,15 @@ Deno.serve(async (req) => {
       .select()
       .single();
 
-    if (saleErr) throw saleErr;
+    if (saleErr) {
+      console.error("VF insert error details:", {
+        error: saleErr,
+        status: saleErr?.status,
+        code: saleErr?.code,
+        message: saleErr?.message,
+      });
+      throw saleErr;
+    }
 
     const saleItems = cleanItems.map((it) => ({
       sale_id: sale.id,
