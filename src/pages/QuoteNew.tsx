@@ -63,7 +63,7 @@ const QuoteNew = () => {
       setCar((q as any).car ?? "");
       setNotes(q.notes ?? "");
       setPaymentMethod((q as any).payment_method ?? "Dinheiro");
-      setPieceType((q as any).piece_type ?? "Nova");
+      setPieceType((q as any).piece_type ?? "Peça");
       setQuoteNumber(q.quote_number);
       const { data: its, error: e2 } = await supabase.from("quote_items").select("*").eq("quote_id", editId);
       if (e2) { toast.error(e2.message); return; }
