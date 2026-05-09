@@ -31,7 +31,7 @@ const QuoteNew = () => {
   const [car, setCar] = useState("");
   const [notes, setNotes] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<string>("Dinheiro");
-  const [pieceType, setPieceType] = useState<string>("Nova");
+  const [pieceType, setPieceType] = useState<string>("Peça");
   const [items, setItems] = useState<Item[]>([]);
   const [search, setSearch] = useState("");
   const [saving, setSaving] = useState(false);
