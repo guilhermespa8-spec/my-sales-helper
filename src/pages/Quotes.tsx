@@ -10,6 +10,7 @@ import { toast } from "sonner";
 interface Quote {
   id: string; quote_number: number; customer_name: string | null;
   total: number; created_at: string;
+  seller: string | null; payment_method: string | null; piece_type: string | null;
 }
 
 const Quotes = () => {
