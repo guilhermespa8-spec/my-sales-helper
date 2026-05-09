@@ -11,7 +11,7 @@ import { Search, X, Plus, Minus, Trash2, ArrowLeft, Save, User, Car as CarIcon, 
 
 const SELLERS = ["André", "João Victor", "Mateus", "Loja"] as const;
 const PAYMENT_METHODS = ["Dinheiro", "Cartão de Crédito", "Cartão de Débito", "PIX", "Boleto", "Fiado"] as const;
-const PIECE_TYPES = ["Nova", "Usada", "Recondicionada", "Outro"] as const;
+const PIECE_TYPES = ["Peça", "Peça Separada", "LED", "Vonixx"] as const;
 
 interface Product { id: string; name: string; description: string | null; price: number; car_filter?: string | null; }
 interface Item { product_id: string; product_name: string; quantity: number; unit_price: number; }
