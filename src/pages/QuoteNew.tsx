@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Search, X, Plus, Minus, Trash2, ArrowLeft, Save, User, Car as CarIcon, FileText } from "lucide-react";
 
-const SELLERS = ["André", "João Victor", "Mateus", "Loja"] as const;
+// SELLERS are now loaded from the database
 const PAYMENT_METHODS = ["Dinheiro", "Cartão de Crédito", "Cartão de Débito", "PIX", "Boleto", "Fiado"] as const;
 const PIECE_TYPES = ["Peça", "Peça Separada", "LED", "Vonixx"] as const;
 
@@ -25,6 +25,7 @@ const QuoteNew = () => {
   const isEdit = Boolean(editId);
   const [products, setProducts] = useState<Product[]>([]);
   const [mechanics, setMechanics] = useState<Mechanic[]>([]);
+  const [sellersList, setSellersList] = useState<{ id: string, name: string }[]>([]);
   const [carsList, setCarsList] = useState<CarRecord[]>([]);
   const [customer, setCustomer] = useState("");
   const [seller, setSeller] = useState<string>("");
@@ -76,12 +77,14 @@ const QuoteNew = () => {
 
   useEffect(() => {
     const loadStaticData = async () => {
-      const [mecsRes, carsRes] = await Promise.all([
+      const [mecsRes, carsRes, sellersRes] = await Promise.all([
         supabase.from("mechanics").select("id,name").order("name"),
-        supabase.from("cars").select("id,name,notes").order("name")
+        supabase.from("cars").select("id,name,notes").order("name"),
+        supabase.from("sellers").select("id,name").order("name")
       ]);
       if (mecsRes.data) setMechanics(mecsRes.data as Mechanic[]);
       if (carsRes.data) setCarsList(carsRes.data as CarRecord[]);
+      if (sellersRes.data) setSellersList(sellersRes.data as { id: string, name: string }[]);
     };
     loadStaticData();
   }, []);
@@ -239,7 +242,7 @@ const QuoteNew = () => {
                     className="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-bold text-slate-900"
                   >
                     <option value="">Selecione um Vendedor</option>
-                    {SELLERS.map((s) => (<option key={s} value={s}>{s}</option>))}
+                    {sellersList.map((s) => (<option key={s.id} value={s.name}>{s.name}</option>))}
                   </select>
                 </div>
                 <div className="space-y-2">
