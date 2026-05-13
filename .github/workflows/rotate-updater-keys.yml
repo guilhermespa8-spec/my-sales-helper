@@ -1,0 +1,83 @@
+name: Rotate Updater Keys
+
+on:
+  workflow_dispatch:
+    inputs:
+      password:
+        description: "Senha para a nova chave privada do updater"
+        required: true
+        type: string
+
+jobs:
+  rotate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Tauri CLI
+        run: npm install -g @tauri-apps/cli@latest
+
+      - name: Generate new keypair
+        id: keys
+        env:
+          KEY_PASSWORD: ${{ inputs.password }}
+        run: |
+          mkdir -p .keys
+          # Tauri v2: gera ~/.tauri/<name>.key e .key.pub
+          tauri signer generate -w .keys/updater.key -p "$KEY_PASSWORD" --force
+          PRIVATE_KEY=$(cat .keys/updater.key)
+          PUBLIC_KEY=$(cat .keys/updater.key.pub)
+          {
+            echo "private_key<<EOF"
+            echo "$PRIVATE_KEY"
+            echo "EOF"
+            echo "public_key<<EOF"
+            echo "$PUBLIC_KEY"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Update pubkey in tauri.conf.json
+        env:
+          PUBLIC_KEY: ${{ steps.keys.outputs.public_key }}
+        run: |
+          node -e "
+            const fs = require('fs');
+            const path = 'src-tauri/tauri.conf.json';
+            const cfg = JSON.parse(fs.readFileSync(path, 'utf8'));
+            cfg.plugins = cfg.plugins || {};
+            cfg.plugins.updater = cfg.plugins.updater || {};
+            cfg.plugins.updater.pubkey = process.env.PUBLIC_KEY;
+            fs.writeFileSync(path, JSON.stringify(cfg, null, 2) + '\n');
+          "
+
+      - name: Set repository secrets
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+          PRIVATE_KEY: ${{ steps.keys.outputs.private_key }}
+          KEY_PASSWORD: ${{ inputs.password }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::error::Secret GH_PAT não configurado. Crie um Personal Access Token com escopo 'repo' e adicione como secret GH_PAT."
+            exit 1
+          fi
+          gh secret set TAURI_SIGNING_PRIVATE_KEY --body "$PRIVATE_KEY"
+          gh secret set TAURI_SIGNING_PRIVATE_KEY_PASSWORD --body "$KEY_PASSWORD"
+
+      - name: Cleanup keys
+        if: always()
+        run: rm -rf .keys
+
+      - name: Commit pubkey update
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src-tauri/tauri.conf.json
+          git diff --cached --quiet || git commit -m "chore: rotate updater pubkey"
+          git push
