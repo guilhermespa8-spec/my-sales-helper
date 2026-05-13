@@ -1,6 +1,6 @@
 [package]
 name = "venda-facil"
-version = "0.1.0"
+version = "0.1.1"
 description = "Venda Fácil Desktop App"
 authors = ["Lovable"]
 edition = "2021"
