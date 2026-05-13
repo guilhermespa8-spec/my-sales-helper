@@ -51,7 +51,7 @@ const Quotes = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <Card className="bg-white border-none shadow-sm ring-1 ring-slate-200">
+        <Card className="bg-transparent border-none shadow-none ring-1 ring-slate-200/50">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
@@ -65,7 +65,7 @@ const Quotes = () => {
           </CardContent>
         </Card>
         
-        <Card className="bg-white border-none shadow-sm ring-1 ring-slate-200">
+        <Card className="bg-transparent border-none shadow-none ring-1 ring-slate-200/50">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
@@ -83,7 +83,7 @@ const Quotes = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-white border-none shadow-sm ring-1 ring-slate-200">
+        <Card className="bg-transparent border-none shadow-none ring-1 ring-slate-200/50">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
@@ -100,7 +100,7 @@ const Quotes = () => {
         </Card>
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-transparent rounded-xl border border-slate-200 shadow-none overflow-hidden">
         {items.length === 0 ? (
           <div className="text-center py-20 text-slate-400">
             <FileText className="w-16 h-16 mx-auto mb-4 opacity-10" />
