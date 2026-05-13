@@ -413,7 +413,7 @@ const Products = () => {
       </div>
 
       <Card className="border-none shadow-none bg-transparent">
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div className="overflow-hidden rounded-xl border border-slate-200 bg-card shadow-sm">
           <Table>
             <TableHeader className="bg-slate-50/50">
               <TableRow className="hover:bg-transparent">
