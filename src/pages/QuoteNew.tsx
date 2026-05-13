@@ -387,7 +387,7 @@ const QuoteNew = () => {
                               min="0"
                               value={i.unit_price}
                               onChange={(e) => updateItem(idx, { unit_price: Math.max(0, Number(e.target.value)) })}
-                              className="w-24 h-9 text-right font-mono font-bold bg-white"
+                              className="w-24 h-9 text-right font-mono font-bold bg-transparent"
                             />
                           </td>
                           <td className="py-4 px-6 text-right font-mono font-black text-slate-900">
