@@ -40,7 +40,7 @@
       "endpoints": [
         "https://github.com/guilhermespa8-spec/my-sales-helper/releases/latest/download/latest.json"
       ],
-      "pubkey": "untrusted comment: minisign public key: 37F690D8F7B13316\nRWQWM7H32JD2Nzuf8hpcA37X7/83AzfJVhDB6ZTLG+Z+zo8oWYiBZmfa"
+      "pubkey": "untrusted comment: minisign public key: 8714C172F5BCF400\nRWQA9Lz1csEUh2KmXeoWDmMX9OGMWoJ9Fd6EGCasyfroUUV1n3Gs8psQ"
     }
   }
 }
