@@ -22,6 +22,7 @@ import {
   Car,
   CheckCircle2,
   UserCheck,
+  Settings,
 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 
@@ -43,6 +44,7 @@ const menu: Item[] = [
   { to: "/fiado", label: "Fiado", icon: Wallet },
   { to: "/fiados-pagos", label: "Fiados Pagos", icon: CheckCircle2 },
   { to: "/vendedores", label: "Vendedores", icon: UserCheck },
+  { to: "/configuracoes", label: "Configurações", icon: Settings },
 ];
 
 const AppLayout = ({ children }: { children: ReactNode }) => {
