@@ -37,7 +37,7 @@
 
     --radius: 1rem;
 
-    --gradient-brand: linear-gradient(135deg, hsl(142 76% 36%), hsl(142 76% 26%));
+    --gradient-brand: linear-gradient(135deg, hsl(142 76% 40%), hsl(142 76% 20%));
     --gradient-accent: linear-gradient(135deg, hsl(142 76% 46%), hsl(142 76% 36%));
     --shadow-soft: 0 4px 18px -8px hsl(142 76% 15% / 0.15);
     --shadow-elevated: 0 16px 44px -14px hsl(142 76% 15% / 0.25);
