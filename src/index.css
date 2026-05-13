@@ -35,7 +35,7 @@
     --input: 142 20% 88%;
     --ring: 142 76% 36%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
     --gradient-brand: linear-gradient(135deg, hsl(142 76% 36%), hsl(142 76% 26%));
     --gradient-accent: linear-gradient(135deg, hsl(142 76% 46%), hsl(142 76% 36%));
