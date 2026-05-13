@@ -44,5 +44,7 @@ jobs:
           tagName: v__VERSION__
           releaseName: "Venda Fácil v__VERSION__"
           releaseBody: "Nova versão automática do Venda Fácil."
-          releaseDraft: true
+          releaseDraft: false
           prerelease: false
+          includeUpdaterJson: true
+          updaterJsonPreferNsis: true
