@@ -434,8 +434,8 @@ const QuoteNew = () => {
             </Button>
           </Card>
 
-          <Card className="border-none shadow-sm ring-1 ring-slate-200 rounded-2xl overflow-hidden">
-            <div className="bg-slate-50 border-b border-slate-200 px-6 py-4">
+          <Card className="border-none shadow-none ring-1 ring-slate-200/50 rounded-2xl overflow-hidden bg-transparent">
+            <div className="bg-slate-50/50 border-b border-slate-200 px-6 py-4">
               <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">Observações</h2>
             </div>
             <CardContent className="p-6">
