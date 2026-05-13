@@ -34,7 +34,12 @@ const Quotes = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Orçamentos</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2">
+            Orçamentos
+            <span className="text-[10px] bg-green-500 text-white px-2 py-0.5 rounded-full uppercase tracking-widest font-bold animate-pulse">
+              v0.1.1
+            </span>
+          </h1>
           <p className="text-slate-500 mt-1">Gerencie e acompanhe todas as suas propostas de venda</p>
         </div>
         <Button asChild className="bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all active:scale-95">
