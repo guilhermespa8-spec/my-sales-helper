@@ -21,15 +21,6 @@
     ],
     "security": {
       "csp": null
-    },
-    "plugins": {
-      "updater": {
-        "active": true,
-        "endpoints": [
-          "https://github.com/{{YOUR_GITHUB_USER}}/{{YOUR_REPO_NAME}}/releases/latest/download/latest.json"
-        ],
-        "pubkey": "{{YOUR_PUBLIC_KEY}}"
-      }
     }
   },
   "bundle": {
@@ -42,5 +33,14 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
+  },
+  "plugins": {
+    "updater": {
+      "active": true,
+      "endpoints": [
+        "https://github.com/SEU_USUARIO/SEU_REPOSITORIO/releases/latest/download/latest.json"
+      ],
+      "pubkey": "SUA_CHAVE_PUBLICA_AQUI"
+    }
   }
 }
