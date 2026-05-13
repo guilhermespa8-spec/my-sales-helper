@@ -198,7 +198,7 @@ const QuoteNew = () => {
   return (
     <div className="max-w-6xl mx-auto space-y-6 px-4 py-6 md:py-8">
       {/* Top Header */}
-      <div className="flex items-center justify-between gap-4 flex-wrap bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+      <div className="flex items-center justify-between gap-4 flex-wrap bg-transparent p-4 rounded-2xl border border-slate-200 shadow-none">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => nav("/orcamentos")} className="rounded-full">
             <ArrowLeft className="w-5 h-5 text-slate-600" />
@@ -213,7 +213,7 @@ const QuoteNew = () => {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => { setItems([]); setNotes(""); }} className="border-slate-200 text-slate-600 font-bold px-6">
+          <Button variant="outline" onClick={() => { setItems([]); setNotes(""); }} className="border-slate-200 text-slate-600 font-bold px-6 bg-transparent">
             Limpar
           </Button>
           <Button onClick={save} disabled={saving || items.length === 0} className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 shadow-lg shadow-blue-100 transition-all active:scale-95">
@@ -225,8 +225,8 @@ const QuoteNew = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <Card className="border-none shadow-sm ring-1 ring-slate-200 rounded-2xl overflow-hidden">
-            <div className="bg-slate-50 border-b border-slate-200 px-6 py-4">
+          <Card className="border-none shadow-none ring-1 ring-slate-200/50 rounded-2xl overflow-hidden bg-transparent">
+            <div className="bg-slate-50/50 border-b border-slate-200 px-6 py-4">
               <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
                 <User className="w-4 h-4 text-blue-600" />
                 Informações do Cliente
@@ -291,8 +291,8 @@ const QuoteNew = () => {
             </CardContent>
           </Card>
 
-          <Card className="border-none shadow-sm ring-1 ring-slate-200 rounded-2xl overflow-hidden min-h-[400px]">
-            <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+          <Card className="border-none shadow-none ring-1 ring-slate-200/50 rounded-2xl overflow-hidden min-h-[400px] bg-transparent">
+            <div className="bg-slate-50/50 border-b border-slate-200 px-6 py-4 flex items-center justify-between">
               <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
                 <FileText className="w-4 h-4 text-blue-600" />
                 Itens do Pedido
@@ -304,7 +304,7 @@ const QuoteNew = () => {
             </div>
             
             <div className="p-0">
-              <div className="bg-white border-b border-slate-100 p-4">
+              <div className="bg-transparent border-b border-slate-100 p-4">
                 <div className="relative group">
                   <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-blue-500 transition-colors" />
                   <input
@@ -387,7 +387,7 @@ const QuoteNew = () => {
                               min="0"
                               value={i.unit_price}
                               onChange={(e) => updateItem(idx, { unit_price: Math.max(0, Number(e.target.value)) })}
-                              className="w-24 h-9 text-right font-mono font-bold bg-white"
+                              className="w-24 h-9 text-right font-mono font-bold bg-transparent"
                             />
                           </td>
                           <td className="py-4 px-6 text-right font-mono font-black text-slate-900">
@@ -434,8 +434,8 @@ const QuoteNew = () => {
             </Button>
           </Card>
 
-          <Card className="border-none shadow-sm ring-1 ring-slate-200 rounded-2xl overflow-hidden">
-            <div className="bg-slate-50 border-b border-slate-200 px-6 py-4">
+          <Card className="border-none shadow-none ring-1 ring-slate-200/50 rounded-2xl overflow-hidden bg-transparent">
+            <div className="bg-slate-50/50 border-b border-slate-200 px-6 py-4">
               <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">Observações</h2>
             </div>
             <CardContent className="p-6">
