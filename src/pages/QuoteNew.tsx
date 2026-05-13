@@ -291,8 +291,8 @@ const QuoteNew = () => {
             </CardContent>
           </Card>
 
-          <Card className="border-none shadow-sm ring-1 ring-slate-200 rounded-2xl overflow-hidden min-h-[400px]">
-            <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+          <Card className="border-none shadow-none ring-1 ring-slate-200/50 rounded-2xl overflow-hidden min-h-[400px] bg-transparent">
+            <div className="bg-slate-50/50 border-b border-slate-200 px-6 py-4 flex items-center justify-between">
               <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
                 <FileText className="w-4 h-4 text-blue-600" />
                 Itens do Pedido
@@ -304,7 +304,7 @@ const QuoteNew = () => {
             </div>
             
             <div className="p-0">
-              <div className="bg-white border-b border-slate-100 p-4">
+              <div className="bg-transparent border-b border-slate-100 p-4">
                 <div className="relative group">
                   <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-blue-500 transition-colors" />
                   <input
