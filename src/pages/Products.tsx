@@ -428,7 +428,7 @@ const Products = () => {
                 <TableRow key={p.id} className="group hover:bg-slate-50/50 transition-colors">
                   <TableCell className="py-4">
                     <div className="flex flex-col">
-                      <span className="font-bold text-slate-800 text-sm md:text-base leading-tight">
+                      <span className="font-bold text-red-600 text-sm md:text-base leading-tight">
                         {p.name}
                       </span>
                       {p.description && (
@@ -454,7 +454,7 @@ const Products = () => {
                     </div>
                   </TableCell>
                   <TableCell className="text-center">
-                    <span className="font-mono font-bold text-slate-900 text-base">
+                    <span className="font-mono font-bold text-red-600 text-base">
                       {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(p.price)}
                     </span>
                   </TableCell>
