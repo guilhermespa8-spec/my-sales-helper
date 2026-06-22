@@ -34,7 +34,7 @@ const Quotes = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2">
+          <h1 className="text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-2">
             Orçamentos
             <span className="text-[10px] bg-green-500 text-white px-2 py-0.5 rounded-full uppercase tracking-widest font-bold animate-pulse">
               v0.1.1
@@ -56,7 +56,7 @@ const Quotes = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-slate-500">Total de Orçamentos</p>
-                <h3 className="text-2xl font-bold text-slate-900 mt-1">{items.length}</h3>
+                <h3 className="text-2xl font-bold text-foreground mt-1">{items.length}</h3>
               </div>
               <div className="h-10 w-10 bg-blue-50 rounded-full flex items-center justify-center">
                 <FileText className="h-5 w-5 text-blue-600" />
@@ -70,7 +70,7 @@ const Quotes = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-slate-500">Volume Total (Mês)</p>
-                <h3 className="text-2xl font-bold text-slate-900 mt-1">
+                <h3 className="text-2xl font-bold text-foreground mt-1">
                   {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
                     items.reduce((acc, curr) => acc + Number(curr.total), 0)
                   )}
@@ -88,7 +88,7 @@ const Quotes = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-slate-500">Última Atualização</p>
-                <h3 className="text-base font-bold text-slate-900 mt-1">
+                <h3 className="text-base font-bold text-foreground mt-1">
                   {items.length > 0 ? new Date(items[0].created_at).toLocaleDateString('pt-BR') : 'Sem dados'}
                 </h3>
               </div>
@@ -114,27 +114,27 @@ const Quotes = () => {
           <Table>
             <TableHeader className="bg-slate-50/50">
               <TableRow className="hover:bg-transparent">
-                <TableHead className="w-[100px] py-4 pl-6 font-bold text-slate-900">Pedido</TableHead>
-                <TableHead className="font-bold text-slate-900">Cliente</TableHead>
-                <TableHead className="font-bold text-slate-900">Vendedor</TableHead>
-                <TableHead className="font-bold text-slate-900">Pagamento</TableHead>
-                <TableHead className="font-bold text-slate-900">Tipo</TableHead>
-                <TableHead className="font-bold text-slate-900">Data e Hora</TableHead>
-                <TableHead className="text-right font-bold text-slate-900">Valor Total</TableHead>
-                <TableHead className="w-[140px] text-right py-4 pr-6 font-bold text-slate-900">Ações</TableHead>
+                <TableHead className="w-[100px] py-4 pl-6 font-bold text-foreground">Pedido</TableHead>
+                <TableHead className="font-bold text-foreground">Cliente</TableHead>
+                <TableHead className="font-bold text-foreground">Vendedor</TableHead>
+                <TableHead className="font-bold text-foreground">Pagamento</TableHead>
+                <TableHead className="font-bold text-foreground">Tipo</TableHead>
+                <TableHead className="font-bold text-foreground">Data e Hora</TableHead>
+                <TableHead className="text-right font-bold text-foreground">Valor Total</TableHead>
+                <TableHead className="w-[140px] text-right py-4 pr-6 font-bold text-foreground">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {items.map((q) => (
                 <TableRow key={q.id} className="group hover:bg-slate-50/50 transition-colors">
                   <TableCell className="py-4 pl-6">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-800 border border-slate-200">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-foreground border border-slate-200">
                       #{String(q.quote_number).padStart(5, "0")}
                     </span>
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-col">
-                      <span className="font-bold text-slate-900">
+                      <span className="font-bold text-foreground">
                         {q.customer_name || "Consumidor Final"}
                       </span>
                     </div>
@@ -164,7 +164,7 @@ const Quotes = () => {
                     })}
                   </TableCell>
                   <TableCell className="text-right">
-                    <span className="text-lg font-bold text-slate-900">
+                    <span className="text-lg font-bold text-foreground">
                       {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(q.total)}
                     </span>
                   </TableCell>
