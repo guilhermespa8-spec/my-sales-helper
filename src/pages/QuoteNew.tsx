@@ -4,54 +4,37 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Search, X, Plus, Minus, Trash2, ArrowLeft, Save, User, Car as CarIcon, FileText } from "lucide-react";
+import { Search, X, Plus, Minus, Trash2, ArrowLeft, Save } from "lucide-react";
 
-// SELLERS are now loaded from the database
-const PAYMENT_METHODS = ["Dinheiro", "Cartão de Crédito", "Cartão de Débito", "PIX", "Boleto", "Fiado"] as const;
-const PIECE_TYPES = ["Peça", "Peça Separada", "LED", "Vonixx"] as const;
-
-interface Product { id: string; name: string; description: string | null; price: number; car_filter?: string | null; }
+interface Product { id: string; name: string; description: string | null; price: number; }
 interface Item { product_id: string; product_name: string; quantity: number; unit_price: number; }
-interface Mechanic { id: string; name: string; }
-interface CarRecord { id: string; name: string; notes: string | null; }
+
+const brl = (n: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(n);
 
 const QuoteNew = () => {
   const { user } = useAuth();
   const nav = useNavigate();
   const { id: editId } = useParams<{ id: string }>();
   const isEdit = Boolean(editId);
+
   const [products, setProducts] = useState<Product[]>([]);
-  const [mechanics, setMechanics] = useState<Mechanic[]>([]);
-  const [sellersList, setSellersList] = useState<{ id: string, name: string }[]>([]);
-  const [carsList, setCarsList] = useState<CarRecord[]>([]);
-  const [customer, setCustomer] = useState("");
+  const [sellersList, setSellersList] = useState<{ id: string; name: string }[]>([]);
   const [seller, setSeller] = useState<string>("");
-  const [car, setCar] = useState("");
-  const [notes, setNotes] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<string>("Dinheiro");
-  const [pieceType, setPieceType] = useState<string>("Peça");
   const [items, setItems] = useState<Item[]>([]);
   const [search, setSearch] = useState("");
+  const [showResults, setShowResults] = useState(false);
+  const [searching, setSearching] = useState(false);
   const [saving, setSaving] = useState(false);
   const [quoteNumber, setQuoteNumber] = useState<number | null>(null);
-  const [showSearch, setShowSearch] = useState(false);
-  const [showConsulta, setShowConsulta] = useState(false);
-  const [consultaSearch, setConsultaSearch] = useState("");
-  const [consultaSelected, setConsultaSelected] = useState<string | null>(null);
-  const [searching, setSearching] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
-  const consultaRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && (e.key === "k" || e.key === "K")) { e.preventDefault(); setShowSearch(true); setTimeout(() => searchRef.current?.focus(), 50); }
-      if (e.key === "Escape") { setShowSearch(false); setSearch(""); }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    (async () => {
+      const { data } = await supabase.from("sellers").select("id,name").order("name");
+      if (data) setSellersList(data as { id: string; name: string }[]);
+    })();
   }, []);
 
   useEffect(() => {
@@ -59,15 +42,9 @@ const QuoteNew = () => {
     (async () => {
       const { data: q, error } = await supabase.from("quotes").select("*").eq("id", editId).single();
       if (error) { toast.error(error.message); return; }
-      setCustomer(q.customer_name ?? "");
       setSeller((q as any).seller ?? "");
-      setCar((q as any).car ?? "");
-      setNotes(q.notes ?? "");
-      setPaymentMethod((q as any).payment_method ?? "Dinheiro");
-      setPieceType((q as any).piece_type ?? "Peça");
       setQuoteNumber(q.quote_number);
-      const { data: its, error: e2 } = await supabase.from("quote_items").select("*").eq("quote_id", editId);
-      if (e2) { toast.error(e2.message); return; }
+      const { data: its } = await supabase.from("quote_items").select("*").eq("quote_id", editId);
       setItems((its ?? []).map((i: any) => ({
         product_id: i.product_id, product_name: i.product_name,
         quantity: i.quantity, unit_price: Number(i.unit_price),
@@ -76,38 +53,18 @@ const QuoteNew = () => {
   }, [editId]);
 
   useEffect(() => {
-    const loadStaticData = async () => {
-      const [mecsRes, carsRes, sellersRes] = await Promise.all([
-        supabase.from("mechanics").select("id,name").order("name"),
-        supabase.from("cars").select("id,name,notes").order("name"),
-        supabase.from("sellers").select("id,name").order("name")
-      ]);
-      if (mecsRes.data) setMechanics(mecsRes.data as Mechanic[]);
-      if (carsRes.data) setCarsList(carsRes.data as CarRecord[]);
-      if (sellersRes.data) setSellersList(sellersRes.data as { id: string, name: string }[]);
-    };
-    loadStaticData();
-  }, []);
-
-  const fetchProducts = async (q: string) => {
-    setSearching(true);
-    try {
-      const trimmedQ = q.trim();
-      let response;
-      if (trimmedQ) {
-        response = await supabase.rpc('search_products', { search_term: trimmedQ });
-      } else {
-        response = await supabase.from("products").select("id,name,description,price,car_filter").order("name").limit(100);
-      }
-      if (response.error) { toast.error("Erro ao carregar produtos"); return; }
-      setProducts((response.data ?? []) as Product[]);
-    } finally { setSearching(false); }
-  };
-
-  useEffect(() => {
-    const timer = setTimeout(() => { fetchProducts(search || consultaSearch); }, 300);
-    return () => clearTimeout(timer);
-  }, [search, consultaSearch]);
+    const t = setTimeout(async () => {
+      setSearching(true);
+      try {
+        const q = search.trim();
+        const r = q
+          ? await supabase.rpc("search_products", { search_term: q })
+          : await supabase.from("products").select("id,name,description,price").order("name").limit(50);
+        if (!r.error) setProducts((r.data ?? []) as Product[]);
+      } finally { setSearching(false); }
+    }, 250);
+    return () => clearTimeout(t);
+  }, [search]);
 
   const addItem = (productId: string) => {
     const p = products.find((x) => x.id === productId);
@@ -118,31 +75,13 @@ const QuoteNew = () => {
       setItems([...items, { product_id: p.id, product_name: p.name, quantity: 1, unit_price: Number(p.price) }]);
     }
     setSearch("");
-    setShowSearch(false);
+    setShowResults(false);
   };
 
-  const updateItem = (idx: number, patch: Partial<Item>) => {
-    setItems(items.map((i, k) => k === idx ? { ...i, ...patch } : i));
-  };
+  const updateItem = (idx: number, patch: Partial<Item>) =>
+    setItems(items.map((i, k) => (k === idx ? { ...i, ...patch } : i)));
 
   const total = useMemo(() => items.reduce((s, i) => s + i.quantity * i.unit_price, 0), [items]);
-  const totalProdutos = total;
-  const consultaResults = products;
-
-  const openConsulta = () => {
-    setShowConsulta(true);
-    setConsultaSelected(null);
-    setTimeout(() => consultaRef.current?.focus(), 50);
-  };
-
-  const confirmConsulta = () => {
-    if (consultaSelected) {
-      addItem(consultaSelected);
-      setShowConsulta(false);
-      setConsultaSearch("");
-      setConsultaSelected(null);
-    }
-  };
 
   const save = async () => {
     if (items.length === 0) { toast.error("Adicione ao menos 1 item"); return; }
@@ -152,28 +91,14 @@ const QuoteNew = () => {
       let qNumber = quoteNumber ?? 0;
       if (isEdit && editId) {
         const { error } = await supabase.from("quotes").update({
-          customer_name: customer.trim() || null,
-          seller: seller || null,
-          car: car.trim() || null,
-          notes: notes.trim() || null,
-          payment_method: paymentMethod,
-          piece_type: pieceType,
-          total,
+          seller: seller || null, total,
         } as any).eq("id", editId);
         if (error) throw error;
         const { error: delErr } = await supabase.from("quote_items").delete().eq("quote_id", editId);
         if (delErr) throw delErr;
       } else {
         const { data: quote, error } = await supabase.from("quotes").insert({
-          user_id: user!.id,
-          quote_number: 0,
-          customer_name: customer.trim() || null,
-          seller: seller || null,
-          car: car.trim() || null,
-          notes: notes.trim() || null,
-          payment_method: paymentMethod,
-          piece_type: pieceType,
-          total,
+          user_id: user!.id, quote_number: 0, seller: seller || null, total,
         } as any).select().single();
         if (error) throw error;
         quoteId = quote.id;
@@ -193,338 +118,127 @@ const QuoteNew = () => {
     } finally { setSaving(false); }
   };
 
-  const numFmt = String(quoteNumber ?? 0).padStart(5, "0");
-
   return (
-    <div className="max-w-6xl mx-auto space-y-6 px-4 py-6 md:py-8">
-      {/* Top Header */}
-      <div className="flex items-center justify-between gap-4 flex-wrap bg-transparent p-4 rounded-2xl border border-slate-200 shadow-none">
-        <div className="flex items-center gap-3">
+    <div className="max-w-3xl mx-auto px-4 py-6 md:py-10 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" onClick={() => nav("/orcamentos")} className="rounded-full">
-            <ArrowLeft className="w-5 h-5 text-slate-600" />
+            <ArrowLeft className="w-5 h-5" />
           </Button>
-          <div>
-            <h1 className="text-xl font-black text-slate-900 leading-none">
-              {isEdit ? "Editar Orçamento" : "Novo Orçamento"}
-            </h1>
-            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-              Pedido de Venda #{numFmt}
-            </p>
-          </div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            {isEdit ? "Editar Orçamento" : "Novo Orçamento"}
+          </h1>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => { setItems([]); setNotes(""); }} className="border-slate-200 text-slate-600 font-bold px-6 bg-transparent">
-            Limpar
-          </Button>
-          <Button onClick={save} disabled={saving || items.length === 0} className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 shadow-lg shadow-blue-100 transition-all active:scale-95">
-            <Save className="w-4 h-4 mr-2" />
-            {saving ? "Salvando..." : "Salvar Orçamento"}
-          </Button>
-        </div>
+        <Button onClick={save} disabled={saving || items.length === 0} className="font-semibold">
+          <Save className="w-4 h-4 mr-2" />
+          {saving ? "Salvando..." : "Salvar"}
+        </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          <Card className="border-none shadow-none ring-1 ring-slate-200/50 rounded-2xl overflow-hidden bg-transparent">
-            <div className="bg-slate-50/50 border-b border-slate-200 px-6 py-4">
-              <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
-                <User className="w-4 h-4 text-blue-600" />
-                Informações do Cliente
-              </h2>
-            </div>
-            <CardContent className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label className="text-xs font-black uppercase text-slate-400 tracking-wider">Vendedor</Label>
-                  <select
-                    value={seller}
-                    onChange={(e) => setSeller(e.target.value)}
-                    className="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-bold text-slate-900"
-                  >
-                    <option value="">Selecione um Vendedor</option>
-                    {sellersList.map((s) => (<option key={s.id} value={s.name}>{s.name}</option>))}
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs font-black uppercase text-slate-400 tracking-wider">Cliente / Mecânico</Label>
-                  <select
-                    value={customer || "__none__"}
-                    onChange={(e) => setCustomer(e.target.value === "__none__" ? "" : e.target.value)}
-                    className="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-bold text-slate-900"
-                  >
-                    <option value="__none__">Consumidor Final</option>
-                    {mechanics.map((m) => (<option key={m.id} value={m.name}>{m.name}</option>))}
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs font-black uppercase text-slate-400 tracking-wider">Forma de Pagamento</Label>
-                  <select
-                    value={paymentMethod}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                    className="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-bold text-slate-900"
-                  >
-                    {PAYMENT_METHODS.map((m) => (<option key={m} value={m}>{m}</option>))}
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs font-black uppercase text-slate-400 tracking-wider">Tipo de Peça</Label>
-                  <select
-                    value={pieceType}
-                    onChange={(e) => setPieceType(e.target.value)}
-                    className="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-bold text-slate-900"
-                  >
-                    {PIECE_TYPES.map((t) => (<option key={t} value={t}>{t}</option>))}
-                  </select>
-                </div>
-                <div className="md:col-span-2 space-y-2">
-                  <Label className="text-xs font-black uppercase text-slate-400 tracking-wider">Veículo (Opcional)</Label>
-                  <select
-                    value={car || "__none__"}
-                    onChange={(e) => setCar(e.target.value === "__none__" ? "" : e.target.value)}
-                    className="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-bold text-slate-900"
-                  >
-                    <option value="__none__">Nenhum Veículo</option>
-                    {carsList.map((c) => (<option key={c.id} value={c.name}>{c.name}</option>))}
-                  </select>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+      {/* Vendedor */}
+      <div className="space-y-2">
+        <Label className="text-sm font-medium text-foreground">Vendedor</Label>
+        <select
+          value={seller}
+          onChange={(e) => setSeller(e.target.value)}
+          className="w-full h-11 px-3 bg-background border border-input rounded-md focus:ring-2 focus:ring-ring outline-none transition-all text-foreground"
+        >
+          <option value="">Selecione um vendedor</option>
+          {sellersList.map((s) => (<option key={s.id} value={s.name}>{s.name}</option>))}
+        </select>
+      </div>
 
-          <Card className="border-none shadow-none ring-1 ring-slate-200/50 rounded-2xl overflow-hidden min-h-[400px] bg-transparent">
-            <div className="bg-slate-50/50 border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-              <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
-                <FileText className="w-4 h-4 text-blue-600" />
-                Itens do Pedido
-              </h2>
-              <Button size="sm" variant="outline" onClick={openConsulta} className="text-xs font-black uppercase tracking-widest border-blue-200 text-blue-700 bg-blue-50/50 hover:bg-blue-50">
-                <Search className="w-3.5 h-3.5 mr-1.5" />
-                Buscar Produto
-              </Button>
-            </div>
-            
-            <div className="p-0">
-              <div className="bg-transparent border-b border-slate-100 p-4">
-                <div className="relative group">
-                  <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-blue-500 transition-colors" />
-                  <input
-                    ref={searchRef}
-                    value={search}
-                    onChange={(e) => { setSearch(e.target.value); if (!showSearch) setShowSearch(true); }}
-                    onFocus={() => setShowSearch(true)}
-                    placeholder="Digite para pesquisar por nome ou descrição..."
-                    className="w-full h-12 pl-12 pr-12 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-slate-900 placeholder:text-slate-400"
-                  />
-                  {search && (
-                    <button onClick={() => { setSearch(""); setShowSearch(false); }} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                      <X className="w-5 h-5" />
-                    </button>
-                  )}
-                  {showSearch && search && (
-                    <div className="absolute left-0 right-0 top-full mt-2 z-50 bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden max-h-[350px] overflow-y-auto">
-                      {searching ? (
-                        <div className="p-8 text-center text-slate-400 italic font-medium">Buscando produtos...</div>
-                      ) : products.length === 0 ? (
-                        <div className="p-8 text-center text-slate-400 italic font-medium">Nenhum produto encontrado para "{search}"</div>
-                      ) : (
-                        products.map((p) => (
-                          <button
-                            key={p.id}
-                            type="button"
-                            onClick={() => addItem(p.id)}
-                            className="w-full text-left p-4 hover:bg-blue-50 border-b border-slate-50 last:border-0 transition-colors flex items-center justify-between group"
-                          >
-                            <div className="min-w-0 pr-4">
-                              <p className="font-bold text-slate-900 group-hover:text-blue-700 transition-colors">{p.name}</p>
-                              <p className="text-xs text-slate-500 line-clamp-1 mt-0.5 font-medium">{p.description || "Sem descrição"}</p>
-                            </div>
-                            <p className="font-mono font-black text-blue-600 shrink-0 text-base">
-                              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(p.price)}
-                            </p>
-                          </button>
-                        ))
-                      )}
+      {/* Produto */}
+      <div className="space-y-2">
+        <Label className="text-sm font-medium text-foreground">Produto</Label>
+        <div className="relative">
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <input
+            ref={searchRef}
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setShowResults(true); }}
+            onFocus={() => setShowResults(true)}
+            placeholder="Buscar produto por nome ou descrição..."
+            className="w-full h-11 pl-10 pr-10 bg-background border border-input rounded-md focus:ring-2 focus:ring-ring outline-none transition-all text-foreground placeholder:text-muted-foreground"
+          />
+          {search && (
+            <button onClick={() => { setSearch(""); setShowResults(false); }} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+              <X className="w-4 h-4" />
+            </button>
+          )}
+          {showResults && search && (
+            <div className="absolute left-0 right-0 top-full mt-2 z-50 bg-popover border border-border rounded-md shadow-lg overflow-hidden max-h-80 overflow-y-auto">
+              {searching ? (
+                <div className="p-4 text-center text-muted-foreground text-sm">Buscando...</div>
+              ) : products.length === 0 ? (
+                <div className="p-4 text-center text-muted-foreground text-sm">Nenhum produto encontrado</div>
+              ) : (
+                products.map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => addItem(p.id)}
+                    className="w-full text-left p-3 hover:bg-accent border-b border-border last:border-0 transition-colors flex items-center justify-between gap-3"
+                  >
+                    <div className="min-w-0">
+                      <p className="font-medium text-foreground truncate">{p.name}</p>
+                      <p className="text-xs text-muted-foreground line-clamp-1">{p.description || "—"}</p>
                     </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="bg-slate-50/50 text-slate-400 uppercase text-[10px] font-black tracking-[0.2em] border-b border-slate-100">
-                      <th className="py-4 px-6 text-left">Produto</th>
-                      <th className="py-4 px-6 text-center w-32">Quantidade</th>
-                      <th className="py-4 px-6 text-right w-32">Unitário</th>
-                      <th className="py-4 px-6 text-right w-32">Total</th>
-                      <th className="py-4 px-6 text-right w-16"></th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-50">
-                    {items.length === 0 ? (
-                      <tr>
-                        <td colSpan={5} className="py-20 text-center text-slate-300 italic font-medium">
-                          Adicione produtos pesquisando acima ou no botão "Buscar Produto"
-                        </td>
-                      </tr>
-                    ) : (
-                      items.map((i, idx) => (
-                        <tr key={idx} className="group hover:bg-slate-50/30 transition-colors">
-                          <td className="py-4 px-6">
-                            <p className="font-bold text-slate-900 leading-tight">{i.product_name}</p>
-                          </td>
-                          <td className="py-4 px-6">
-                            <div className="flex items-center justify-center gap-3 bg-slate-50 border border-slate-200 p-1 rounded-xl">
-                              <button onClick={() => updateItem(idx, { quantity: Math.max(1, i.quantity - 1) })} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white hover:shadow-sm text-slate-400 hover:text-blue-600 transition-all"><Minus className="w-3.5 h-3.5" /></button>
-                              <span className="font-mono font-black text-slate-900 w-8 text-center">{i.quantity}</span>
-                              <button onClick={() => updateItem(idx, { quantity: i.quantity + 1 })} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white hover:shadow-sm text-slate-400 hover:text-blue-600 transition-all"><Plus className="w-3.5 h-3.5" /></button>
-                            </div>
-                          </td>
-                          <td className="py-4 px-6 text-right">
-                            <Input
-                              type="number"
-                              step="0.01"
-                              min="0"
-                              value={i.unit_price}
-                              onChange={(e) => updateItem(idx, { unit_price: Math.max(0, Number(e.target.value)) })}
-                              className="w-24 h-9 text-right font-mono font-bold bg-transparent"
-                            />
-                          </td>
-                          <td className="py-4 px-6 text-right font-mono font-black text-slate-900">
-                            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(i.quantity * i.unit_price)}
-                          </td>
-                          <td className="py-4 px-6 text-right">
-                            <button onClick={() => setItems(items.filter((_, k) => k !== idx))} className="text-slate-300 hover:text-red-600 transition-colors">
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                    <span className="font-mono font-semibold text-foreground shrink-0">{brl(p.price)}</span>
+                  </button>
+                ))
+              )}
             </div>
-          </Card>
-        </div>
-
-        <div className="space-y-6">
-          <Card className="border-none shadow-xl shadow-slate-200/50 ring-1 ring-slate-200 rounded-3xl overflow-hidden bg-slate-900 text-white p-8">
-            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-6">Resumo Financeiro</h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between text-slate-400">
-                <span className="text-xs font-bold uppercase tracking-widest">Subtotal</span>
-                <span className="font-mono font-bold">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalProdutos)}</span>
-              </div>
-              <div className="flex items-center justify-between text-slate-400">
-                <span className="text-xs font-bold uppercase tracking-widest">Descontos</span>
-                <span className="font-mono font-bold text-green-400">R$ 0,00</span>
-              </div>
-              <div className="pt-6 mt-6 border-t border-white/10">
-                <div className="flex flex-col items-end">
-                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-400 mb-1">Total a Pagar</span>
-                  <span className="text-4xl font-black font-mono tracking-tighter text-white">
-                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(total)}
-                  </span>
-                </div>
-              </div>
-            </div>
-            <Button onClick={save} disabled={saving || items.length === 0} className="w-full mt-10 h-14 bg-blue-600 hover:bg-blue-500 text-white font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl shadow-blue-500/20 active:scale-[0.98]">
-              {saving ? "Processando..." : "Confirmar Venda"}
-            </Button>
-          </Card>
-
-          <Card className="border-none shadow-none ring-1 ring-slate-200/50 rounded-2xl overflow-hidden bg-transparent">
-            <div className="bg-slate-50/50 border-b border-slate-200 px-6 py-4">
-              <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">Observações</h2>
-            </div>
-            <CardContent className="p-6">
-              <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                maxLength={500}
-                placeholder="Informações adicionais para este orçamento..."
-                className="w-full h-32 p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-slate-900 resize-none text-sm"
-              />
-            </CardContent>
-          </Card>
+          )}
         </div>
       </div>
 
-      {showConsulta && (
-        <div className="fixed inset-0 z-[60] bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in zoom-in duration-200" onClick={() => setShowConsulta(false)}>
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden ring-1 ring-slate-200" onClick={(e) => e.stopPropagation()}>
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-              <div>
-                <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">Catálogo de Produtos</h3>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Busque e selecione itens para o orçamento</p>
-              </div>
-              <Button variant="ghost" size="icon" onClick={() => setShowConsulta(false)} className="rounded-full hover:bg-slate-100">
-                <X className="w-5 h-5" />
-              </Button>
-            </div>
-            <div className="p-6 bg-slate-50 border-b border-slate-100">
-              <div className="relative">
-                <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input
-                  ref={consultaRef}
-                  value={consultaSearch}
-                  onChange={(e) => { setConsultaSearch(e.target.value); setConsultaSelected(null); }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Escape") setShowConsulta(false);
-                    if (e.key === "Enter") confirmConsulta();
-                  }}
-                  placeholder="Pesquisar por nome, código ou descrição..."
-                  className="w-full h-14 pl-12 pr-6 bg-white border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-bold text-slate-900 shadow-sm"
-                />
-              </div>
-            </div>
-            <div className="flex-1 overflow-auto p-4">
-              <table className="w-full text-sm">
-                <thead className="sticky top-0 bg-white z-10">
-                  <tr className="text-slate-400 uppercase text-[9px] font-black tracking-widest border-b border-slate-100">
-                    <th className="px-4 py-3 text-left">Descrição do Produto</th>
-                    <th className="px-4 py-3 text-right w-32">Preço Unitário</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50">
-                  {searching ? (
-                    <tr><td colSpan={2} className="py-20 text-center text-slate-400 italic font-medium">Buscando produtos...</td></tr>
-                  ) : consultaResults.length === 0 ? (
-                    <tr><td colSpan={2} className="py-20 text-center text-slate-400 italic font-medium">Nenhum produto encontrado</td></tr>
-                  ) : (
-                    consultaResults.map((p) => (
-                      <tr
-                        key={p.id}
-                        onClick={() => setConsultaSelected(p.id)}
-                        onDoubleClick={() => { addItem(p.id); setShowConsulta(false); setConsultaSearch(""); }}
-                        className={`cursor-pointer group transition-all ${consultaSelected === p.id ? "bg-blue-600 rounded-xl" : "hover:bg-blue-50"}`}
-                      >
-                        <td className="px-4 py-4 rounded-l-xl">
-                          <div className="flex flex-col">
-                            <span className={`font-bold transition-colors ${consultaSelected === p.id ? "text-white" : "text-slate-900 group-hover:text-blue-700"}`}>{p.name}</span>
-                            <span className={`text-xs mt-0.5 line-clamp-1 font-medium ${consultaSelected === p.id ? "text-blue-100" : "text-slate-500"}`}>{p.description || "Sem descrição disponível"}</span>
-                          </div>
-                        </td>
-                        <td className="px-4 py-4 text-right rounded-r-xl">
-                          <span className={`font-mono font-black text-lg transition-colors ${consultaSelected === p.id ? "text-white" : "text-blue-600"}`}>
-                            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(p.price)}
-                          </span>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-            <div className="p-6 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest italic">Dica: Clique duplo para adicionar rapidamente</p>
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setShowConsulta(false)} className="rounded-xl border-slate-200 font-bold">Cancelar</Button>
-                <Button onClick={confirmConsulta} disabled={!consultaSelected} className="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl px-8 shadow-lg shadow-blue-100">Confirmar Seleção</Button>
-              </div>
-            </div>
+      {/* Itens */}
+      <div className="space-y-2">
+        {items.length === 0 ? (
+          <div className="border border-dashed border-border rounded-md p-10 text-center text-sm text-muted-foreground">
+            Nenhum produto adicionado
           </div>
+        ) : (
+          <ul className="divide-y divide-border border border-border rounded-md overflow-hidden">
+            {items.map((i, idx) => (
+              <li key={idx} className="p-4 flex items-center gap-3 bg-card">
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-foreground truncate">{i.product_name}</p>
+                  <div className="flex items-center gap-3 mt-2">
+                    <div className="flex items-center gap-1 border border-border rounded-md">
+                      <button onClick={() => updateItem(idx, { quantity: Math.max(1, i.quantity - 1) })} className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-foreground"><Minus className="w-3.5 h-3.5" /></button>
+                      <span className="font-mono font-semibold w-8 text-center text-foreground">{i.quantity}</span>
+                      <button onClick={() => updateItem(idx, { quantity: i.quantity + 1 })} className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-foreground"><Plus className="w-3.5 h-3.5" /></button>
+                    </div>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={i.unit_price}
+                      onChange={(e) => updateItem(idx, { unit_price: Math.max(0, Number(e.target.value)) })}
+                      className="w-28 h-8 text-right font-mono"
+                    />
+                  </div>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="font-mono font-bold text-foreground">{brl(i.quantity * i.unit_price)}</p>
+                  <button onClick={() => setItems(items.filter((_, k) => k !== idx))} className="text-muted-foreground hover:text-destructive mt-1 inline-flex">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {/* Total */}
+      {items.length > 0 && (
+        <div className="flex items-center justify-between border-t border-border pt-4">
+          <span className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Total</span>
+          <span className="text-2xl font-mono font-bold text-foreground">{brl(total)}</span>
         </div>
       )}
     </div>
