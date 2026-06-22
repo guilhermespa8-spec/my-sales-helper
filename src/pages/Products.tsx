@@ -428,11 +428,11 @@ const Products = () => {
                 <TableRow key={p.id} className="group hover:bg-slate-50/50 transition-colors">
                   <TableCell className="py-4">
                     <div className="flex flex-col">
-                      <span className="font-bold text-red-600 text-sm md:text-base leading-tight">
+                      <span className="font-bold text-red-600 text-sm md:text-base leading-tight break-words whitespace-normal">
                         {p.name}
                       </span>
                       {p.description && (
-                        <span className="text-xs text-slate-500 mt-1 line-clamp-1 italic">
+                        <span className="text-xs text-slate-500 mt-1 italic break-words whitespace-normal">
                           {p.description}
                         </span>
                       )}
