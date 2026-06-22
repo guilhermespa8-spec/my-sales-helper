@@ -1,8 +1,9 @@
 import { ReactNode } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "@/hooks/useTheme";
 import { Button } from "@/components/ui/button";
-import { Package, FileText, LogOut, Receipt } from "lucide-react";
+import { Package, FileText, LogOut, Receipt, Sun, Moon } from "lucide-react";
 
 type Item = { to: string; label: string; icon: React.ComponentType<{ className?: string }>; end?: boolean };
 
@@ -13,6 +14,7 @@ const menu: Item[] = [
 
 const AppLayout = ({ children }: { children: ReactNode }) => {
   const { user, signOut } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const nav = useNavigate();
 
   return (
@@ -57,6 +59,14 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
             <span className="hidden lg:block text-sm text-muted-foreground truncate max-w-[180px]">
               {user?.email}
             </span>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              aria-label={theme === "dark" ? "Modo claro" : "Modo escuro"}
+            >
+              {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </Button>
             <Button
               variant="ghost"
               size="icon"
