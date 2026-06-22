@@ -48,29 +48,29 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: "var(--gradient-brand)" }}>
-      <Card className="w-full max-w-md shadow-[var(--shadow-elevated)]">
-        <CardHeader className="text-center space-y-3">
-          <div className="mx-auto w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: "var(--gradient-accent)" }}>
+    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-8 sm:px-6">
+      <Card className="w-full max-w-md border-border shadow-[var(--shadow-elevated)]">
+        <CardHeader className="text-center space-y-3 pb-5">
+          <div className="mx-auto w-14 h-14 rounded-xl flex items-center justify-center bg-primary">
             <Receipt className="w-7 h-7 text-accent-foreground" />
           </div>
-          <CardTitle className="text-2xl">Abrantes Auto Peças</CardTitle>
-          <CardDescription>Sistema de vendas e orçamentos</CardDescription>
+          <CardTitle className="text-2xl text-foreground">Abrantes Auto Peças</CardTitle>
+          <CardDescription className="text-muted-foreground">Produtos e orçamentos</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin">
-            <TabsList className="grid grid-cols-2 w-full">
+            <TabsList className="grid grid-cols-2 w-full bg-secondary">
               <TabsTrigger value="signin">Entrar</TabsTrigger>
               <TabsTrigger value="signup">Criar conta</TabsTrigger>
             </TabsList>
             {(["signin", "signup"] as const).map((m) => (
               <TabsContent key={m} value={m} className="space-y-4 mt-4">
                 <div className="space-y-2">
-                  <Label>E-mail</Label>
+                  <Label className="text-foreground">E-mail</Label>
                   <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="voce@exemplo.com" />
                 </div>
                 <div className="space-y-2">
-                  <Label>Senha</Label>
+                  <Label className="text-foreground">Senha</Label>
                   <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••" />
                 </div>
                 <Button className="w-full" onClick={() => handle(m)} disabled={busy}>
