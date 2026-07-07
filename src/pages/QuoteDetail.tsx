@@ -27,6 +27,8 @@ const QuoteDetail = () => {
   const [selectedMechanic, setSelectedMechanic] = useState<string>("");
   const [saving, setSaving] = useState(false);
   const [registering, setRegistering] = useState(false);
+  const [customHeaderName, setCustomHeaderName] = useState("");
+
 
 
 
