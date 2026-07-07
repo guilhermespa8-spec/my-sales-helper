@@ -139,8 +139,7 @@ const QuoteDetail = () => {
           </div>
         )}
 
-          </div>
-        )}
+
 
         <div style={{ textAlign: "center", fontSize: "22px", fontWeight: 900, letterSpacing: "1px", marginBottom: "4px" }}>
           PEDIDO DE VENDA
