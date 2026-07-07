@@ -28,6 +28,7 @@ const QuoteDetail = () => {
   const [saving, setSaving] = useState(false);
   const [registering, setRegistering] = useState(false);
   const [showCustomerHeader, setShowCustomerHeader] = useState(false);
+  const [customHeaderName, setCustomHeaderName] = useState("");
 
   useEffect(() => {
     if (!id) return;
