@@ -27,6 +27,8 @@ const QuoteDetail = () => {
   const [selectedMechanic, setSelectedMechanic] = useState<string>("");
   const [saving, setSaving] = useState(false);
   const [registering, setRegistering] = useState(false);
+  const [customHeaderName, setCustomHeaderName] = useState("");
+
 
 
 
@@ -118,9 +120,17 @@ const QuoteDetail = () => {
             <CheckCircle2 className="w-4 h-4 mr-2" /> 
             {registering ? "Registrando..." : "REGISTRAR VENDA"}
           </Button>
+          <input
+            type="text"
+            value={customHeaderName}
+            onChange={(e) => setCustomHeaderName(e.target.value)}
+            placeholder="Nome do cliente no topo (opcional)"
+            className="px-3 py-2 border border-slate-200 rounded-md bg-white text-sm w-64"
+          />
           <Button onClick={() => window.print()} className="bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-200">
             <Printer className="w-4 h-4 mr-2" /> Imprimir Documento
           </Button>
+
         </div>
       </div>
 
@@ -129,8 +139,15 @@ const QuoteDetail = () => {
         className="print-area hidden print:block text-black"
         style={{ fontFamily: "Inter, Arial, sans-serif", padding: "2mm" }}
       >
+        {/* Custom customer header */}
+        {customHeaderName.trim() && (
+          <div style={{ textAlign: "center", fontSize: "22px", fontWeight: 900, textTransform: "uppercase", marginBottom: "8px", paddingBottom: "4px", borderBottom: "2px solid #000" }}>
+            {customHeaderName}
+          </div>
+        )}
         {/* Store Header */}
         <div style={{ textAlign: "center", marginBottom: "10px" }}>
+
           <h1 style={{ fontSize: "16px", fontWeight: 900, textTransform: "uppercase", letterSpacing: "-0.3px", margin: 0 }}>
             Abrantes &amp; Abrantes LTDA
           </h1>
