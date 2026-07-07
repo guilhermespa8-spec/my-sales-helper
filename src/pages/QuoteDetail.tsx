@@ -116,6 +116,10 @@ const QuoteDetail = () => {
             <CheckCircle2 className="w-4 h-4 mr-2" /> 
             {registering ? "Registrando..." : "REGISTRAR VENDA"}
           </Button>
+          <label className="flex items-center gap-2 text-sm font-medium text-slate-700 px-3 py-2 border border-slate-200 rounded-md bg-white cursor-pointer">
+            <input type="checkbox" checked={showCustomerHeader} onChange={(e) => setShowCustomerHeader(e.target.checked)} />
+            Nome do cliente no topo
+          </label>
           <Button onClick={() => window.print()} className="bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-200">
             <Printer className="w-4 h-4 mr-2" /> Imprimir Documento
           </Button>
@@ -124,9 +128,15 @@ const QuoteDetail = () => {
 
       {/* PRINT-ONLY RECEIPT (matches "PEDIDO DE VENDA" example) */}
       <div className="print-area hidden print:block text-black" style={{ fontFamily: "Arial, sans-serif" }}>
+        {showCustomerHeader && quote.customer_name && (
+          <div style={{ textAlign: "center", fontSize: "28px", fontWeight: 900, textTransform: "uppercase", marginBottom: "6px", borderBottom: "2px solid #000", paddingBottom: "4px" }}>
+            {quote.customer_name}
+          </div>
+        )}
         <div style={{ textAlign: "center", fontSize: "22px", fontWeight: 900, letterSpacing: "1px", marginBottom: "4px" }}>
           PEDIDO DE VENDA
         </div>
+
         <div style={{ borderTop: "1px solid #000", margin: "4px 0" }} />
         <div style={{ fontSize: "12px", fontWeight: 700, lineHeight: 1.35 }}>
           <div>ABRANTES &amp; ABRANTES LTDA</div>
