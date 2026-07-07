@@ -134,8 +134,11 @@ const QuoteDetail = () => {
       {/* PRINT-ONLY RECEIPT (matches "PEDIDO DE VENDA" example) */}
       <div className="print-area hidden print:block text-black" style={{ fontFamily: "Arial, sans-serif" }}>
         {customHeaderName.trim() && (
-          <div style={{ textAlign: "center", fontSize: "28px", fontWeight: 900, textTransform: "uppercase", marginBottom: "6px", borderBottom: "2px solid #000", paddingBottom: "4px" }}>
+          <div style={{ textAlign: "center", fontSize: "28px", fontWeight: 900, textTransform: "uppercase", marginTop: "-2mm", marginBottom: "4px", borderBottom: "2px solid #000", paddingBottom: "2px" }}>
             {customHeaderName}
+          </div>
+        )}
+
           </div>
         )}
 
