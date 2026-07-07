@@ -182,7 +182,7 @@ const QuoteDetail = () => {
         )}
 
         {/* Items Table */}
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "10px", marginBottom: "10px" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "10px", marginBottom: "10px", tableLayout: "fixed" }}>
           <thead>
             <tr style={{ borderBottom: "2px solid #000" }}>
               <th style={{ textAlign: "left", padding: "3px 2px" }}>Desc.</th>
