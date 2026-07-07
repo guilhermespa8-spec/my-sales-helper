@@ -194,7 +194,7 @@ const QuoteDetail = () => {
           <tbody style={{ fontFamily: "'JetBrains Mono', 'Courier New', monospace" }}>
             {items.map((i) => (
               <tr key={i.id} style={{ borderBottom: "1px solid #ddd" }}>
-                <td style={{ padding: "3px 2px", lineHeight: 1.25 }}>{i.product_name}</td>
+                <td style={{ padding: "3px 2px", lineHeight: 1.25, wordBreak: "break-word", whiteSpace: "normal" }}>{i.product_name}</td>
                 <td style={{ textAlign: "center", padding: "3px 2px" }}>{i.quantity}</td>
                 <td style={{ textAlign: "right", padding: "3px 2px" }}>{i.unit_price.toFixed(2)}</td>
                 <td style={{ textAlign: "right", padding: "3px 2px" }}>{i.subtotal.toFixed(2)}</td>
