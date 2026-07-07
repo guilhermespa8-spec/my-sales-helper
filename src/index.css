@@ -125,4 +125,8 @@
   .print-area tbody td { font-weight: 700 !important; }
   .print-area h1, .print-area h2, .print-area h3 { margin: 0 !important; }
   .no-print { display: none !important; }
+  .print-area { padding: 2mm !important; font-size: 11px !important; }
+  .print-area table { font-size: 11px !important; }
+  .print-area th, .print-area td { padding: 2px 3px !important; font-size: 11px !important; }
 }
+
