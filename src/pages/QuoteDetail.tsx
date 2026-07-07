@@ -118,124 +118,114 @@ const QuoteDetail = () => {
             <CheckCircle2 className="w-4 h-4 mr-2" /> 
             {registering ? "Registrando..." : "REGISTRAR VENDA"}
           </Button>
-          <input
-            type="text"
-            value={customHeaderName}
-            onChange={(e) => setCustomHeaderName(e.target.value)}
-            placeholder="Nome do cliente no topo (opcional)"
-            className="px-3 py-2 border border-slate-200 rounded-md bg-white text-sm w-64"
-          />
           <Button onClick={() => window.print()} className="bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-200">
             <Printer className="w-4 h-4 mr-2" /> Imprimir Documento
           </Button>
         </div>
       </div>
 
-      {/* PRINT-ONLY RECEIPT (matches "PEDIDO DE VENDA" example) */}
-      <div className="print-area hidden print:block text-black" style={{ fontFamily: "Arial, sans-serif" }}>
-        {customHeaderName.trim() && (
-          <div style={{ textAlign: "center", fontSize: "28px", fontWeight: 900, textTransform: "uppercase", marginTop: "-2mm", marginBottom: "4px", borderBottom: "2px solid #000", paddingBottom: "2px" }}>
-            {customHeaderName}
+      {/* PRINT-ONLY RECEIPT — Moderno Estruturado */}
+      <div
+        className="print-area hidden print:block text-black"
+        style={{ fontFamily: "Inter, Arial, sans-serif", padding: "2mm" }}
+      >
+        {/* Store Header */}
+        <div style={{ textAlign: "center", marginBottom: "10px" }}>
+          <h1 style={{ fontSize: "16px", fontWeight: 900, textTransform: "uppercase", letterSpacing: "-0.3px", margin: 0 }}>
+            Abrantes &amp; Abrantes LTDA
+          </h1>
+          <p style={{ fontSize: "10px", lineHeight: 1.35, marginTop: "3px" }}>
+            Rua Teixeira Brandão, 519 - Estação<br />
+            São Pedro da Aldeia - RJ | CEP 28940-001<br />
+            Telefone: (22) 99955-4939<br />
+            CNPJ: 29.327.178/0001-23
+          </p>
+        </div>
+
+        {/* Document Info */}
+        <div style={{ borderTop: "1px solid #000", borderBottom: "1px solid #000", padding: "5px 0", marginBottom: "8px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", fontWeight: 700, textTransform: "uppercase" }}>
+            <span>Orçamento: #{String(quote.quote_number).padStart(6, "0")}</span>
+            <span>Data: {date}</span>
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", marginTop: "3px" }}>
+            <span>Vendedor: {quote.seller || "—"}</span>
+            <span>Hora: {time}</span>
+          </div>
+        </div>
+
+        {/* Vehicle */}
+        {quote.car && (
+          <div style={{ marginBottom: "8px" }}>
+            <h2 style={{ fontSize: "10px", fontWeight: 700, textTransform: "uppercase", borderBottom: "1px solid #000", marginBottom: "3px", paddingBottom: "1px" }}>
+              Veículo
+            </h2>
+            <p style={{ fontSize: "11px", fontWeight: 500, margin: 0 }}>{quote.car}</p>
           </div>
         )}
 
-
-
-        <div style={{ textAlign: "center", fontSize: "22px", fontWeight: 900, letterSpacing: "1px", marginBottom: "4px" }}>
-          PEDIDO DE VENDA
-        </div>
-
-        <div style={{ borderTop: "1px solid #000", margin: "4px 0" }} />
-        <div style={{ fontSize: "12px", fontWeight: 700, lineHeight: 1.35 }}>
-          <div>ABRANTES &amp; ABRANTES LTDA</div>
-          <div>CNPJ: 29.327.178/0001-23 &nbsp; IE: 82684360</div>
-          <div>rua teixeira brandao, 519, ESTACAO, 28940-001, São Pedro da Aldeia-RJ</div>
-          <div>TELEFONE: (22) 99955-4939</div>
-          <div>EMAIL:</div>
-        </div>
-        <div style={{ textAlign: "center", marginTop: "8px", fontSize: "14px", fontWeight: 900 }}>
-          PEDIDO Nº <span style={{ color: "#c00" }}>{String(quote.quote_number).padStart(6, "0")}</span>
-        </div>
-        <div style={{ textAlign: "center", fontSize: "11px", marginBottom: "6px" }}>
-          Emissão: {date} {time}
-        </div>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px", marginBottom: "6px" }}>
-          <tbody>
-            <tr>
-              <td style={{ border: "1px solid #000", padding: "3px", width: "60%" }}>
-                <div style={{ fontWeight: 700 }}>Nome / Razão Social:</div>
-                <div>{quote.customer_name || "Consumidor"}</div>
-              </td>
-              <td style={{ border: "1px solid #000", padding: "3px" }}>
-                <div style={{ fontWeight: 700 }}>CNPJ / CPF:</div>
-                <div>&nbsp;</div>
-              </td>
-            </tr>
-            <tr>
-              <td style={{ border: "1px solid #000", padding: "3px" }}>
-                <div style={{ fontWeight: 700 }}>Vendedor:</div>
-                <div>{quote.seller || "—"}</div>
-              </td>
-              <td style={{ border: "1px solid #000", padding: "3px" }}>
-                <div style={{ fontWeight: 700 }}>Veículo:</div>
-                <div>{quote.car || "—"}</div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
+        {/* Items Table */}
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "10px", marginBottom: "10px" }}>
           <thead>
-            <tr style={{ borderTop: "1px solid #000", borderBottom: "1px solid #000" }}>
-              <th style={{ textAlign: "left", padding: "3px" }}>Descrição</th>
-              <th style={{ textAlign: "center", padding: "3px", width: "40px" }}>Qtd</th>
-              <th style={{ textAlign: "right", padding: "3px", width: "60px" }}>Unitário</th>
-              <th style={{ textAlign: "right", padding: "3px", width: "70px" }}>Total(R$)</th>
+            <tr style={{ borderBottom: "2px solid #000" }}>
+              <th style={{ textAlign: "left", padding: "3px 2px" }}>Desc.</th>
+              <th style={{ textAlign: "center", padding: "3px 2px", width: "30px" }}>Qtd</th>
+              <th style={{ textAlign: "right", padding: "3px 2px", width: "55px" }}>Unit.</th>
+              <th style={{ textAlign: "right", padding: "3px 2px", width: "60px" }}>Total</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody style={{ fontFamily: "'JetBrains Mono', 'Courier New', monospace" }}>
             {items.map((i) => (
-              <tr key={i.id}>
-                <td style={{ padding: "3px", fontWeight: 700 }}>{i.product_name}</td>
-                <td style={{ padding: "3px", textAlign: "center" }}>{i.quantity.toFixed(2)}</td>
-                <td style={{ padding: "3px", textAlign: "right" }}>{i.unit_price.toFixed(2)}</td>
-                <td style={{ padding: "3px", textAlign: "right" }}>{i.subtotal.toFixed(2)}</td>
+              <tr key={i.id} style={{ borderBottom: "1px solid #ddd" }}>
+                <td style={{ padding: "3px 2px", lineHeight: 1.25 }}>{i.product_name}</td>
+                <td style={{ textAlign: "center", padding: "3px 2px" }}>{i.quantity}</td>
+                <td style={{ textAlign: "right", padding: "3px 2px" }}>{i.unit_price.toFixed(2)}</td>
+                <td style={{ textAlign: "right", padding: "3px 2px" }}>{i.subtotal.toFixed(2)}</td>
               </tr>
             ))}
           </tbody>
         </table>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px", marginTop: "4px" }}>
-          <tbody>
-            <tr>
-              <td style={{ border: "1px solid #000", padding: "3px" }}>
-                <div style={{ fontWeight: 700 }}>Quantidade</div>
-                <div>{items.reduce((s, i) => s + Number(i.quantity), 0).toFixed(2)}</div>
-              </td>
-              <td style={{ border: "1px solid #000", padding: "3px" }}>
-                <div style={{ fontWeight: 700 }}>Total</div>
-                <div>R$ {quote.total.toFixed(2)}</div>
-              </td>
-              <td style={{ border: "1px solid #000", padding: "3px" }}>
-                <div style={{ fontWeight: 700 }}>Desconto</div>
-                <div>R$ 0,00</div>
-              </td>
-              <td style={{ border: "1px solid #000", padding: "3px" }}>
-                <div style={{ fontWeight: 700 }}>Total</div>
-                <div>R$ {quote.total.toFixed(2)}</div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <div style={{ borderTop: "1px solid #000", marginTop: "6px", padding: "3px 0", fontSize: "12px" }}>
-          <div style={{ fontWeight: 700 }}>Forma(s) de Pagamento:</div>
-          <div>{quote.payment_method ? `${quote.payment_method}: R$ ${quote.total.toFixed(2)}` : "—"}</div>
-        </div>
-        {quote.notes && (
-          <div style={{ borderTop: "1px solid #000", padding: "3px 0", fontSize: "12px" }}>
-            <div style={{ fontWeight: 700 }}>Observações:</div>
-            <div>{quote.notes}</div>
+
+        {/* Totals */}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "3px", marginBottom: "10px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", width: "70%", fontSize: "10px" }}>
+            <span>Subtotal:</span>
+            <span style={{ fontFamily: "'JetBrains Mono', monospace" }}>{quote.total.toFixed(2)}</span>
           </div>
-        )}
+          <div style={{ display: "flex", justifyContent: "space-between", width: "70%", fontSize: "10px" }}>
+            <span>Desconto:</span>
+            <span style={{ fontFamily: "'JetBrains Mono', monospace" }}>0,00</span>
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", width: "70%", fontSize: "13px", fontWeight: 900, borderTop: "1px solid #000", paddingTop: "3px" }}>
+            <span>TOTAL:</span>
+            <span style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+              R$ {quote.total.toFixed(2)}
+            </span>
+          </div>
+        </div>
+
+        {/* Payment & Notes */}
+        <div style={{ borderTop: "1px dashed #000", paddingTop: "6px", fontSize: "10px" }}>
+          <p style={{ fontWeight: 700, textTransform: "uppercase", margin: "0 0 2px" }}>Forma de Pagamento:</p>
+          <p style={{ margin: 0 }}>{quote.payment_method || "—"}</p>
+
+          {quote.notes && (
+            <div style={{ marginTop: "8px" }}>
+              <p style={{ fontWeight: 700, textTransform: "uppercase", margin: "0 0 2px" }}>Observações:</p>
+              <p style={{ margin: 0, fontStyle: "italic" }}>{quote.notes}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div style={{ marginTop: "18px", textAlign: "center", borderTop: "1px solid #000", paddingTop: "5px" }}>
+          <p style={{ fontSize: "9px", textTransform: "uppercase", letterSpacing: "2px", margin: 0 }}>
+            Obrigado pela preferência
+          </p>
+        </div>
       </div>
+
+
 
       <Card className="print:hidden shadow-2xl shadow-slate-200/50 print:shadow-none border-none print:border-0 rounded-3xl overflow-hidden bg-white text-slate-900">
 
