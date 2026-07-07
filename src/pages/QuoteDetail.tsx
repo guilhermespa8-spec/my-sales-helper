@@ -139,8 +139,15 @@ const QuoteDetail = () => {
         className="print-area hidden print:block text-black"
         style={{ fontFamily: "Inter, Arial, sans-serif", padding: "2mm" }}
       >
+        {/* Custom customer header */}
+        {customHeaderName.trim() && (
+          <div style={{ textAlign: "center", fontSize: "22px", fontWeight: 900, textTransform: "uppercase", marginBottom: "8px", paddingBottom: "4px", borderBottom: "2px solid #000" }}>
+            {customHeaderName}
+          </div>
+        )}
         {/* Store Header */}
         <div style={{ textAlign: "center", marginBottom: "10px" }}>
+
           <h1 style={{ fontSize: "16px", fontWeight: 900, textTransform: "uppercase", letterSpacing: "-0.3px", margin: 0 }}>
             Abrantes &amp; Abrantes LTDA
           </h1>
