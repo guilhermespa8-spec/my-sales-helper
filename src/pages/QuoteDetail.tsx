@@ -122,7 +122,105 @@ const QuoteDetail = () => {
         </div>
       </div>
 
-      <Card className="print-area shadow-2xl shadow-slate-200/50 print:shadow-none border-none print:border-0 rounded-3xl overflow-hidden bg-white text-slate-900">
+      {/* PRINT-ONLY RECEIPT (matches "PEDIDO DE VENDA" example) */}
+      <div className="print-area hidden print:block text-black" style={{ fontFamily: "Arial, sans-serif" }}>
+        <div style={{ textAlign: "center", fontSize: "22px", fontWeight: 900, letterSpacing: "1px", marginBottom: "4px" }}>
+          PEDIDO DE VENDA
+        </div>
+        <div style={{ borderTop: "1px solid #000", margin: "4px 0" }} />
+        <div style={{ fontSize: "12px", fontWeight: 700, lineHeight: 1.35 }}>
+          <div>ABRANTES &amp; ABRANTES LTDA</div>
+          <div>CNPJ: 29.327.178/0001-23 &nbsp; IE: 82684360</div>
+          <div>rua teixeira brandao, 519, ESTACAO, 28940-001, São Pedro da Aldeia-RJ</div>
+          <div>TELEFONE: (22) 99955-4939</div>
+          <div>EMAIL:</div>
+        </div>
+        <div style={{ textAlign: "center", marginTop: "8px", fontSize: "14px", fontWeight: 900 }}>
+          PEDIDO Nº <span style={{ color: "#c00" }}>{String(quote.quote_number).padStart(6, "0")}</span>
+        </div>
+        <div style={{ textAlign: "center", fontSize: "11px", marginBottom: "6px" }}>
+          Emissão: {date} {time}
+        </div>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px", marginBottom: "6px" }}>
+          <tbody>
+            <tr>
+              <td style={{ border: "1px solid #000", padding: "3px", width: "60%" }}>
+                <div style={{ fontWeight: 700 }}>Nome / Razão Social:</div>
+                <div>{quote.customer_name || "Consumidor"}</div>
+              </td>
+              <td style={{ border: "1px solid #000", padding: "3px" }}>
+                <div style={{ fontWeight: 700 }}>CNPJ / CPF:</div>
+                <div>&nbsp;</div>
+              </td>
+            </tr>
+            <tr>
+              <td style={{ border: "1px solid #000", padding: "3px" }}>
+                <div style={{ fontWeight: 700 }}>Vendedor:</div>
+                <div>{quote.seller || "—"}</div>
+              </td>
+              <td style={{ border: "1px solid #000", padding: "3px" }}>
+                <div style={{ fontWeight: 700 }}>Veículo:</div>
+                <div>{quote.car || "—"}</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
+          <thead>
+            <tr style={{ borderTop: "1px solid #000", borderBottom: "1px solid #000" }}>
+              <th style={{ textAlign: "left", padding: "3px" }}>Descrição</th>
+              <th style={{ textAlign: "center", padding: "3px", width: "40px" }}>Qtd</th>
+              <th style={{ textAlign: "right", padding: "3px", width: "60px" }}>Unitário</th>
+              <th style={{ textAlign: "right", padding: "3px", width: "70px" }}>Total(R$)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map((i) => (
+              <tr key={i.id}>
+                <td style={{ padding: "3px", fontWeight: 700 }}>{i.product_name}</td>
+                <td style={{ padding: "3px", textAlign: "center" }}>{i.quantity.toFixed(2)}</td>
+                <td style={{ padding: "3px", textAlign: "right" }}>{i.unit_price.toFixed(2)}</td>
+                <td style={{ padding: "3px", textAlign: "right" }}>{i.subtotal.toFixed(2)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px", marginTop: "4px" }}>
+          <tbody>
+            <tr>
+              <td style={{ border: "1px solid #000", padding: "3px" }}>
+                <div style={{ fontWeight: 700 }}>Quantidade</div>
+                <div>{items.reduce((s, i) => s + Number(i.quantity), 0).toFixed(2)}</div>
+              </td>
+              <td style={{ border: "1px solid #000", padding: "3px" }}>
+                <div style={{ fontWeight: 700 }}>Total</div>
+                <div>R$ {quote.total.toFixed(2)}</div>
+              </td>
+              <td style={{ border: "1px solid #000", padding: "3px" }}>
+                <div style={{ fontWeight: 700 }}>Desconto</div>
+                <div>R$ 0,00</div>
+              </td>
+              <td style={{ border: "1px solid #000", padding: "3px" }}>
+                <div style={{ fontWeight: 700 }}>Total</div>
+                <div>R$ {quote.total.toFixed(2)}</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div style={{ borderTop: "1px solid #000", marginTop: "6px", padding: "3px 0", fontSize: "12px" }}>
+          <div style={{ fontWeight: 700 }}>Forma(s) de Pagamento:</div>
+          <div>{quote.payment_method ? `${quote.payment_method}: R$ ${quote.total.toFixed(2)}` : "—"}</div>
+        </div>
+        {quote.notes && (
+          <div style={{ borderTop: "1px solid #000", padding: "3px 0", fontSize: "12px" }}>
+            <div style={{ fontWeight: 700 }}>Observações:</div>
+            <div>{quote.notes}</div>
+          </div>
+        )}
+      </div>
+
+      <Card className="print:hidden shadow-2xl shadow-slate-200/50 print:shadow-none border-none print:border-0 rounded-3xl overflow-hidden bg-white text-slate-900">
+
         {/* Decorative Top Bar */}
         <div className="h-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-400 print:hidden" />
         
