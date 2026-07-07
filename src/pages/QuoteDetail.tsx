@@ -120,9 +120,17 @@ const QuoteDetail = () => {
             <CheckCircle2 className="w-4 h-4 mr-2" /> 
             {registering ? "Registrando..." : "REGISTRAR VENDA"}
           </Button>
+          <input
+            type="text"
+            value={customHeaderName}
+            onChange={(e) => setCustomHeaderName(e.target.value)}
+            placeholder="Nome do cliente no topo (opcional)"
+            className="px-3 py-2 border border-slate-200 rounded-md bg-white text-sm w-64"
+          />
           <Button onClick={() => window.print()} className="bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-200">
             <Printer className="w-4 h-4 mr-2" /> Imprimir Documento
           </Button>
+
         </div>
       </div>
 
