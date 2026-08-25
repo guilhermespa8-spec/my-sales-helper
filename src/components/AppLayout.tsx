@@ -19,7 +19,6 @@ import {
   Sun,
   Moon,
   Menu,
-  ChevronRight,
 } from "lucide-react";
 
 type Item = {
@@ -30,61 +29,29 @@ type Item = {
 };
 
 const menu: Item[] = [
-  { to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
+  { to: "/", label: "Painel", icon: LayoutDashboard, end: true },
   { to: "/pdv", label: "PDV", icon: ShoppingCart },
   { to: "/produtos", label: "Produtos", icon: Package },
   { to: "/estoque", label: "Estoque", icon: PackageCheck },
   { to: "/vendas", label: "Vendas", icon: Receipt },
   { to: "/financeiro", label: "Financeiro", icon: Wallet },
   { to: "/relatorios", label: "Relatórios", icon: BarChart3 },
-  { to: "/ordens", label: "Ordens de Serviço", icon: Wrench },
-  { to: "/configuracoes", label: "Configurações", icon: Settings },
+  { to: "/ordens", label: "Ordens", icon: Wrench },
+  { to: "/configuracoes", label: "Ajustes", icon: Settings },
 ];
 
-const SidebarContent = ({ onNavigate }: { onNavigate?: () => void }) => {
+const useActive = () => {
   const location = useLocation();
-  return (
-    <div className="flex flex-col h-full">
-      <div className="h-16 flex items-center px-5 border-b border-sidebar-border">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-            <PackageCheck className="w-4 h-4 text-primary-foreground" />
-          </div>
-          <span className="font-bold text-sidebar-foreground tracking-tight">Abrantes Auto Peças</span>
-        </div>
-      </div>
-      <nav className="flex-1 overflow-y-auto py-3 px-3 space-y-1 scrollbar-thin">
-        {menu.map(({ to, label, icon: Icon, end }) => {
-          const active = end ? location.pathname === to : location.pathname.startsWith(to);
-          return (
-            <NavLink
-              key={to}
-              to={to}
-              end={end}
-              onClick={onNavigate}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors group",
-                active
-                  ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                  : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-              )}
-            >
-              <Icon className={cn("w-4 h-4", active ? "text-sidebar-primary-foreground" : "text-sidebar-foreground/60 group-hover:text-sidebar-accent-foreground")} />
-              <span className="flex-1">{label}</span>
-              {active && <ChevronRight className="w-4 h-4 opacity-60" />}
-            </NavLink>
-          );
-        })}
-      </nav>
-    </div>
-  );
+  return (item: Item) =>
+    item.end ? location.pathname === item.to : location.pathname.startsWith(item.to);
 };
 
 const AppLayout = ({ children }: { children: ReactNode }) => {
   const { user, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const nav = useNavigate();
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const isActive = useActive();
+  const [open, setOpen] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
@@ -92,81 +59,131 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <div className="min-h-screen flex bg-background">
-      {/* Desktop sidebar */}
-      <aside className="hidden lg:flex flex-col w-64 fixed inset-y-0 left-0 z-40 bg-sidebar text-sidebar-foreground border-r border-sidebar-border">
-        <SidebarContent />
-        <div className="p-4 border-t border-sidebar-border">
-          <div className="flex items-center gap-3 mb-3 px-1">
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-sidebar-foreground truncate">{user?.email}</p>
-              <p className="text-xs text-sidebar-foreground/60">Administrador</p>
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Masthead */}
+      <header className="no-print border-b border-border bg-background sticky top-0 z-40">
+        <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-8">
+          <div className="h-16 flex items-center justify-between gap-4">
+            <NavLink to="/" className="flex items-baseline gap-3 min-w-0">
+              <span className="font-display text-2xl sm:text-3xl leading-none text-foreground truncate">
+                Abrantes
+              </span>
+              <span className="hidden sm:inline rule-label text-primary">Auto Peças</span>
+            </NavLink>
+
+            <div className="flex items-center gap-1">
+              <span className="hidden md:block rule-label mr-3 max-w-[180px] truncate normal-case tracking-normal">
+                {user?.email}
+              </span>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleTheme}
+                aria-label={theme === "dark" ? "Modo claro" : "Modo escuro"}
+              >
+                {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="hidden md:inline-flex"
+                onClick={handleSignOut}
+                aria-label="Sair"
+              >
+                <LogOut className="w-4 h-4" />
+              </Button>
+
+              <Sheet open={open} onOpenChange={setOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="md:hidden" aria-label="Menu">
+                    <Menu className="w-5 h-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-72 p-0">
+                  <div className="px-5 h-16 flex items-center border-b border-border">
+                    <span className="font-display text-2xl">Abrantes</span>
+                  </div>
+                  <nav className="p-3 space-y-0.5">
+                    {menu.map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <NavLink
+                          key={item.to}
+                          to={item.to}
+                          end={item.end}
+                          onClick={() => setOpen(false)}
+                          className={cn(
+                            "flex items-center gap-3 px-3 py-3 text-sm font-medium border-l-2 transition-colors",
+                            isActive(item)
+                              ? "border-primary text-primary bg-secondary"
+                              : "border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary/60"
+                          )}
+                        >
+                          <Icon className="w-4 h-4" />
+                          {item.label}
+                        </NavLink>
+                      );
+                    })}
+                  </nav>
+                  <div className="p-3 border-t border-border">
+                    <Button variant="ghost" className="w-full justify-start gap-2" onClick={handleSignOut}>
+                      <LogOut className="w-4 h-4" /> Sair
+                    </Button>
+                  </div>
+                </SheetContent>
+              </Sheet>
             </div>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="flex-1 h-9 text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-              onClick={toggleTheme}
-              aria-label={theme === "dark" ? "Modo claro" : "Modo escuro"}
-            >
-              {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="flex-1 h-9 text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-              onClick={handleSignOut}
-              aria-label="Sair"
-            >
-              <LogOut className="w-4 h-4" />
-            </Button>
           </div>
         </div>
-      </aside>
 
-      {/* Main wrapper */}
-      <div className="flex-1 flex flex-col lg:ml-64 min-w-0">
-        {/* Mobile header */}
-        <header className="lg:hidden no-print sticky top-0 z-30 h-16 border-b bg-card/95 backdrop-blur flex items-center justify-between px-4">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <PackageCheck className="w-4 h-4 text-primary-foreground" />
-            </div>
-            <span className="font-bold text-foreground tracking-tight">Abrantes Auto Peças</span>
+        {/* Tabs desktop */}
+        <div className="hidden md:block border-t border-border">
+          <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-8">
+            <nav className="flex items-center gap-7 overflow-x-auto scrollbar-thin">
+              {menu.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  end={item.end}
+                  className={cn(
+                    "relative py-3 text-[13px] uppercase tracking-[0.14em] font-semibold whitespace-nowrap transition-colors",
+                    isActive(item)
+                      ? "text-foreground after:absolute after:inset-x-0 after:-bottom-px after:h-[2px] after:bg-primary"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {item.label}
+                </NavLink>
+              ))}
+            </nav>
           </div>
-          <div className="flex items-center gap-1">
-            <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Tema">
-              {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </Button>
-            <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" aria-label="Menu">
-                  <Menu className="w-5 h-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="p-0 w-72 bg-sidebar border-r-sidebar-border">
-                <SidebarContent onNavigate={() => setMobileOpen(false)} />
-                <div className="p-4 border-t border-sidebar-border">
-                  <p className="text-sm font-medium text-sidebar-foreground truncate mb-3">{user?.email}</p>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start gap-2 text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                    onClick={handleSignOut}
-                  >
-                    <LogOut className="w-4 h-4" /> Sair
-                  </Button>
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
-        </header>
+        </div>
+      </header>
 
-        <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-8">
-          {children}
-        </main>
-      </div>
+      <main className="flex-1 w-full max-w-[1400px] mx-auto px-4 sm:px-8 py-8 pb-24 md:pb-12">
+        {children}
+      </main>
+
+      {/* Bottom bar mobile */}
+      <nav className="md:hidden no-print fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background grid grid-cols-5">
+        {menu.slice(0, 5).map((item) => {
+          const Icon = item.icon;
+          return (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.end}
+              className={cn(
+                "flex flex-col items-center justify-center gap-1 py-2.5 text-[10px] uppercase tracking-wider font-semibold",
+                isActive(item) ? "text-primary" : "text-muted-foreground"
+              )}
+            >
+              <Icon className="w-[18px] h-[18px]" />
+              {item.label}
+            </NavLink>
+          );
+        })}
+      </nav>
     </div>
   );
 };
