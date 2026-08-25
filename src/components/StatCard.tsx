@@ -9,25 +9,21 @@ interface StatCardProps {
   className?: string;
 }
 
-const variantMap = {
-  default: "bg-primary/10 text-primary",
-  success: "bg-success/10 text-success",
-  warning: "bg-warning/10 text-warning",
-  destructive: "bg-destructive/10 text-destructive",
+const accentMap = {
+  default: "text-primary",
+  success: "text-success",
+  warning: "text-warning",
+  destructive: "text-destructive",
 };
 
 export const StatCard = ({ title, value, icon: Icon, variant = "default", className }: StatCardProps) => {
   return (
-    <div className={cn("rounded-xl border bg-card p-5 shadow-soft", className)}>
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm font-medium text-muted-foreground">{title}</p>
-          <p className="text-2xl font-bold text-card-foreground mt-1">{value}</p>
-        </div>
-        <div className={cn("p-2.5 rounded-lg", variantMap[variant])}>
-          <Icon className="w-5 h-5" />
-        </div>
+    <div className={cn("border border-border bg-card p-5", className)}>
+      <div className="flex items-center justify-between">
+        <p className="rule-label">{title}</p>
+        <Icon className={cn("w-4 h-4", accentMap[variant])} />
       </div>
+      <p className={cn("font-display text-4xl mt-4 leading-none", accentMap[variant])}>{value}</p>
     </div>
   );
 };
