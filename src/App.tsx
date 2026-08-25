@@ -9,21 +9,18 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import AppLayout from "@/components/AppLayout";
 import { lazy, Suspense } from "react";
 
-// Lazy loading components for better performance
-const Index = lazy(() => import("./pages/Index"));
-const Auth = lazy(() => import("./pages/Auth"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const PDV = lazy(() => import("./pages/PDV"));
 const Products = lazy(() => import("./pages/Products"));
-const QuoteNew = lazy(() => import("./pages/QuoteNew"));
-const QuoteDetail = lazy(() => import("./pages/QuoteDetail"));
-const Mechanics = lazy(() => import("./pages/Mechanics"));
-const Fiado = lazy(() => import("./pages/Fiado"));
-const FiadosPagos = lazy(() => import("./pages/FiadosPagos"));
-const Cars = lazy(() => import("./pages/Cars"));
-const Sellers = lazy(() => import("./pages/Sellers"));
-const NotFound = lazy(() => import("./pages/NotFound"));
+const Stock = lazy(() => import("./pages/Stock"));
+const Sales = lazy(() => import("./pages/Sales"));
+const Finance = lazy(() => import("./pages/Finance"));
+const Reports = lazy(() => import("./pages/Reports"));
+const ServiceOrders = lazy(() => import("./pages/ServiceOrders"));
 const Settings = lazy(() => import("./pages/Settings"));
+const Auth = lazy(() => import("./pages/Auth"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
-// Loading fallback component
 const PageLoader = () => (
   <div className="flex items-center justify-center min-h-screen">
     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -39,31 +36,29 @@ const Protected = ({ children }: { children: React.ReactNode }) => (
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/" element={<Protected><Index /></Protected>} />
-              <Route path="/produtos" element={<Protected><Products /></Protected>} />
-              <Route path="/orcamentos/novo" element={<Protected><QuoteNew /></Protected>} />
-              <Route path="/orcamentos/:id/editar" element={<Protected><QuoteNew /></Protected>} />
-              <Route path="/orcamentos/:id" element={<Protected><QuoteDetail /></Protected>} />
-              <Route path="/mecanicos" element={<Protected><Mechanics /></Protected>} />
-              <Route path="/fiado" element={<Protected><Fiado /></Protected>} />
-              <Route path="/fiados-pagos" element={<Protected><FiadosPagos /></Protected>} />
-              <Route path="/carros" element={<Protected><Cars /></Protected>} />
-              <Route path="/vendedores" element={<Protected><Sellers /></Protected>} />
-              <Route path="/configuracoes" element={<Protected><Settings /></Protected>} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/" element={<Protected><Dashboard /></Protected>} />
+                <Route path="/pdv" element={<Protected><PDV /></Protected>} />
+                <Route path="/produtos" element={<Protected><Products /></Protected>} />
+                <Route path="/estoque" element={<Protected><Stock /></Protected>} />
+                <Route path="/vendas" element={<Protected><Sales /></Protected>} />
+                <Route path="/financeiro" element={<Protected><Finance /></Protected>} />
+                <Route path="/relatorios" element={<Protected><Reports /></Protected>} />
+                <Route path="/ordens" element={<Protected><ServiceOrders /></Protected>} />
+                <Route path="/configuracoes" element={<Protected><Settings /></Protected>} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
     </ThemeProvider>
   </QueryClientProvider>
 );

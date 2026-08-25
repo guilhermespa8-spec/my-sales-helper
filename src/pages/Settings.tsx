@@ -3,8 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Download, RefreshCw, CheckCircle2, Settings as SettingsIcon } from "lucide-react";
+import { PageHeader } from "@/components/PageHeader";
+import { Progress } from "@/components/ui/progress";
 
-const APP_VERSION = "0.1.1";
+const APP_VERSION = "0.1.2";
 
 type Status = "idle" | "checking" | "available" | "downloading" | "installed" | "uptodate" | "error";
 
@@ -72,80 +74,67 @@ const Settings = () => {
 
   return (
     <div className="max-w-3xl space-y-6">
-      <div>
-        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2">
-          <SettingsIcon className="w-7 h-7 text-blue-600" />
-          Configurações
-        </h1>
-        <p className="text-slate-500 mt-1">Preferências e atualizações do sistema</p>
-      </div>
+      <PageHeader title="Configurações" description="Preferências e atualizações do sistema" />
 
-      <Card className="border border-slate-200 shadow-none bg-transparent">
+      <Card>
         <CardContent className="p-6 space-y-4">
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
-              <h2 className="text-lg font-bold text-slate-900">Atualizações do Sistema</h2>
-              <p className="text-sm text-slate-500 mt-0.5">
-                Versão atual: <span className="font-mono font-bold text-slate-700">v{APP_VERSION}</span>
+              <h2 className="text-lg font-bold text-card-foreground flex items-center gap-2">
+                <SettingsIcon className="w-5 h-5 text-primary" />
+                Atualizações do Sistema
+              </h2>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                Versão atual: <span className="font-mono font-bold text-foreground">v{APP_VERSION}</span>
               </p>
             </div>
             <Button
               onClick={checkForUpdates}
               disabled={status === "checking" || status === "downloading"}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold"
             >
               <RefreshCw className={`w-4 h-4 mr-2 ${status === "checking" ? "animate-spin" : ""}`} />
-              {status === "checking" ? "Verificando..." : "Verificar Atualizações"}
+              {status === "checking" ? "Verificando..." : "Verificar atualizações"}
             </Button>
           </div>
 
           {status === "uptodate" && (
-            <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg text-green-700">
+            <div className="flex items-center gap-2 p-3 bg-success/10 border border-success/20 rounded-lg text-success">
               <CheckCircle2 className="w-5 h-5" />
               <span className="font-medium">Você já está na versão mais recente.</span>
             </div>
           )}
 
           {status === "available" && newVersion && (
-            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-3">
+            <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg space-y-3">
               <div>
-                <p className="font-bold text-blue-900">Nova versão disponível: v{newVersion}</p>
-                <p className="text-sm text-blue-700">Clique em baixar para atualizar agora.</p>
+                <p className="font-bold text-card-foreground">Nova versão disponível: v{newVersion}</p>
+                <p className="text-sm text-muted-foreground">Clique em baixar para atualizar agora.</p>
               </div>
-              <Button onClick={downloadAndInstall} className="bg-green-600 hover:bg-green-700 text-white font-bold">
+              <Button onClick={downloadAndInstall}>
                 <Download className="w-4 h-4 mr-2" />
-                Baixar e Instalar
+                Baixar e instalar
               </Button>
             </div>
           )}
 
           {status === "downloading" && (
-            <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
-              <p className="font-bold text-slate-900">Baixando atualização... {progress}%</p>
-              <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
-                <div className="h-full bg-blue-600 transition-all" style={{ width: `${progress}%` }} />
-              </div>
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">Baixando atualização... {progress}%</p>
+              <Progress value={progress} />
             </div>
           )}
 
           {status === "installed" && (
-            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-              <p className="font-bold text-green-900">Atualização instalada com sucesso!</p>
-              <p className="text-sm text-green-700">Feche e reabra o programa para aplicar as mudanças.</p>
+            <div className="flex items-center gap-2 p-3 bg-success/10 border border-success/20 rounded-lg text-success">
+              <CheckCircle2 className="w-5 h-5" />
+              <span className="font-medium">Atualização instalada. Reinicie o programa.</span>
             </div>
           )}
 
           {status === "error" && errorMsg && (
-            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="font-bold text-red-900">Erro</p>
-              <p className="text-sm text-red-700 font-mono break-all">{errorMsg}</p>
+            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
+              {errorMsg}
             </div>
-          )}
-
-          {!isTauri && (
-            <p className="text-xs text-slate-400 italic">
-              A verificação de atualizações só funciona no aplicativo desktop instalado.
-            </p>
           )}
         </CardContent>
       </Card>
