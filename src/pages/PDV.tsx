@@ -518,7 +518,57 @@ const PDV = () => {
           </div>
         </aside>
       </div>
+
+      <Dialog open={pickerOpen} onOpenChange={setPickerOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Escolher peças — {pickerTitle}</DialogTitle>
+          </DialogHeader>
+          <div className="max-h-[50vh] overflow-y-auto divide-y divide-border">
+            {pickerItems.map((i) => {
+              const checked = pickerSel.has(i.product_id);
+              return (
+                <label
+                  key={i.product_id}
+                  className="flex items-center gap-3 py-2.5 cursor-pointer"
+                >
+                  <Checkbox
+                    checked={checked}
+                    onCheckedChange={() =>
+                      setPickerSel((prev) => {
+                        const next = new Set(prev);
+                        if (next.has(i.product_id)) next.delete(i.product_id);
+                        else next.add(i.product_id);
+                        return next;
+                      })
+                    }
+                  />
+                  <span className="flex-1 text-sm">{i.product_name}</span>
+                  <span className="rule-label">{i.quantity}x</span>
+                  <span className="text-sm tabular-nums text-primary">{brl(i.unit_price)}</span>
+                </label>
+              );
+            })}
+          </div>
+          <div className="flex justify-between gap-2">
+            <Button
+              variant="ghost"
+              onClick={() =>
+                setPickerSel((prev) =>
+                  prev.size === pickerItems.length
+                    ? new Set()
+                    : new Set(pickerItems.map((i) => i.product_id))
+                )
+              }
+            >
+              Marcar/desmarcar todas
+            </Button>
+            <Button onClick={confirmPicker}>Adicionar selecionadas</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
+
   );
 };
 
