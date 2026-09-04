@@ -18,6 +18,7 @@ interface Product {
   color: string | null;
   price: number;
   stock: number;
+  created_at?: string | null;
 }
 
 interface TemplateRow {
