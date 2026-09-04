@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Search, X, Command, Delete, CheckCheck } from "lucide-react";
@@ -55,6 +57,11 @@ const PDV = () => {
   const [finishing, setFinishing] = useState(false);
 
   const [templates, setTemplates] = useState<TemplateRow[]>([]);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerTitle, setPickerTitle] = useState("");
+  const [pickerItems, setPickerItems] = useState<CartItem[]>([]);
+  const [pickerSel, setPickerSel] = useState<Set<string>>(new Set());
+
 
   const searchRef = useRef<HTMLInputElement>(null);
 
@@ -71,7 +78,7 @@ const PDV = () => {
     searchRef.current?.focus();
   }, []);
 
-  const applyTemplate = async (id: string) => {
+  const openTemplate = async (id: string) => {
     const t = templates.find((x) => x.id === id);
     if (!t) return;
     const ids = t.quote_template_items.map((i) => i.product_id).filter(Boolean) as string[];
@@ -79,16 +86,34 @@ const PDV = () => {
       ? await supabase.from("products").select("id,price").in("id", ids)
       : { data: [] as { id: string; price: number }[] };
     const priceOf = new Map((prods ?? []).map((p) => [p.id, Number(p.price)]));
-    setCart(
-      t.quote_template_items.map((i) => ({
-        product_id: i.product_id ?? crypto.randomUUID(),
-        product_name: i.product_name,
-        quantity: i.quantity,
-        unit_price: i.product_id ? priceOf.get(i.product_id) ?? 0 : 0,
-      }))
-    );
-    toast.success(`Modelo "${t.car_name}" carregado`);
+    const items: CartItem[] = t.quote_template_items.map((i) => ({
+      product_id: i.product_id ?? crypto.randomUUID(),
+      product_name: i.product_name,
+      quantity: i.quantity,
+      unit_price: i.product_id ? priceOf.get(i.product_id) ?? 0 : 0,
+    }));
+    setPickerTitle([t.car_name, t.car_year, t.car_engine].filter(Boolean).join(" · "));
+    setPickerItems(items);
+    setPickerSel(new Set(items.map((i) => i.product_id)));
+    setPickerOpen(true);
   };
+
+  const confirmPicker = () => {
+    const chosen = pickerItems.filter((i) => pickerSel.has(i.product_id));
+    if (chosen.length === 0) return toast.error("Selecione ao menos uma peça");
+    setCart((prev) => {
+      const next = [...prev];
+      for (const c of chosen) {
+        const idx = next.findIndex((i) => i.product_id === c.product_id);
+        if (idx >= 0) next[idx] = { ...next[idx], quantity: next[idx].quantity + c.quantity };
+        else next.push(c);
+      }
+      return next;
+    });
+    setPickerOpen(false);
+    toast.success(`${chosen.length} peça(s) adicionada(s)`);
+  };
+
 
   useEffect(() => {
     const t = setTimeout(async () => {
@@ -248,7 +273,7 @@ const PDV = () => {
             <select
               defaultValue=""
               onChange={(e) => {
-                if (e.target.value) void applyTemplate(e.target.value);
+                if (e.target.value) void openTemplate(e.target.value);
                 e.target.value = "";
               }}
               className="h-10 rounded-md bg-background border border-border px-2 text-sm"
@@ -495,7 +520,57 @@ const PDV = () => {
           </div>
         </aside>
       </div>
+
+      <Dialog open={pickerOpen} onOpenChange={setPickerOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Escolher peças — {pickerTitle}</DialogTitle>
+          </DialogHeader>
+          <div className="max-h-[50vh] overflow-y-auto divide-y divide-border">
+            {pickerItems.map((i) => {
+              const checked = pickerSel.has(i.product_id);
+              return (
+                <label
+                  key={i.product_id}
+                  className="flex items-center gap-3 py-2.5 cursor-pointer"
+                >
+                  <Checkbox
+                    checked={checked}
+                    onCheckedChange={() =>
+                      setPickerSel((prev) => {
+                        const next = new Set(prev);
+                        if (next.has(i.product_id)) next.delete(i.product_id);
+                        else next.add(i.product_id);
+                        return next;
+                      })
+                    }
+                  />
+                  <span className="flex-1 text-sm">{i.product_name}</span>
+                  <span className="rule-label">{i.quantity}x</span>
+                  <span className="text-sm tabular-nums text-primary">{brl(i.unit_price)}</span>
+                </label>
+              );
+            })}
+          </div>
+          <div className="flex justify-between gap-2">
+            <Button
+              variant="ghost"
+              onClick={() =>
+                setPickerSel((prev) =>
+                  prev.size === pickerItems.length
+                    ? new Set()
+                    : new Set(pickerItems.map((i) => i.product_id))
+                )
+              }
+            >
+              Marcar/desmarcar todas
+            </Button>
+            <Button onClick={confirmPicker}>Adicionar selecionadas</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
+
   );
 };
 
