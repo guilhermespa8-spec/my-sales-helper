@@ -16,6 +16,14 @@ interface Product {
   stock: number;
 }
 
+interface TemplateRow {
+  id: string;
+  car_name: string;
+  car_year: string | null;
+  car_engine: string | null;
+  quote_template_items: { product_id: string | null; product_name: string; quantity: number }[];
+}
+
 interface CartItem {
   product_id: string;
   product_name: string;
