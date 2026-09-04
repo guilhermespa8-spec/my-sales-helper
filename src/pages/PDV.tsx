@@ -55,6 +55,11 @@ const PDV = () => {
   const [finishing, setFinishing] = useState(false);
 
   const [templates, setTemplates] = useState<TemplateRow[]>([]);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerTitle, setPickerTitle] = useState("");
+  const [pickerItems, setPickerItems] = useState<CartItem[]>([]);
+  const [pickerSel, setPickerSel] = useState<Set<string>>(new Set());
+
 
   const searchRef = useRef<HTMLInputElement>(null);
 
