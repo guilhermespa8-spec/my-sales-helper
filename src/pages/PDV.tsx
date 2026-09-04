@@ -71,7 +71,7 @@ const PDV = () => {
     searchRef.current?.focus();
   }, []);
 
-  const applyTemplate = async (id: string) => {
+  const openTemplate = async (id: string) => {
     const t = templates.find((x) => x.id === id);
     if (!t) return;
     const ids = t.quote_template_items.map((i) => i.product_id).filter(Boolean) as string[];
@@ -79,16 +79,34 @@ const PDV = () => {
       ? await supabase.from("products").select("id,price").in("id", ids)
       : { data: [] as { id: string; price: number }[] };
     const priceOf = new Map((prods ?? []).map((p) => [p.id, Number(p.price)]));
-    setCart(
-      t.quote_template_items.map((i) => ({
-        product_id: i.product_id ?? crypto.randomUUID(),
-        product_name: i.product_name,
-        quantity: i.quantity,
-        unit_price: i.product_id ? priceOf.get(i.product_id) ?? 0 : 0,
-      }))
-    );
-    toast.success(`Modelo "${t.car_name}" carregado`);
+    const items: CartItem[] = t.quote_template_items.map((i) => ({
+      product_id: i.product_id ?? crypto.randomUUID(),
+      product_name: i.product_name,
+      quantity: i.quantity,
+      unit_price: i.product_id ? priceOf.get(i.product_id) ?? 0 : 0,
+    }));
+    setPickerTitle([t.car_name, t.car_year, t.car_engine].filter(Boolean).join(" · "));
+    setPickerItems(items);
+    setPickerSel(new Set(items.map((i) => i.product_id)));
+    setPickerOpen(true);
   };
+
+  const confirmPicker = () => {
+    const chosen = pickerItems.filter((i) => pickerSel.has(i.product_id));
+    if (chosen.length === 0) return toast.error("Selecione ao menos uma peça");
+    setCart((prev) => {
+      const next = [...prev];
+      for (const c of chosen) {
+        const idx = next.findIndex((i) => i.product_id === c.product_id);
+        if (idx >= 0) next[idx] = { ...next[idx], quantity: next[idx].quantity + c.quantity };
+        else next.push(c);
+      }
+      return next;
+    });
+    setPickerOpen(false);
+    toast.success(`${chosen.length} peça(s) adicionada(s)`);
+  };
+
 
   useEffect(() => {
     const t = setTimeout(async () => {
