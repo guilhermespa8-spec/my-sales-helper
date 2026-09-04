@@ -196,7 +196,7 @@ const PDV = () => {
           total,
           payment_method: paymentMethod,
           piece_type: pieceType || null,
-          customer_name: null,
+          customer_name: customer.trim() || null,
           seller_id: seller || null,
         })
         .select()
