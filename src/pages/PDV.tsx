@@ -55,6 +55,7 @@ const PDV = () => {
   const [discount, setDiscount] = useState(0);
   const [sellersList, setSellersList] = useState<{ id: string; name: string }[]>([]);
   const [finishing, setFinishing] = useState(false);
+  const [receipt, setReceipt] = useState<ReceiptData | null>(null);
 
   const [templates, setTemplates] = useState<TemplateRow[]>([]);
   const [pickerOpen, setPickerOpen] = useState(false);
