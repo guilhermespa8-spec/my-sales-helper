@@ -39,12 +39,9 @@ const App = () => (
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/auth" element={<Auth />} />
-                <Route path="/" element={<Protected><Home /></Protected>} />
-                <Route path="/balcao" element={<Protected><PDV /></Protected>} />
+                <Route path="/" element={<Protected><PDV /></Protected>} />
                 <Route path="/pecas" element={<Protected><Products /></Protected>} />
-                <Route path="/vendas" element={<Protected><Sales /></Protected>} />
-                <Route path="/caixa" element={<Protected><Cash /></Protected>} />
-                <Route path="/ajustes" element={<Protected><Settings /></Protected>} />
+
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
