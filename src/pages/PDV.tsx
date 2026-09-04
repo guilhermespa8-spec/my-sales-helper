@@ -38,7 +38,6 @@ interface CartItem {
 const brl = (n: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(n);
 
-const PAYMENTS = ["Dinheiro", "Pix", "Cartão de Débito", "Cartão de Crédito", "Fiado"] as const;
 const PIECE_TYPES = ["Peça", "Peça Separada", "LED", "Vonixx"] as const;
 
 const PDV = () => {
@@ -52,9 +51,7 @@ const PDV = () => {
 
   const [cart, setCart] = useState<CartItem[]>([]);
   const [seller, setSeller] = useState("");
-  const [customer, setCustomer] = useState("");
   const [notes, setNotes] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<string>("");
   const [pieceType, setPieceType] = useState<string>("");
   const [discount, setDiscount] = useState(0);
   const [sellersList, setSellersList] = useState<{ id: string; name: string }[]>([]);
@@ -186,7 +183,6 @@ const PDV = () => {
 
   const finishSale = async () => {
     if (cart.length === 0) return toast.error("Nenhum item no cupom");
-    if (!paymentMethod) return toast.error("Escolha a forma de pagamento");
     setFinishing(true);
     try {
       const { data: sale, error } = await supabase
@@ -194,9 +190,9 @@ const PDV = () => {
         .insert({
           user_id: user!.id,
           total,
-          payment_method: paymentMethod,
+          payment_method: null,
           piece_type: pieceType || null,
-          customer_name: customer.trim() || null,
+          customer_name: null,
           seller_id: seller || null,
         })
         .select()
@@ -232,7 +228,6 @@ const PDV = () => {
         number: String(sale.id).slice(0, 8).toUpperCase(),
         date: new Date().toLocaleString("pt-BR"),
         seller: sellersList.find((s) => s.id === seller)?.name,
-        paymentMethod,
         pieceType,
         discount,
         total,
@@ -606,7 +601,6 @@ const PDV = () => {
             setReceipt(null);
             setCart([]);
             setDiscount(0);
-            setPaymentMethod("");
             setPieceType("");
           }}
         />
