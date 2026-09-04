@@ -94,7 +94,7 @@ const PDV = () => {
     }));
     setPickerTitle([t.car_name, t.car_year, t.car_engine].filter(Boolean).join(" · "));
     setPickerItems(items);
-    setPickerSel(new Set(items.map((i) => i.product_id)));
+    setPickerSel(new Set());
     setPickerOpen(true);
   };
 
