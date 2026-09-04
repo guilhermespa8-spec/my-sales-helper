@@ -52,6 +52,8 @@ const PDV = () => {
 
   const [cart, setCart] = useState<CartItem[]>([]);
   const [seller, setSeller] = useState("");
+  const [customer, setCustomer] = useState("");
+  const [notes, setNotes] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<string>("");
   const [pieceType, setPieceType] = useState<string>("");
   const [discount, setDiscount] = useState(0);
@@ -194,7 +196,7 @@ const PDV = () => {
           total,
           payment_method: paymentMethod,
           piece_type: pieceType || null,
-          customer_name: null,
+          customer_name: customer.trim() || null,
           seller_id: seller || null,
         })
         .select()
@@ -281,15 +283,86 @@ const PDV = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="stripe-title text-2xl sm:text-3xl">Orçamento</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Busque as peças, ajuste valores e finalize.
-          </p>
+    <div className="space-y-4">
+      {/* Cabeçalho do documento */}
+      <div className="rounded-xl border border-border bg-card">
+        <div className="flex flex-wrap items-baseline justify-between gap-2 px-5 py-3 border-b border-border">
+          <h1 className="stripe-title text-lg sm:text-xl">
+            Documento auxiliar de venda — <span className="text-primary">Orçamento</span>
+          </h1>
+          <span className="rule-label hidden sm:flex items-center gap-1.5">
+            <Command className="w-3.5 h-3.5" /> F2 buscar · F4 finalizar
+          </span>
         </div>
-        <div className="flex items-center gap-3">
+
+        <div className="grid gap-4 p-5 lg:grid-cols-[2fr_1fr_1fr]">
+          <label className="block">
+            <span className="rule-label">Cliente</span>
+            <Input
+              value={customer}
+              onChange={(e) => setCustomer(e.target.value)}
+              placeholder="Nome do cliente"
+              className="mt-1 h-10"
+            />
+          </label>
+          <label className="block">
+            <span className="rule-label">Vendedor</span>
+            <select
+              value={seller}
+              onChange={(e) => setSeller(e.target.value)}
+              className="mt-1 w-full h-10 rounded-md bg-background border border-border px-2 text-sm"
+            >
+              <option value="">—</option>
+              {sellersList.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block">
+            <span className="rule-label">Forma de pagamento</span>
+            <select
+              value={paymentMethod}
+              onChange={(e) => setPaymentMethod(e.target.value)}
+              className="mt-1 w-full h-10 rounded-md bg-background border border-border px-2 text-sm"
+            >
+              <option value="">—</option>
+              {PAYMENTS.map((p) => (
+                <option key={p} value={p}>
+                  {p}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      </div>
+
+      {/* Produtos */}
+      <div className="rounded-xl border border-border bg-card overflow-hidden">
+        <div className="flex flex-wrap items-center gap-3 px-5 py-3 border-b border-border">
+          <span className="rule-label">Produtos</span>
+          <div className="relative flex-1 min-w-[220px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              ref={searchRef}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={onSearchKey}
+              placeholder="Incluir produto: bipe o código ou digite o nome"
+              className="pl-9 pr-9 h-10"
+            />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                aria-label="Limpar busca"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
           {templates.length > 0 && (
             <select
               defaultValue=""
@@ -308,245 +381,193 @@ const PDV = () => {
               ))}
             </select>
           )}
-          <span className="hidden sm:flex items-center gap-1.5 rule-label">
-            <Command className="w-3.5 h-3.5" /> F2 buscar · F4 finalizar
-          </span>
         </div>
-      </div>
 
-      <div className="grid gap-6 items-start">
-        {/* Busca e resultados */}
-        <section className="rounded-xl border border-border bg-card overflow-hidden">
-          <div className="p-4 border-b border-border">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                ref={searchRef}
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                onKeyDown={onSearchKey}
-                placeholder="Bipe o código ou digite o nome da peça"
-                className="pl-9 pr-9 h-12 text-base"
-              />
-              {search && (
-                <button
-                  type="button"
-                  onClick={() => setSearch("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  aria-label="Limpar busca"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-          </div>
-
-          <div className="max-h-[60vh] overflow-y-auto scrollbar-thin divide-y divide-border">
+        {/* Resultados da busca */}
+        {search.trim() !== "" && (
+          <div className="max-h-64 overflow-y-auto scrollbar-thin divide-y divide-border border-b border-border bg-secondary/30">
             {searching && <p className="p-4 rule-label">Buscando...</p>}
             {!searching && products.length === 0 && (
               <p className="p-4 rule-label">Nenhuma peça encontrada</p>
             )}
-            {products.map((p, idx) => {
-              const out = Number(p.stock) <= 0;
-              return (
+            {products.map((p, idx) => (
+              <button
+                key={p.id}
+                type="button"
+                onMouseEnter={() => setCursor(idx)}
+                onClick={() => addToCart(p)}
+                className={cn(
+                  "w-full text-left px-4 py-2.5 flex items-center gap-4 transition-colors",
+                  idx === cursor ? "bg-secondary" : "hover:bg-secondary/60"
+                )}
+              >
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm font-semibold truncate">{p.name}</span>
+                  {(p.color || p.description) && (
+                    <span className="block text-xs text-muted-foreground truncate">
+                      {[p.color, p.description].filter(Boolean).join(" · ")}
+                    </span>
+                  )}
+                </span>
+                <span className={cn("rule-label", Number(p.stock) <= 0 && "text-destructive")}>
+                  {Number(p.stock) <= 0 ? "Sem estoque" : `${p.stock} un`}
+                </span>
+                <span className="font-semibold tabular-nums text-primary shrink-0">
+                  {brl(Number(p.price))}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Grade de itens */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm min-w-[680px]">
+            <thead>
+              <tr className="bg-secondary/60 text-left">
+                <th className="px-3 py-2 w-14 rule-label">Item</th>
+                <th className="px-3 py-2 w-28 rule-label">Código</th>
+                <th className="px-3 py-2 rule-label">Produto</th>
+                <th className="px-3 py-2 w-32 rule-label text-center">Qtd</th>
+                <th className="px-3 py-2 w-32 rule-label text-right">Valor R$</th>
+                <th className="px-3 py-2 w-32 rule-label text-right">Total R$</th>
+                <th className="px-3 py-2 w-10" />
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {cart.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-4 py-10 text-center text-sm text-muted-foreground">
+                    Nenhuma peça adicionada ainda.
+                  </td>
+                </tr>
+              ) : (
+                cart.map((i, idx) => (
+                  <tr key={i.product_id} className="hover:bg-secondary/40">
+                    <td className="px-3 py-2 tabular-nums text-muted-foreground">{idx + 1}</td>
+                    <td className="px-3 py-2 font-mono text-xs text-muted-foreground">
+                      {i.product_id.slice(0, 8).toUpperCase()}
+                    </td>
+                    <td className="px-3 py-2 font-medium">{i.product_name}</td>
+                    <td className="px-3 py-2">
+                      <div className="mx-auto flex w-fit items-center rounded-md border border-border overflow-hidden">
+                        <button
+                          type="button"
+                          className="w-7 h-7 leading-none hover:bg-secondary"
+                          onClick={() => setQty(i.product_id, i.quantity - 1)}
+                        >
+                          −
+                        </button>
+                        <span className="w-8 text-center text-sm font-semibold tabular-nums">
+                          {i.quantity}
+                        </span>
+                        <button
+                          type="button"
+                          className="w-7 h-7 leading-none hover:bg-secondary"
+                          onClick={() => setQty(i.product_id, i.quantity + 1)}
+                        >
+                          +
+                        </button>
+                      </div>
+                    </td>
+                    <td className="px-3 py-2">
+                      <Input
+                        type="number"
+                        min={0}
+                        step="0.01"
+                        value={i.unit_price}
+                        onChange={(e) => setPrice(i.product_id, Number(e.target.value))}
+                        className="h-8 tabular-nums text-right"
+                      />
+                    </td>
+                    <td className="px-3 py-2 text-right font-semibold tabular-nums">
+                      {brl(i.quantity * i.unit_price)}
+                    </td>
+                    <td className="px-3 py-2 text-right">
+                      <button
+                        type="button"
+                        onClick={() => setQty(i.product_id, 0)}
+                        className="text-muted-foreground hover:text-destructive"
+                        aria-label="Excluir item"
+                      >
+                        <Delete className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Rodapé: observações + totais */}
+      <div className="grid gap-4 lg:grid-cols-2 items-start">
+        <div className="rounded-xl border border-border bg-card p-5 space-y-4">
+          <label className="block">
+            <span className="rule-label">Observações</span>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={4}
+              className="mt-1 w-full rounded-md bg-background border border-border p-2 text-sm resize-y"
+            />
+          </label>
+          <div>
+            <span className="rule-label">Tipo de peça</span>
+            <div className="mt-1.5 flex flex-wrap gap-1.5">
+              {PIECE_TYPES.map((p) => (
                 <button
-                  key={p.id}
+                  key={p}
                   type="button"
-                  onMouseEnter={() => setCursor(idx)}
-                  onClick={() => addToCart(p)}
+                  onClick={() => setPieceType(pieceType === p ? "" : p)}
                   className={cn(
-                    "w-full text-left px-4 py-3 flex items-center gap-4 transition-colors",
-                    idx === cursor ? "bg-secondary" : "hover:bg-secondary/60"
+                    "px-3 py-1.5 rounded-full text-xs font-medium border transition-colors",
+                    pieceType === p
+                      ? "bg-foreground text-background border-foreground"
+                      : "border-border text-muted-foreground hover:bg-secondary"
                   )}
                 >
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-sm font-semibold truncate">{p.name}</span>
-                    {(p.color || p.description) && (
-                      <span className="block text-xs text-muted-foreground truncate">
-                        {[p.color, p.description].filter(Boolean).join(" · ")}
-                      </span>
-                    )}
-                    <span
-                      className={cn("rule-label", out ? "text-destructive" : "")}
-                    >
-                      {out ? "Sem estoque" : `${p.stock} un disponíveis`}
-                    </span>
-                  </span>
-
-                  <span className="font-semibold tabular-nums text-primary shrink-0">
-                    {brl(Number(p.price))}
-                  </span>
+                  {p}
                 </button>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* Orçamento atual */}
-        <aside className="rounded-xl border border-border bg-card lg:sticky lg:top-20">
-          <div className="px-5 py-4 border-b border-border flex items-baseline justify-between">
-            <span className="font-display text-lg">Itens</span>
-            <span className="rule-label">{itemCount} no orçamento</span>
-          </div>
-
-          <div className="max-h-[38vh] overflow-y-auto scrollbar-thin divide-y divide-border">
-            {cart.length === 0 ? (
-              <p className="p-5 text-sm text-muted-foreground">
-                Nenhuma peça adicionada ainda.
-              </p>
-            ) : (
-              cart.map((i) => (
-                <div key={i.product_id} className="p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <p className="text-sm font-semibold leading-snug flex-1">{i.product_name}</p>
-                    <button
-                      type="button"
-                      onClick={() => setQty(i.product_id, 0)}
-                      className="text-muted-foreground hover:text-destructive"
-                      aria-label="Remover item"
-                    >
-                      <Delete className="w-4 h-4" />
-                    </button>
-                  </div>
-                  <div className="mt-3 flex items-center gap-2">
-                    <div className="flex items-center rounded-md border border-border overflow-hidden">
-                      <button
-                        type="button"
-                        className="w-8 h-8 text-lg leading-none hover:bg-secondary"
-                        onClick={() => setQty(i.product_id, i.quantity - 1)}
-                      >
-                        −
-                      </button>
-                      <span className="w-9 text-center text-sm font-semibold tabular-nums">
-                        {i.quantity}
-                      </span>
-                      <button
-                        type="button"
-                        className="w-8 h-8 text-lg leading-none hover:bg-secondary"
-                        onClick={() => setQty(i.product_id, i.quantity + 1)}
-                      >
-                        +
-                      </button>
-                    </div>
-                    <Input
-                      type="number"
-                      min={0}
-                      step="0.01"
-                      value={i.unit_price}
-                      onChange={(e) => setPrice(i.product_id, Number(e.target.value))}
-                      className="h-8 w-24 tabular-nums"
-                    />
-                    <span className="ml-auto text-sm font-semibold tabular-nums">
-                      {brl(i.quantity * i.unit_price)}
-                    </span>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-
-          <div className="border-t border-border p-5 space-y-4">
-            <div className="grid grid-cols-2 gap-3">
-              <label className="block">
-                <span className="rule-label">Vendedor</span>
-                <select
-                  value={seller}
-                  onChange={(e) => setSeller(e.target.value)}
-                  className="mt-1 w-full h-10 rounded-md bg-background border border-border px-2 text-sm"
-                >
-                  <option value="">—</option>
-                  {sellersList.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="block">
-                <span className="rule-label">Desconto</span>
-                <Input
-                  type="number"
-                  min={0}
-                  step="0.01"
-                  value={discount}
-                  onChange={(e) => setDiscount(Math.max(0, Number(e.target.value)))}
-                  className="mt-1 h-10 tabular-nums"
-                />
-              </label>
+              ))}
             </div>
-
-            <div>
-              <span className="rule-label">Pagamento</span>
-              <div className="mt-1.5 flex flex-wrap gap-1.5">
-                {PAYMENTS.map((p) => (
-                  <button
-                    key={p}
-                    type="button"
-                    onClick={() => setPaymentMethod(p)}
-                    className={cn(
-                      "px-3 py-1.5 rounded-full text-xs font-medium border transition-colors",
-                      paymentMethod === p
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "border-border text-muted-foreground hover:bg-secondary"
-                    )}
-                  >
-                    {p}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <span className="rule-label">Tipo de peça</span>
-              <div className="mt-1.5 flex flex-wrap gap-1.5">
-                {PIECE_TYPES.map((p) => (
-                  <button
-                    key={p}
-                    type="button"
-                    onClick={() => setPieceType(pieceType === p ? "" : p)}
-                    className={cn(
-                      "px-3 py-1.5 rounded-full text-xs font-medium border transition-colors",
-                      pieceType === p
-                        ? "bg-foreground text-background border-foreground"
-                        : "border-border text-muted-foreground hover:bg-secondary"
-                    )}
-                  >
-                    {p}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="pt-3 border-t border-border space-y-1">
-              <div className="flex justify-between rule-label">
-                <span>Subtotal</span>
-                <span className="tabular-nums">{brl(subtotal)}</span>
-              </div>
-              {discount > 0 && (
-                <div className="flex justify-between rule-label text-destructive">
-                  <span>Desconto</span>
-                  <span className="tabular-nums">-{brl(discount)}</span>
-                </div>
-              )}
-              <div className="flex items-baseline justify-between pt-1">
-                <span className="rule-label">Total</span>
-                <span className="font-display text-3xl leading-none text-primary tabular-nums">
-                  {brl(total)}
-                </span>
-              </div>
-            </div>
-
-            <Button
-              className="w-full h-12 text-base"
-              onClick={finishSale}
-              disabled={finishing || cart.length === 0}
-            >
-              <CheckCheck className="w-5 h-5 mr-2" />
-              {finishing ? "Finalizando..." : "Finalizar (F4)"}
-            </Button>
           </div>
-        </aside>
+        </div>
+
+        <div className="rounded-xl border border-border bg-card p-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="rule-label">Total produtos ({itemCount} itens)</span>
+            <span className="font-semibold tabular-nums">{brl(subtotal)}</span>
+          </div>
+          <label className="flex items-center justify-between gap-3">
+            <span className="rule-label">Desconto R$</span>
+            <Input
+              type="number"
+              min={0}
+              step="0.01"
+              value={discount}
+              onChange={(e) => setDiscount(Math.max(0, Number(e.target.value)))}
+              className="h-9 w-32 tabular-nums text-right"
+            />
+          </label>
+          <div className="flex items-baseline justify-between border-t border-border pt-3">
+            <span className="rule-label">Total</span>
+            <span className="font-display text-3xl leading-none text-primary tabular-nums">
+              {brl(total)}
+            </span>
+          </div>
+          <Button
+            className="w-full h-12 text-base"
+            onClick={finishSale}
+            disabled={finishing || cart.length === 0}
+          >
+            <CheckCheck className="w-5 h-5 mr-2" />
+            {finishing ? "Finalizando..." : "Fechar e imprimir (F4)"}
+          </Button>
+        </div>
       </div>
+
 
       <Dialog open={pickerOpen} onOpenChange={setPickerOpen}>
         <DialogContent className="max-w-lg">
