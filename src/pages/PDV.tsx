@@ -94,9 +94,18 @@ const PDV = () => {
     }));
     setPickerTitle([t.car_name, t.car_year, t.car_engine].filter(Boolean).join(" · "));
     setPickerItems(items);
-    setPickerSel(new Set(items.map((i) => i.product_id)));
+    setPickerSel(new Set());
     setPickerOpen(true);
   };
+
+  const pickerGroups = useMemo(() => {
+    const map = new Map<string, CartItem[]>();
+    for (const i of pickerItems) {
+      const cat = (i.product_name.trim().split(/\s+/)[0] || "OUTROS").toUpperCase();
+      map.set(cat, [...(map.get(cat) ?? []), i]);
+    }
+    return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+  }, [pickerItems]);
 
   const confirmPicker = () => {
     const chosen = pickerItems.filter((i) => pickerSel.has(i.product_id));
@@ -526,31 +535,35 @@ const PDV = () => {
           <DialogHeader>
             <DialogTitle>Escolher peças — {pickerTitle}</DialogTitle>
           </DialogHeader>
-          <div className="max-h-[50vh] overflow-y-auto divide-y divide-border">
-            {pickerItems.map((i) => {
-              const checked = pickerSel.has(i.product_id);
-              return (
-                <label
-                  key={i.product_id}
-                  className="flex items-center gap-3 py-2.5 cursor-pointer"
-                >
-                  <Checkbox
-                    checked={checked}
-                    onCheckedChange={() =>
-                      setPickerSel((prev) => {
-                        const next = new Set(prev);
-                        if (next.has(i.product_id)) next.delete(i.product_id);
-                        else next.add(i.product_id);
-                        return next;
-                      })
-                    }
-                  />
-                  <span className="flex-1 text-sm">{i.product_name}</span>
-                  <span className="rule-label">{i.quantity}x</span>
-                  <span className="text-sm tabular-nums text-primary">{brl(i.unit_price)}</span>
-                </label>
-              );
-            })}
+          <div className="max-h-[50vh] overflow-y-auto space-y-4">
+            {pickerGroups.map(([cat, items]) => (
+              <div key={cat}>
+                <p className="rule-label sticky top-0 bg-background py-1">{cat}</p>
+                <div className="divide-y divide-border">
+                  {items.map((i) => (
+                    <label
+                      key={i.product_id}
+                      className="flex items-center gap-3 py-2.5 cursor-pointer"
+                    >
+                      <Checkbox
+                        checked={pickerSel.has(i.product_id)}
+                        onCheckedChange={() =>
+                          setPickerSel((prev) => {
+                            const next = new Set(prev);
+                            if (next.has(i.product_id)) next.delete(i.product_id);
+                            else next.add(i.product_id);
+                            return next;
+                          })
+                        }
+                      />
+                      <span className="flex-1 text-sm">{i.product_name}</span>
+                      <span className="rule-label">{i.quantity}x</span>
+                      <span className="text-sm tabular-nums text-primary">{brl(i.unit_price)}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
           <div className="flex justify-between gap-2">
             <Button
