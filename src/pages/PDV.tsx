@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Search, X, Command, Delete, CheckCheck } from "lucide-react";
+import Receipt, { type ReceiptData } from "@/components/Receipt";
 
 interface Product {
   id: string;
