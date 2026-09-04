@@ -9,28 +9,27 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import AppLayout from "@/components/AppLayout";
 import { lazy, Suspense } from "react";
 
-const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Home = lazy(() => import("./pages/Home"));
 const PDV = lazy(() => import("./pages/PDV"));
 const Products = lazy(() => import("./pages/Products"));
-const Stock = lazy(() => import("./pages/Stock"));
 const Sales = lazy(() => import("./pages/Sales"));
-const Finance = lazy(() => import("./pages/Finance"));
-const Reports = lazy(() => import("./pages/Reports"));
-const ServiceOrders = lazy(() => import("./pages/ServiceOrders"));
+const Cash = lazy(() => import("./pages/Cash"));
 const Settings = lazy(() => import("./pages/Settings"));
 const Auth = lazy(() => import("./pages/Auth"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const PageLoader = () => (
   <div className="flex items-center justify-center min-h-screen">
-    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+    <div className="h-1 w-24 hazard animate-pulse" />
   </div>
 );
 
 const queryClient = new QueryClient();
 
 const Protected = ({ children }: { children: React.ReactNode }) => (
-  <ProtectedRoute><AppLayout>{children}</AppLayout></ProtectedRoute>
+  <ProtectedRoute>
+    <AppLayout>{children}</AppLayout>
+  </ProtectedRoute>
 );
 
 const App = () => (
@@ -44,15 +43,12 @@ const App = () => (
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/auth" element={<Auth />} />
-                <Route path="/" element={<Protected><Dashboard /></Protected>} />
-                <Route path="/pdv" element={<Protected><PDV /></Protected>} />
-                <Route path="/produtos" element={<Protected><Products /></Protected>} />
-                <Route path="/estoque" element={<Protected><Stock /></Protected>} />
+                <Route path="/" element={<Protected><Home /></Protected>} />
+                <Route path="/balcao" element={<Protected><PDV /></Protected>} />
+                <Route path="/pecas" element={<Protected><Products /></Protected>} />
                 <Route path="/vendas" element={<Protected><Sales /></Protected>} />
-                <Route path="/financeiro" element={<Protected><Finance /></Protected>} />
-                <Route path="/relatorios" element={<Protected><Reports /></Protected>} />
-                <Route path="/ordens" element={<Protected><ServiceOrders /></Protected>} />
-                <Route path="/configuracoes" element={<Protected><Settings /></Protected>} />
+                <Route path="/caixa" element={<Protected><Cash /></Protected>} />
+                <Route path="/ajustes" element={<Protected><Settings /></Protected>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
