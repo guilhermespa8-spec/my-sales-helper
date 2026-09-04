@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Search, X, Command, Delete, CheckCheck } from "lucide-react";
+import Receipt, { type ReceiptData } from "@/components/Receipt";
 
 interface Product {
   id: string;
@@ -55,6 +56,7 @@ const PDV = () => {
   const [discount, setDiscount] = useState(0);
   const [sellersList, setSellersList] = useState<{ id: string; name: string }[]>([]);
   const [finishing, setFinishing] = useState(false);
+  const [receipt, setReceipt] = useState<ReceiptData | null>(null);
 
   const [templates, setTemplates] = useState<TemplateRow[]>([]);
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -223,12 +225,21 @@ const PDV = () => {
         }
       }
 
+      setReceipt({
+        number: String(sale.id).slice(0, 8).toUpperCase(),
+        date: new Date().toLocaleString("pt-BR"),
+        seller: sellersList.find((s) => s.id === seller)?.name,
+        paymentMethod,
+        pieceType,
+        discount,
+        total,
+        items: cart.map((i) => ({
+          product_name: i.product_name,
+          quantity: i.quantity,
+          unit_price: i.unit_price,
+        })),
+      });
       toast.success(`Venda finalizada — ${brl(total)}`);
-      setCart([]);
-      setDiscount(0);
-      setPaymentMethod("");
-      setPieceType("");
-      nav("/");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Erro ao finalizar venda");
     } finally {
@@ -582,7 +593,21 @@ const PDV = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {receipt && (
+        <Receipt
+          data={receipt}
+          onClose={() => {
+            setReceipt(null);
+            setCart([]);
+            setDiscount(0);
+            setPaymentMethod("");
+            setPieceType("");
+          }}
+        />
+      )}
     </div>
+
 
   );
 };
