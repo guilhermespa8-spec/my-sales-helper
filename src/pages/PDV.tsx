@@ -271,7 +271,7 @@ const PDV = () => {
             <select
               defaultValue=""
               onChange={(e) => {
-                if (e.target.value) void applyTemplate(e.target.value);
+                if (e.target.value) void openTemplate(e.target.value);
                 e.target.value = "";
               }}
               className="h-10 rounded-md bg-background border border-border px-2 text-sm"
