@@ -63,9 +63,9 @@ export default {
         },
       },
       fontFamily: {
-        display: ["'Archivo'", "'Barlow'", "system-ui", "sans-serif"],
-        sans: ["'Barlow'", "system-ui", "sans-serif"],
-        mono: ["'JetBrains Mono'", "ui-monospace", "monospace"],
+        display: ["'Sora'", "'Manrope'", "system-ui", "sans-serif"],
+        sans: ["'Manrope'", "system-ui", "sans-serif"],
+        mono: ["ui-monospace", "SFMono-Regular", "monospace"],
       },
       borderRadius: {
         lg: "var(--radius)",
