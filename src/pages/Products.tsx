@@ -56,9 +56,9 @@ const Products = () => {
       const q = searchQuery.trim();
       const r = q
         ? await supabase.rpc("search_products", { search_term: q })
-        : await supabase.from("products").select("*").order("name").limit(300);
+        : await supabase.from("products").select("*").order("name").limit(20);
       if (r.error) toast.error(r.error.message);
-      else setItems((r.data ?? []) as Product[]);
+      else setItems(((r.data ?? []) as Product[]).slice(0, 20));
     } finally {
       setLoading(false);
     }
