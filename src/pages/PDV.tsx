@@ -16,6 +16,14 @@ interface Product {
   stock: number;
 }
 
+interface TemplateRow {
+  id: string;
+  car_name: string;
+  car_year: string | null;
+  car_engine: string | null;
+  quote_template_items: { product_id: string | null; product_name: string; quantity: number }[];
+}
+
 interface CartItem {
   product_id: string;
   product_name: string;
@@ -46,15 +54,41 @@ const PDV = () => {
   const [sellersList, setSellersList] = useState<{ id: string; name: string }[]>([]);
   const [finishing, setFinishing] = useState(false);
 
+  const [templates, setTemplates] = useState<TemplateRow[]>([]);
+
   const searchRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     (async () => {
       const { data } = await supabase.from("sellers").select("id,name").order("name");
       if (data) setSellersList(data as { id: string; name: string }[]);
+      const { data: tpl } = await supabase
+        .from("quote_templates")
+        .select("id,car_name,car_year,car_engine,quote_template_items(product_id,product_name,quantity)")
+        .order("car_name");
+      if (tpl) setTemplates(tpl as TemplateRow[]);
     })();
     searchRef.current?.focus();
   }, []);
+
+  const applyTemplate = async (id: string) => {
+    const t = templates.find((x) => x.id === id);
+    if (!t) return;
+    const ids = t.quote_template_items.map((i) => i.product_id).filter(Boolean) as string[];
+    const { data: prods } = ids.length
+      ? await supabase.from("products").select("id,price").in("id", ids)
+      : { data: [] as { id: string; price: number }[] };
+    const priceOf = new Map((prods ?? []).map((p) => [p.id, Number(p.price)]));
+    setCart(
+      t.quote_template_items.map((i) => ({
+        product_id: i.product_id ?? crypto.randomUUID(),
+        product_name: i.product_name,
+        quantity: i.quantity,
+        unit_price: i.product_id ? priceOf.get(i.product_id) ?? 0 : 0,
+      }))
+    );
+    toast.success(`Modelo "${t.car_name}" carregado`);
+  };
 
   useEffect(() => {
     const t = setTimeout(async () => {
@@ -209,9 +243,29 @@ const PDV = () => {
             Busque as peças, ajuste valores e finalize.
           </p>
         </div>
-        <span className="hidden sm:flex items-center gap-1.5 rule-label">
-          <Command className="w-3.5 h-3.5" /> F2 buscar · F4 finalizar
-        </span>
+        <div className="flex items-center gap-3">
+          {templates.length > 0 && (
+            <select
+              defaultValue=""
+              onChange={(e) => {
+                if (e.target.value) void applyTemplate(e.target.value);
+                e.target.value = "";
+              }}
+              className="h-10 rounded-md bg-background border border-border px-2 text-sm"
+              aria-label="Usar modelo pronto"
+            >
+              <option value="">Usar modelo pronto…</option>
+              {templates.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {[t.car_name, t.car_year, t.car_engine].filter(Boolean).join(" · ")}
+                </option>
+              ))}
+            </select>
+          )}
+          <span className="hidden sm:flex items-center gap-1.5 rule-label">
+            <Command className="w-3.5 h-3.5" /> F2 buscar · F4 finalizar
+          </span>
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_400px] items-start">

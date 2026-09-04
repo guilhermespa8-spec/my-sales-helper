@@ -11,6 +11,7 @@ type Item = { to: string; label: string; end?: boolean };
 export const menu: Item[] = [
   { to: "/", label: "Orçamento", end: true },
   { to: "/pecas", label: "Peças" },
+  { to: "/modelos", label: "Modelos" },
 ];
 
 const AppLayout = ({ children }: { children: ReactNode }) => {
