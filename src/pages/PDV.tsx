@@ -223,12 +223,21 @@ const PDV = () => {
         }
       }
 
+      setReceipt({
+        number: String(sale.id).slice(0, 8).toUpperCase(),
+        date: new Date().toLocaleString("pt-BR"),
+        seller: sellersList.find((s) => s.id === seller)?.name,
+        paymentMethod,
+        pieceType,
+        discount,
+        total,
+        items: cart.map((i) => ({
+          product_name: i.product_name,
+          quantity: i.quantity,
+          unit_price: i.unit_price,
+        })),
+      });
       toast.success(`Venda finalizada — ${brl(total)}`);
-      setCart([]);
-      setDiscount(0);
-      setPaymentMethod("");
-      setPieceType("");
-      nav("/");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Erro ao finalizar venda");
     } finally {
