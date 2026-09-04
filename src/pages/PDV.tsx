@@ -593,7 +593,21 @@ const PDV = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {receipt && (
+        <Receipt
+          data={receipt}
+          onClose={() => {
+            setReceipt(null);
+            setCart([]);
+            setDiscount(0);
+            setPaymentMethod("");
+            setPieceType("");
+          }}
+        />
+      )}
     </div>
+
 
   );
 };
