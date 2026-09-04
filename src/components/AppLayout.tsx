@@ -25,13 +25,10 @@ type Item = {
 };
 
 export const menu: Item[] = [
-  { to: "/", label: "Painel", code: "00", icon: Gauge, end: true },
-  { to: "/balcao", label: "Balcão", code: "01", icon: ScanBarcode },
+  { to: "/", label: "Balcão", code: "01", icon: ScanBarcode, end: true },
   { to: "/pecas", label: "Peças", code: "02", icon: Boxes },
-  { to: "/vendas", label: "Vendas", code: "03", icon: ReceiptText },
-  { to: "/caixa", label: "Caixa", code: "04", icon: Banknote },
-  { to: "/ajustes", label: "Ajustes", code: "05", icon: SlidersHorizontal },
 ];
+
 
 const AppLayout = ({ children }: { children: ReactNode }) => {
   const { user, signOut } = useAuth();
