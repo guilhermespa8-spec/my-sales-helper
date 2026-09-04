@@ -46,15 +46,41 @@ const PDV = () => {
   const [sellersList, setSellersList] = useState<{ id: string; name: string }[]>([]);
   const [finishing, setFinishing] = useState(false);
 
+  const [templates, setTemplates] = useState<TemplateRow[]>([]);
+
   const searchRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     (async () => {
       const { data } = await supabase.from("sellers").select("id,name").order("name");
       if (data) setSellersList(data as { id: string; name: string }[]);
+      const { data: tpl } = await supabase
+        .from("quote_templates")
+        .select("id,car_name,car_year,car_engine,quote_template_items(product_id,product_name,quantity)")
+        .order("car_name");
+      if (tpl) setTemplates(tpl as TemplateRow[]);
     })();
     searchRef.current?.focus();
   }, []);
+
+  const applyTemplate = async (id: string) => {
+    const t = templates.find((x) => x.id === id);
+    if (!t) return;
+    const ids = t.quote_template_items.map((i) => i.product_id).filter(Boolean) as string[];
+    const { data: prods } = ids.length
+      ? await supabase.from("products").select("id,price").in("id", ids)
+      : { data: [] as { id: string; price: number }[] };
+    const priceOf = new Map((prods ?? []).map((p) => [p.id, Number(p.price)]));
+    setCart(
+      t.quote_template_items.map((i) => ({
+        product_id: i.product_id ?? crypto.randomUUID(),
+        product_name: i.product_name,
+        quantity: i.quantity,
+        unit_price: i.product_id ? priceOf.get(i.product_id) ?? 0 : 0,
+      }))
+    );
+    toast.success(`Modelo "${t.car_name}" carregado`);
+  };
 
   useEffect(() => {
     const t = setTimeout(async () => {
