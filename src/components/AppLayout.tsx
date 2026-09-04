@@ -9,7 +9,7 @@ import { LogOut, Sun, Moon } from "lucide-react";
 type Item = { to: string; label: string; end?: boolean };
 
 export const menu: Item[] = [
-  { to: "/", label: "Balcão", end: true },
+  { to: "/", label: "Orçamento", end: true },
   { to: "/pecas", label: "Peças" },
 ];
 
