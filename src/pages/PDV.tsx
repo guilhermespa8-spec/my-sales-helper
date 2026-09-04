@@ -52,6 +52,8 @@ const PDV = () => {
 
   const [cart, setCart] = useState<CartItem[]>([]);
   const [seller, setSeller] = useState("");
+  const [customer, setCustomer] = useState("");
+  const [notes, setNotes] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<string>("");
   const [pieceType, setPieceType] = useState<string>("");
   const [discount, setDiscount] = useState(0);
