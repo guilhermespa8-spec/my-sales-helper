@@ -38,7 +38,6 @@ interface CartItem {
 const brl = (n: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(n);
 
-const PIECE_TYPES = ["Peça", "Peça Separada", "LED", "Vonixx"] as const;
 
 const PDV = () => {
   const { user } = useAuth();
@@ -52,7 +51,6 @@ const PDV = () => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [seller, setSeller] = useState("");
   const [notes, setNotes] = useState("");
-  const [pieceType, setPieceType] = useState<string>("");
   const [discount, setDiscount] = useState(0);
   const [sellersList, setSellersList] = useState<{ id: string; name: string }[]>([]);
   const [finishing, setFinishing] = useState(false);
@@ -191,7 +189,7 @@ const PDV = () => {
           user_id: user!.id,
           total,
           payment_method: null,
-          piece_type: pieceType || null,
+          piece_type: null,
           customer_name: null,
           seller_id: seller || null,
         })
@@ -228,7 +226,6 @@ const PDV = () => {
         number: String(sale.id).slice(0, 8).toUpperCase(),
         date: new Date().toLocaleString("pt-BR"),
         seller: sellersList.find((s) => s.id === seller)?.name,
-        pieceType,
         discount,
         total,
         items: cart.map((i) => ({
@@ -485,26 +482,6 @@ const PDV = () => {
               className="mt-1 w-full rounded-md bg-background border border-border p-2 text-sm resize-y"
             />
           </label>
-          <div>
-            <span className="rule-label">Tipo de peça</span>
-            <div className="mt-1.5 flex flex-wrap gap-1.5">
-              {PIECE_TYPES.map((p) => (
-                <button
-                  key={p}
-                  type="button"
-                  onClick={() => setPieceType(pieceType === p ? "" : p)}
-                  className={cn(
-                    "px-3 py-1.5 rounded-full text-xs font-medium border transition-colors",
-                    pieceType === p
-                      ? "bg-foreground text-background border-foreground"
-                      : "border-border text-muted-foreground hover:bg-secondary"
-                  )}
-                >
-                  {p}
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
 
         <div className="rounded-xl border border-border bg-card p-5 space-y-4">
@@ -601,7 +578,6 @@ const PDV = () => {
             setReceipt(null);
             setCart([]);
             setDiscount(0);
-            setPieceType("");
           }}
         />
       )}
