@@ -314,7 +314,7 @@ const PDV = () => {
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_400px] items-start">
+      <div className="grid gap-6 items-start">
         {/* Busca e resultados */}
         <section className="rounded-xl border border-border bg-card overflow-hidden">
           <div className="p-4 border-b border-border">
