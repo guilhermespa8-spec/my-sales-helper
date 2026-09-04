@@ -137,7 +137,7 @@ const PDV = () => {
           ? await supabase.rpc("search_products", { search_term: q })
           : await supabase
               .from("products")
-              .select("id,name,description,price,stock")
+              .select("id,name,description,color,price,stock,created_at")
               .order("name")
               .limit(48);
         if (!r.error) setProducts((r.data ?? []) as Product[]);
@@ -371,6 +371,9 @@ const PDV = () => {
                       className={cn("rule-label", out ? "text-destructive" : "")}
                     >
                       {out ? "Sem estoque" : `${p.stock} un disponíveis`}
+                      {p.created_at
+                        ? ` · ${new Date(p.created_at).toLocaleDateString("pt-BR")}`
+                        : ""}
                     </span>
                   </span>
 
