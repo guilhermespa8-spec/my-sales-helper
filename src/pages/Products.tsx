@@ -288,65 +288,65 @@ const Products = () => {
           description="Cadastre manualmente ou importe sua planilha de peças."
         />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-px bg-border border border-border">
-          {visible.map((p) => {
-            const stock = Number(p.stock);
-            return (
-              <article key={p.id} className="bg-card p-4 flex flex-col gap-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <h3 className="text-sm font-semibold leading-snug">{p.name}</h3>
-                    {(p.description || p.car_filter || p.color) && (
-                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                        {[p.car_filter, p.color, p.description].filter(Boolean).join(" · ")}
-                      </p>
+        <div className="border border-border bg-card overflow-x-auto">
+          <table className="w-full text-xs border-collapse">
+            <thead>
+              <tr className="bg-secondary text-muted-foreground">
+                <th className="text-left font-semibold uppercase tracking-wider px-3 py-2 border-b border-border">Código</th>
+                <th className="text-left font-semibold uppercase tracking-wider px-3 py-2 border-b border-border">Descrição</th>
+                <th className="text-left font-semibold uppercase tracking-wider px-3 py-2 border-b border-border">Aplicação</th>
+                <th className="text-left font-semibold uppercase tracking-wider px-3 py-2 border-b border-border">Cor</th>
+                <th className="text-right font-semibold uppercase tracking-wider px-3 py-2 border-b border-border">Estoque</th>
+                <th className="text-right font-semibold uppercase tracking-wider px-3 py-2 border-b border-border">Preço</th>
+                <th className="px-3 py-2 border-b border-border"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {visible.map((p, i) => {
+                const stock = Number(p.stock);
+                return (
+                  <tr
+                    key={p.id}
+                    onDoubleClick={() => openEdit(p)}
+                    className={cn(
+                      "border-b border-border hover:bg-secondary/60",
+                      i % 2 === 1 && "bg-secondary/25"
                     )}
-                  </div>
-                  <span className="font-display text-xl leading-none text-primary tabular-nums shrink-0">
-                    {brl(Number(p.price))}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between gap-2 mt-auto pt-2 border-t border-border">
-                  <div className="flex items-center border border-border">
-                    <button
-                      type="button"
-                      onClick={() => adjustStock(p, -1)}
-                      className="w-8 h-8 text-base leading-none hover:bg-secondary"
-                      aria-label="Baixar estoque"
-                    >
-                      −
-                    </button>
-                    <span
-                      className={cn(
-                        "w-14 text-center text-xs font-semibold tabular-nums",
-                        stock <= 0 ? "text-destructive" : stock <= 3 ? "text-warning" : "text-foreground"
-                      )}
-                    >
-                      {stock} un
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => adjustStock(p, 1)}
-                      className="w-8 h-8 text-base leading-none hover:bg-secondary"
-                      aria-label="Entrada de estoque"
-                    >
-                      +
-                    </button>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" onClick={() => openEdit(p)} aria-label="Editar peça">
-                      <Pencil className="w-4 h-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => remove(p.id)} aria-label="Excluir peça">
-                      <Trash2 className="w-4 h-4 text-destructive" />
-                    </Button>
-                  </div>
-                </div>
-              </article>
-            );
-          })}
+                  >
+                    <td className="px-3 py-1.5 font-mono text-[11px] text-muted-foreground whitespace-nowrap">
+                      {String(i + 1).padStart(6, "0")}
+                    </td>
+                    <td className="px-3 py-1.5 font-medium">{p.name}</td>
+                    <td className="px-3 py-1.5 text-muted-foreground whitespace-nowrap">{p.car_filter || "—"}</td>
+                    <td className="px-3 py-1.5 text-muted-foreground whitespace-nowrap">{p.color || "—"}</td>
+                    <td className="px-3 py-1.5 text-right whitespace-nowrap">
+                      <span className="inline-flex items-center border border-border">
+                        <button type="button" onClick={() => adjustStock(p, -1)} className="w-6 h-6 hover:bg-secondary" aria-label="Baixar estoque">−</button>
+                        <span className={cn(
+                          "w-10 text-center tabular-nums font-semibold",
+                          stock <= 0 ? "text-destructive" : stock <= 3 ? "text-warning" : "text-foreground"
+                        )}>{stock}</span>
+                        <button type="button" onClick={() => adjustStock(p, 1)} className="w-6 h-6 hover:bg-secondary" aria-label="Entrada de estoque">+</button>
+                      </span>
+                    </td>
+                    <td className="px-3 py-1.5 text-right tabular-nums font-semibold text-primary whitespace-nowrap">
+                      {brl(Number(p.price))}
+                    </td>
+                    <td className="px-2 py-1 text-right whitespace-nowrap">
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(p)} aria-label="Editar peça">
+                        <Pencil className="w-3.5 h-3.5" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => remove(p.id)} aria-label="Excluir peça">
+                        <Trash2 className="w-3.5 h-3.5 text-destructive" />
+                      </Button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
+
       )}
 
       <Dialog open={open} onOpenChange={setOpen}>
