@@ -160,7 +160,7 @@ const PDV = () => {
       setDiscount(0);
       setPaymentMethod("");
       setPieceType("");
-      nav("/vendas");
+      nav("/");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Erro ao finalizar venda");
     } finally {
