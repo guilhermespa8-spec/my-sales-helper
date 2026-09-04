@@ -295,16 +295,7 @@ const PDV = () => {
           </span>
         </div>
 
-        <div className="grid gap-4 p-5 lg:grid-cols-[2fr_1fr_1fr]">
-          <label className="block">
-            <span className="rule-label">Cliente</span>
-            <Input
-              value={customer}
-              onChange={(e) => setCustomer(e.target.value)}
-              placeholder="Nome do cliente"
-              className="mt-1 h-10"
-            />
-          </label>
+        <div className="grid gap-4 p-5 lg:grid-cols-2">
           <label className="block">
             <span className="rule-label">Vendedor</span>
             <select
@@ -320,22 +311,8 @@ const PDV = () => {
               ))}
             </select>
           </label>
-          <label className="block">
-            <span className="rule-label">Forma de pagamento</span>
-            <select
-              value={paymentMethod}
-              onChange={(e) => setPaymentMethod(e.target.value)}
-              className="mt-1 w-full h-10 rounded-md bg-background border border-border px-2 text-sm"
-            >
-              <option value="">—</option>
-              {PAYMENTS.map((p) => (
-                <option key={p} value={p}>
-                  {p}
-                </option>
-              ))}
-            </select>
-          </label>
         </div>
+
       </div>
 
       {/* Produtos */}
