@@ -4,19 +4,20 @@ import { cn } from "@/lib/utils";
 interface PageHeaderProps {
   title: string;
   description?: string;
+  code?: string;
   children?: ReactNode;
   className?: string;
 }
 
-export const PageHeader = ({ title, description, children, className }: PageHeaderProps) => {
+export const PageHeader = ({ title, description, code, children, className }: PageHeaderProps) => {
   return (
-    <div className={cn("border-b border-foreground/15 pb-5 mb-8", className)}>
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+    <div className={cn("mb-8", className)}>
+      <div className="h-1.5 hazard w-full" aria-hidden />
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pt-4">
         <div className="min-w-0">
-          <h1 className="font-display text-4xl sm:text-5xl leading-[1.05] text-foreground">{title}</h1>
-          {description && (
-            <p className="rule-label mt-3 normal-case tracking-[0.12em]">{description}</p>
-          )}
+          {code && <span className="rule-label text-primary">{code}</span>}
+          <h1 className="stripe-title text-3xl sm:text-4xl leading-none mt-1">{title}</h1>
+          {description && <p className="text-sm text-muted-foreground mt-2">{description}</p>}
         </div>
         {children && <div className="flex items-center gap-2 shrink-0">{children}</div>}
       </div>

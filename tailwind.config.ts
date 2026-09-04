@@ -63,8 +63,9 @@ export default {
         },
       },
       fontFamily: {
-        display: ["'Instrument Serif'", "Georgia", "serif"],
-        sans: ["'Work Sans'", "system-ui", "sans-serif"],
+        display: ["'Archivo'", "'Barlow'", "system-ui", "sans-serif"],
+        sans: ["'Barlow'", "system-ui", "sans-serif"],
+        mono: ["'JetBrains Mono'", "ui-monospace", "monospace"],
       },
       borderRadius: {
         lg: "var(--radius)",

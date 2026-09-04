@@ -1,57 +1,48 @@
-import { ReactNode, useState } from "react";
-import { NavLink, useNavigate, useLocation } from "react-router-dom";
+import { ReactNode } from "react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import {
-  LayoutDashboard,
-  ShoppingCart,
-  Package,
-  PackageCheck,
-  Receipt,
-  Wallet,
-  BarChart3,
-  Wrench,
-  Settings,
+  Gauge,
+  ScanBarcode,
+  Boxes,
+  ReceiptText,
+  Banknote,
+  SlidersHorizontal,
   LogOut,
   Sun,
   Moon,
-  Menu,
 } from "lucide-react";
 
 type Item = {
   to: string;
   label: string;
+  code: string;
   icon: React.ComponentType<{ className?: string }>;
   end?: boolean;
 };
 
-const menu: Item[] = [
-  { to: "/", label: "Painel", icon: LayoutDashboard, end: true },
-  { to: "/pdv", label: "PDV", icon: ShoppingCart },
-  { to: "/produtos", label: "Produtos", icon: Package },
-  { to: "/estoque", label: "Estoque", icon: PackageCheck },
-  { to: "/vendas", label: "Vendas", icon: Receipt },
-  { to: "/financeiro", label: "Financeiro", icon: Wallet },
-  { to: "/relatorios", label: "Relatórios", icon: BarChart3 },
-  { to: "/ordens", label: "Ordens", icon: Wrench },
-  { to: "/configuracoes", label: "Ajustes", icon: Settings },
+export const menu: Item[] = [
+  { to: "/", label: "Painel", code: "00", icon: Gauge, end: true },
+  { to: "/balcao", label: "Balcão", code: "01", icon: ScanBarcode },
+  { to: "/pecas", label: "Peças", code: "02", icon: Boxes },
+  { to: "/vendas", label: "Vendas", code: "03", icon: ReceiptText },
+  { to: "/caixa", label: "Caixa", code: "04", icon: Banknote },
+  { to: "/ajustes", label: "Ajustes", code: "05", icon: SlidersHorizontal },
 ];
-
-const useActive = () => {
-  const location = useLocation();
-  return (item: Item) =>
-    item.end ? location.pathname === item.to : location.pathname.startsWith(item.to);
-};
 
 const AppLayout = ({ children }: { children: ReactNode }) => {
   const { user, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const nav = useNavigate();
-  const isActive = useActive();
-  const [open, setOpen] = useState(false);
+  const location = useLocation();
+
+  const isActive = (item: Item) =>
+    item.end ? location.pathname === item.to : location.pathname.startsWith(item.to);
+
+  const current = menu.find(isActive);
 
   const handleSignOut = async () => {
     await signOut();
@@ -59,20 +50,68 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Masthead */}
-      <header className="no-print border-b border-border bg-background sticky top-0 z-40">
-        <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-8">
-          <div className="h-16 flex items-center justify-between gap-4">
-            <NavLink to="/" className="flex items-baseline gap-3 min-w-0">
-              <span className="font-display text-2xl sm:text-3xl leading-none text-foreground truncate">
-                Abrantes
-              </span>
-              <span className="hidden sm:inline rule-label text-primary">Auto Peças</span>
-            </NavLink>
+    <div className="min-h-screen bg-background">
+      {/* Rail lateral — desktop */}
+      <aside className="no-print hidden md:flex fixed left-0 top-0 bottom-0 z-50 w-[84px] flex-col bg-sidebar border-r border-sidebar-border">
+        <div className="h-16 flex items-center justify-center border-b border-sidebar-border">
+          <span className="font-display text-xl leading-none text-sidebar-primary">AB</span>
+        </div>
+        <nav className="flex-1 py-2">
+          {menu.map((item) => {
+            const Icon = item.icon;
+            const active = isActive(item);
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.end}
+                className={cn(
+                  "relative flex flex-col items-center gap-1.5 py-4 transition-colors",
+                  active
+                    ? "text-sidebar-primary bg-sidebar-accent"
+                    : "text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
+                )}
+              >
+                {active && (
+                  <span className="absolute left-0 top-0 h-full w-[3px] bg-sidebar-primary" aria-hidden />
+                )}
+                <Icon className="w-5 h-5" />
+                <span className="text-[9px] uppercase tracking-[0.16em] font-semibold">
+                  {item.label}
+                </span>
+              </NavLink>
+            );
+          })}
+        </nav>
+        <div className="p-2 border-t border-sidebar-border">
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="w-full flex flex-col items-center gap-1 py-3 text-sidebar-foreground/60 hover:text-destructive transition-colors"
+            aria-label="Sair"
+          >
+            <LogOut className="w-4 h-4" />
+            <span className="text-[9px] uppercase tracking-[0.16em] font-semibold">Sair</span>
+          </button>
+        </div>
+      </aside>
 
-            <div className="flex items-center gap-1">
-              <span className="hidden md:block rule-label mr-3 max-w-[180px] truncate normal-case tracking-normal">
+      <div className="md:pl-[84px]">
+        {/* Barra superior */}
+        <header className="no-print sticky top-0 z-40 h-16 bg-background border-b border-border">
+          <div className="h-full px-4 sm:px-8 flex items-center justify-between gap-4">
+            <div className="flex items-baseline gap-3 min-w-0">
+              <span className="md:hidden font-display text-lg text-primary">AB</span>
+              <span className="rule-label text-primary hidden sm:inline">
+                {current?.code ?? "00"}
+              </span>
+              <span className="stripe-title text-lg leading-none truncate">
+                {current?.label ?? "Abrantes"}
+              </span>
+              <span className="hidden lg:inline rule-label">Abrantes Auto Peças</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="hidden md:block rule-label normal-case tracking-normal max-w-[200px] truncate">
                 {user?.email}
               </span>
               <Button
@@ -86,100 +125,38 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
               <Button
                 variant="ghost"
                 size="icon"
-                className="hidden md:inline-flex"
+                className="md:hidden"
                 onClick={handleSignOut}
                 aria-label="Sair"
               >
                 <LogOut className="w-4 h-4" />
               </Button>
-
-              <Sheet open={open} onOpenChange={setOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="md:hidden" aria-label="Menu">
-                    <Menu className="w-5 h-5" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="right" className="w-72 p-0">
-                  <div className="px-5 h-16 flex items-center border-b border-border">
-                    <span className="font-display text-2xl">Abrantes</span>
-                  </div>
-                  <nav className="p-3 space-y-0.5">
-                    {menu.map((item) => {
-                      const Icon = item.icon;
-                      return (
-                        <NavLink
-                          key={item.to}
-                          to={item.to}
-                          end={item.end}
-                          onClick={() => setOpen(false)}
-                          className={cn(
-                            "flex items-center gap-3 px-3 py-3 text-sm font-medium border-l-2 transition-colors",
-                            isActive(item)
-                              ? "border-primary text-primary bg-secondary"
-                              : "border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary/60"
-                          )}
-                        >
-                          <Icon className="w-4 h-4" />
-                          {item.label}
-                        </NavLink>
-                      );
-                    })}
-                  </nav>
-                  <div className="p-3 border-t border-border">
-                    <Button variant="ghost" className="w-full justify-start gap-2" onClick={handleSignOut}>
-                      <LogOut className="w-4 h-4" /> Sair
-                    </Button>
-                  </div>
-                </SheetContent>
-              </Sheet>
             </div>
           </div>
-        </div>
+        </header>
 
-        {/* Tabs desktop */}
-        <div className="hidden md:block border-t border-border">
-          <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-8">
-            <nav className="flex items-center gap-7 overflow-x-auto scrollbar-thin">
-              {menu.map((item) => (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  end={item.end}
-                  className={cn(
-                    "relative py-3 text-[13px] uppercase tracking-[0.14em] font-semibold whitespace-nowrap transition-colors",
-                    isActive(item)
-                      ? "text-foreground after:absolute after:inset-x-0 after:-bottom-px after:h-[2px] after:bg-primary"
-                      : "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  {item.label}
-                </NavLink>
-              ))}
-            </nav>
-          </div>
-        </div>
-      </header>
+        <main className="px-4 sm:px-8 py-8 pb-28 md:pb-12 max-w-[1600px]">{children}</main>
+      </div>
 
-      <main className="flex-1 w-full max-w-[1400px] mx-auto px-4 sm:px-8 py-8 pb-24 md:pb-12">
-        {children}
-      </main>
-
-      {/* Bottom bar mobile */}
-      <nav className="md:hidden no-print fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background grid grid-cols-5">
-        {menu.slice(0, 5).map((item) => {
+      {/* Barra inferior — mobile */}
+      <nav className="md:hidden no-print fixed bottom-0 inset-x-0 z-50 bg-sidebar border-t border-sidebar-border grid grid-cols-6">
+        {menu.map((item) => {
           const Icon = item.icon;
+          const active = isActive(item);
           return (
             <NavLink
               key={item.to}
               to={item.to}
               end={item.end}
               className={cn(
-                "flex flex-col items-center justify-center gap-1 py-2.5 text-[10px] uppercase tracking-wider font-semibold",
-                isActive(item) ? "text-primary" : "text-muted-foreground"
+                "flex flex-col items-center justify-center gap-1 py-2.5",
+                active ? "text-sidebar-primary" : "text-sidebar-foreground/60"
               )}
             >
               <Icon className="w-[18px] h-[18px]" />
-              {item.label}
+              <span className="text-[9px] uppercase tracking-[0.12em] font-semibold">
+                {item.label}
+              </span>
             </NavLink>
           );
         })}

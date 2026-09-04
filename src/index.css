@@ -2,108 +2,155 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+  OFICINA — direção visual industrial.
+  Base grafite, sinal âmbar, cantos retos, tipografia condensada em caixa alta.
+*/
+
 @layer base {
   :root {
-    --background: 36 33% 97%;
-    --foreground: 0 0% 7%;
+    --background: 220 16% 96%;
+    --foreground: 220 18% 11%;
 
-    --card: 40 30% 99%;
-    --card-foreground: 0 0% 7%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 18% 11%;
 
-    --popover: 40 30% 99%;
-    --popover-foreground: 0 0% 7%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 18% 11%;
 
-    --primary: 356 68% 50%;
-    --primary-foreground: 40 30% 99%;
+    --primary: 38 96% 50%;
+    --primary-foreground: 220 20% 8%;
 
-    --secondary: 36 20% 93%;
-    --secondary-foreground: 0 0% 12%;
+    --secondary: 220 14% 91%;
+    --secondary-foreground: 220 18% 14%;
 
-    --muted: 36 18% 92%;
-    --muted-foreground: 0 0% 42%;
+    --muted: 220 14% 92%;
+    --muted-foreground: 220 8% 42%;
 
-    --accent: 356 68% 50%;
-    --accent-foreground: 40 30% 99%;
+    --accent: 196 78% 38%;
+    --accent-foreground: 0 0% 100%;
 
-    --success: 150 45% 32%;
-    --success-foreground: 40 30% 99%;
+    --success: 152 52% 34%;
+    --success-foreground: 0 0% 100%;
 
-    --warning: 32 85% 46%;
-    --warning-foreground: 40 30% 99%;
+    --warning: 38 96% 44%;
+    --warning-foreground: 220 20% 8%;
 
-    --destructive: 356 68% 46%;
-    --destructive-foreground: 40 30% 99%;
+    --destructive: 4 74% 47%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 34 14% 87%;
-    --input: 34 14% 87%;
-    --ring: 356 68% 50%;
+    --border: 220 13% 84%;
+    --input: 220 13% 84%;
+    --ring: 38 96% 50%;
 
-    --radius: 0.25rem;
+    --radius: 0rem;
 
-    --gradient-brand: linear-gradient(135deg, hsl(356 68% 52%), hsl(356 70% 38%));
-    --shadow-soft: 0 1px 0 0 hsl(34 14% 84%);
-    --shadow-elevated: 0 18px 40px -24px hsl(0 0% 7% / 0.35);
+    --grid-line: 220 13% 88%;
+    --shadow-soft: 0 1px 0 0 hsl(220 13% 84%);
+    --shadow-elevated: 0 24px 48px -32px hsl(220 30% 10% / 0.5);
 
-    --sidebar-background: 40 30% 99%;
-    --sidebar-foreground: 0 0% 7%;
-    --sidebar-primary: 356 68% 50%;
-    --sidebar-primary-foreground: 40 30% 99%;
-    --sidebar-accent: 36 20% 93%;
-    --sidebar-accent-foreground: 0 0% 10%;
-    --sidebar-border: 34 14% 87%;
-    --sidebar-ring: 356 68% 50%;
+    --sidebar-background: 220 20% 10%;
+    --sidebar-foreground: 220 14% 82%;
+    --sidebar-primary: 38 96% 50%;
+    --sidebar-primary-foreground: 220 20% 8%;
+    --sidebar-accent: 220 18% 16%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 220 18% 18%;
+    --sidebar-ring: 38 96% 50%;
   }
 
   .dark {
-    --background: 0 0% 7%;
-    --foreground: 36 20% 94%;
-    --card: 0 0% 10%;
-    --card-foreground: 36 20% 94%;
-    --popover: 0 0% 10%;
-    --popover-foreground: 36 20% 94%;
-    --primary: 356 72% 56%;
-    --primary-foreground: 0 0% 7%;
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 36 20% 94%;
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 62%;
-    --accent: 356 72% 56%;
-    --accent-foreground: 0 0% 7%;
-    --destructive: 356 72% 52%;
-    --destructive-foreground: 0 0% 7%;
-    --border: 0 0% 18%;
-    --input: 0 0% 18%;
-    --ring: 356 72% 56%;
+    --background: 220 20% 7%;
+    --foreground: 220 14% 92%;
 
-    --sidebar-background: 0 0% 9%;
-    --sidebar-foreground: 36 20% 94%;
-    --sidebar-primary: 356 72% 56%;
-    --sidebar-primary-foreground: 0 0% 7%;
-    --sidebar-accent: 0 0% 15%;
-    --sidebar-accent-foreground: 36 20% 94%;
-    --sidebar-border: 0 0% 18%;
-    --sidebar-ring: 356 72% 56%;
+    --card: 220 18% 10%;
+    --card-foreground: 220 14% 92%;
+
+    --popover: 220 18% 10%;
+    --popover-foreground: 220 14% 92%;
+
+    --primary: 38 96% 55%;
+    --primary-foreground: 220 24% 7%;
+
+    --secondary: 220 16% 15%;
+    --secondary-foreground: 220 14% 92%;
+
+    --muted: 220 16% 15%;
+    --muted-foreground: 220 9% 60%;
+
+    --accent: 190 82% 48%;
+    --accent-foreground: 220 24% 7%;
+
+    --success: 152 58% 44%;
+    --success-foreground: 220 24% 7%;
+
+    --warning: 38 96% 55%;
+    --warning-foreground: 220 24% 7%;
+
+    --destructive: 4 78% 56%;
+    --destructive-foreground: 220 24% 7%;
+
+    --border: 220 14% 18%;
+    --input: 220 14% 18%;
+    --ring: 38 96% 55%;
+
+    --grid-line: 220 14% 16%;
+
+    --sidebar-background: 220 22% 9%;
+    --sidebar-foreground: 220 14% 82%;
+    --sidebar-primary: 38 96% 55%;
+    --sidebar-primary-foreground: 220 24% 7%;
+    --sidebar-accent: 220 16% 15%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 220 14% 18%;
+    --sidebar-ring: 38 96% 55%;
   }
 }
 
 @layer base {
   * { @apply border-border; }
   html { @apply bg-background; }
-  body { @apply text-foreground antialiased; font-family: 'Work Sans', system-ui, sans-serif; background-color: transparent; }
-  h1, h2, .font-display { font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; letter-spacing: -0.01em; }
-}
-
-@layer utilities {
-  .rule-label {
-    @apply text-[11px] uppercase tracking-[0.18em] font-semibold text-muted-foreground;
+  body {
+    @apply text-foreground antialiased;
+    font-family: 'Barlow', system-ui, sans-serif;
+    background-color: transparent;
   }
+  h1, h2, h3, .font-display {
+    font-family: 'Archivo', 'Barlow', system-ui, sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+  .tabular-nums { font-variant-numeric: tabular-nums; }
 }
 
 @layer utilities {
+  /* Etiqueta técnica */
+  .rule-label {
+    @apply text-[10px] uppercase tracking-[0.22em] font-semibold text-muted-foreground;
+  }
+  /* Título de seção com traço de sinalização */
+  .stripe-title {
+    @apply font-display uppercase tracking-[-0.01em];
+  }
+  /* Fundo de malha técnica */
+  .grid-surface {
+    background-image:
+      linear-gradient(to right, hsl(var(--grid-line)) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--grid-line)) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+  /* Faixa diagonal de advertência */
+  .hazard {
+    background-image: repeating-linear-gradient(
+      45deg,
+      hsl(var(--primary)) 0 8px,
+      hsl(var(--primary) / 0.15) 8px 16px
+    );
+  }
   .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
   .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
-  .scrollbar-thin::-webkit-scrollbar-thumb { background: hsl(var(--muted-foreground) / 0.25); border-radius: 999px; }
-  .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground) / 0.4); }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: hsl(var(--muted-foreground) / 0.3); }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground) / 0.5); }
 }
 
 @page {
@@ -123,33 +170,22 @@
     visibility: visible;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
-    color-adjust: exact !important;
   }
   .print-area {
     position: absolute;
     left: 0;
     top: 0;
     width: 100% !important;
-    min-width: 80mm !important;
-    max-width: none !important;
     margin: 0 !important;
-    padding: 2mm 0 !important;
+    padding: 2mm !important;
     box-sizing: border-box;
     color: #000 !important;
     background: #fff !important;
     border: 0 !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-    font-size: 13px !important;
-    line-height: 1.4 !important;
+    font-size: 12px !important;
+    line-height: 1.35 !important;
   }
-  .print-area > *:not(.rounded-lg) { padding-left: 1.5mm !important; padding-right: 1.5mm !important; }
-  .print-area table { width: 100% !important; font-size: 14px !important; font-weight: 600 !important; }
-  .print-area th, .print-area td { padding: 5px 4px !important; font-size: 14px !important; }
-  .print-area tbody td { font-weight: 700 !important; }
-  .print-area h1, .print-area h2, .print-area h3 { margin: 0 !important; }
+  .print-area table { width: 100% !important; font-size: 12px !important; }
+  .print-area th, .print-area td { padding: 2px 3px !important; }
   .no-print { display: none !important; }
-  .print-area { padding: 2mm !important; font-size: 11px !important; }
-  .print-area table { font-size: 11px !important; }
-  .print-area th, .print-area td { padding: 2px 3px !important; font-size: 11px !important; }
 }
