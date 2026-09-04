@@ -98,6 +98,15 @@ const PDV = () => {
     setPickerOpen(true);
   };
 
+  const pickerGroups = useMemo(() => {
+    const map = new Map<string, CartItem[]>();
+    for (const i of pickerItems) {
+      const cat = (i.product_name.trim().split(/\s+/)[0] || "OUTROS").toUpperCase();
+      map.set(cat, [...(map.get(cat) ?? []), i]);
+    }
+    return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+  }, [pickerItems]);
+
   const confirmPicker = () => {
     const chosen = pickerItems.filter((i) => pickerSel.has(i.product_id));
     if (chosen.length === 0) return toast.error("Selecione ao menos uma peça");
