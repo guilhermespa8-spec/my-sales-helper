@@ -5,12 +5,12 @@ import { useTheme } from "@/hooks/useTheme";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
-  Gauge,
+
   ScanBarcode,
   Boxes,
-  ReceiptText,
-  Banknote,
-  SlidersHorizontal,
+
+
+
   LogOut,
   Sun,
   Moon,
@@ -136,7 +136,7 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
       </div>
 
       {/* Barra inferior — mobile */}
-      <nav className="md:hidden no-print fixed bottom-0 inset-x-0 z-50 bg-sidebar border-t border-sidebar-border grid grid-cols-6">
+      <nav className="md:hidden no-print fixed bottom-0 inset-x-0 z-50 bg-sidebar border-t border-sidebar-border grid grid-cols-2">
         {menu.map((item) => {
           const Icon = item.icon;
           const active = isActive(item);
