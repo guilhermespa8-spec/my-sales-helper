@@ -28,9 +28,10 @@ interface Product {
   price: number;
   stock: number;
   car_filter: string | null;
+  color: string | null;
 }
 
-const emptyForm = { name: "", description: "", price: "0", stock: "0", car_filter: "" };
+const emptyForm = { name: "", description: "", price: "0", stock: "0", car_filter: "", color: "" };
 
 const brl = (n: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(n);
@@ -93,6 +94,7 @@ const Products = () => {
       price: String(p.price),
       stock: String(p.stock),
       car_filter: p.car_filter ?? "",
+      color: p.color ?? "",
     });
     setOpen(true);
   };
@@ -112,6 +114,7 @@ const Products = () => {
         stock,
         description: form.description.trim() || null,
         car_filter: form.car_filter.trim() || null,
+        color: form.color.trim() || null,
         user_id: user!.id,
       };
       const { error } = editing
@@ -293,9 +296,9 @@ const Products = () => {
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <h3 className="text-sm font-semibold leading-snug">{p.name}</h3>
-                    {(p.description || p.car_filter) && (
+                    {(p.description || p.car_filter || p.color) && (
                       <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                        {[p.car_filter, p.description].filter(Boolean).join(" · ")}
+                        {[p.car_filter, p.color, p.description].filter(Boolean).join(" · ")}
                       </p>
                     )}
                   </div>
@@ -392,6 +395,15 @@ const Products = () => {
                 value={form.car_filter}
                 onChange={(e) => setForm({ ...form, car_filter: e.target.value })}
                 placeholder="Gol G5, Onix..."
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="color">Cor</Label>
+              <Input
+                id="color"
+                value={form.color}
+                onChange={(e) => setForm({ ...form, color: e.target.value })}
+                placeholder="Preta, branca, prata..."
               />
             </div>
             <div className="space-y-2">
