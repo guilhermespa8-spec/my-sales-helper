@@ -9,12 +9,8 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import AppLayout from "@/components/AppLayout";
 import { lazy, Suspense } from "react";
 
-const Home = lazy(() => import("./pages/Home"));
 const PDV = lazy(() => import("./pages/PDV"));
 const Products = lazy(() => import("./pages/Products"));
-const Sales = lazy(() => import("./pages/Sales"));
-const Cash = lazy(() => import("./pages/Cash"));
-const Settings = lazy(() => import("./pages/Settings"));
 const Auth = lazy(() => import("./pages/Auth"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
