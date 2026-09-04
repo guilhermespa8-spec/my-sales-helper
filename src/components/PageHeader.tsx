@@ -12,13 +12,13 @@ interface PageHeaderProps {
 export const PageHeader = ({ title, description, code, children, className }: PageHeaderProps) => {
   return (
     <div className={cn("mb-8", className)}>
-      <div className="h-1.5 hazard w-full" aria-hidden />
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pt-4">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div className="min-w-0">
           {code && <span className="rule-label text-primary">{code}</span>}
-          <h1 className="stripe-title text-3xl sm:text-4xl leading-none mt-1">{title}</h1>
-          {description && <p className="text-sm text-muted-foreground mt-2">{description}</p>}
+          <h1 className="stripe-title text-2xl sm:text-3xl leading-tight">{title}</h1>
+          {description && <p className="text-sm text-muted-foreground mt-1">{description}</p>}
         </div>
+
         {children && <div className="flex items-center gap-2 shrink-0">{children}</div>}
       </div>
     </div>
