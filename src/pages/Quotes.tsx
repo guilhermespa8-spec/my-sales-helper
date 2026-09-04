@@ -62,7 +62,12 @@ const Quotes = () => {
       </PageHeader>
 
       <div className="mb-6 max-w-md">
-        <SearchInput value={search} onChange={setSearch} placeholder="Buscar por número, cliente ou vendedor" />
+        <SearchInput
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onClear={() => setSearch("")}
+          placeholder="Buscar por número, cliente ou vendedor"
+        />
       </div>
 
       {loading ? (
