@@ -179,6 +179,84 @@ export type Database = {
           },
         ]
       }
+      quote_template_items: {
+        Row: {
+          created_at: string
+          id: string
+          product_code: string | null
+          product_id: string | null
+          product_name: string
+          quantity: number
+          template_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_code?: string | null
+          product_id?: string | null
+          product_name: string
+          quantity?: number
+          template_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_code?: string | null
+          product_id?: string | null
+          product_name?: string
+          quantity?: number
+          template_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_template_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quote_template_items_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "quote_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quote_templates: {
+        Row: {
+          car_engine: string | null
+          car_name: string
+          car_year: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          car_engine?: string | null
+          car_name: string
+          car_year?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          car_engine?: string | null
+          car_name?: string
+          car_year?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       quotes: {
         Row: {
           car: string | null
