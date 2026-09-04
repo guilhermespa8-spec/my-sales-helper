@@ -9,12 +9,8 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import AppLayout from "@/components/AppLayout";
 import { lazy, Suspense } from "react";
 
-const Home = lazy(() => import("./pages/Home"));
 const PDV = lazy(() => import("./pages/PDV"));
 const Products = lazy(() => import("./pages/Products"));
-const Sales = lazy(() => import("./pages/Sales"));
-const Cash = lazy(() => import("./pages/Cash"));
-const Settings = lazy(() => import("./pages/Settings"));
 const Auth = lazy(() => import("./pages/Auth"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -43,12 +39,9 @@ const App = () => (
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/auth" element={<Auth />} />
-                <Route path="/" element={<Protected><Home /></Protected>} />
-                <Route path="/balcao" element={<Protected><PDV /></Protected>} />
+                <Route path="/" element={<Protected><PDV /></Protected>} />
                 <Route path="/pecas" element={<Protected><Products /></Protected>} />
-                <Route path="/vendas" element={<Protected><Sales /></Protected>} />
-                <Route path="/caixa" element={<Protected><Cash /></Protected>} />
-                <Route path="/ajustes" element={<Protected><Settings /></Protected>} />
+
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>

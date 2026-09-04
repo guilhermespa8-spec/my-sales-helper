@@ -5,12 +5,12 @@ import { useTheme } from "@/hooks/useTheme";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
-  Gauge,
+
   ScanBarcode,
   Boxes,
-  ReceiptText,
-  Banknote,
-  SlidersHorizontal,
+
+
+
   LogOut,
   Sun,
   Moon,
@@ -25,13 +25,10 @@ type Item = {
 };
 
 export const menu: Item[] = [
-  { to: "/", label: "Painel", code: "00", icon: Gauge, end: true },
-  { to: "/balcao", label: "Balcão", code: "01", icon: ScanBarcode },
+  { to: "/", label: "Balcão", code: "01", icon: ScanBarcode, end: true },
   { to: "/pecas", label: "Peças", code: "02", icon: Boxes },
-  { to: "/vendas", label: "Vendas", code: "03", icon: ReceiptText },
-  { to: "/caixa", label: "Caixa", code: "04", icon: Banknote },
-  { to: "/ajustes", label: "Ajustes", code: "05", icon: SlidersHorizontal },
 ];
+
 
 const AppLayout = ({ children }: { children: ReactNode }) => {
   const { user, signOut } = useAuth();
@@ -139,7 +136,7 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
       </div>
 
       {/* Barra inferior — mobile */}
-      <nav className="md:hidden no-print fixed bottom-0 inset-x-0 z-50 bg-sidebar border-t border-sidebar-border grid grid-cols-6">
+      <nav className="md:hidden no-print fixed bottom-0 inset-x-0 z-50 bg-sidebar border-t border-sidebar-border grid grid-cols-2">
         {menu.map((item) => {
           const Icon = item.icon;
           const active = isActive(item);
