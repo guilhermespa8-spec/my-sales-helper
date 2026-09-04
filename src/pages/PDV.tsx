@@ -15,6 +15,7 @@ interface Product {
   id: string;
   name: string;
   description: string | null;
+  color: string | null;
   price: number;
   stock: number;
 }
@@ -313,7 +314,7 @@ const PDV = () => {
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_400px] items-start">
+      <div className="grid gap-6 items-start">
         {/* Busca e resultados */}
         <section className="rounded-xl border border-border bg-card overflow-hidden">
           <div className="p-4 border-b border-border">
@@ -360,12 +361,18 @@ const PDV = () => {
                 >
                   <span className="min-w-0 flex-1">
                     <span className="block text-sm font-semibold truncate">{p.name}</span>
+                    {(p.color || p.description) && (
+                      <span className="block text-xs text-muted-foreground truncate">
+                        {[p.color, p.description].filter(Boolean).join(" · ")}
+                      </span>
+                    )}
                     <span
                       className={cn("rule-label", out ? "text-destructive" : "")}
                     >
                       {out ? "Sem estoque" : `${p.stock} un disponíveis`}
                     </span>
                   </span>
+
                   <span className="font-semibold tabular-nums text-primary shrink-0">
                     {brl(Number(p.price))}
                   </span>
