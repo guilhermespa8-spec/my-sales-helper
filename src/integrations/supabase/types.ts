@@ -101,6 +101,7 @@ export type Database = {
       products: {
         Row: {
           car_filter: string | null
+          color: string | null
           created_at: string
           description: string | null
           id: string
@@ -112,6 +113,7 @@ export type Database = {
         }
         Insert: {
           car_filter?: string | null
+          color?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -123,6 +125,7 @@ export type Database = {
         }
         Update: {
           car_filter?: string | null
+          color?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -443,6 +446,7 @@ export type Database = {
         Args: { search_term: string }
         Returns: {
           car_filter: string | null
+          color: string | null
           created_at: string
           description: string | null
           id: string
