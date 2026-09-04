@@ -11,6 +11,7 @@ import { lazy, Suspense } from "react";
 
 const PDV = lazy(() => import("./pages/PDV"));
 const Products = lazy(() => import("./pages/Products"));
+const Templates = lazy(() => import("./pages/Templates"));
 const Auth = lazy(() => import("./pages/Auth"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
