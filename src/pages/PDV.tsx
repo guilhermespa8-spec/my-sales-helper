@@ -243,9 +243,29 @@ const PDV = () => {
             Busque as peças, ajuste valores e finalize.
           </p>
         </div>
-        <span className="hidden sm:flex items-center gap-1.5 rule-label">
-          <Command className="w-3.5 h-3.5" /> F2 buscar · F4 finalizar
-        </span>
+        <div className="flex items-center gap-3">
+          {templates.length > 0 && (
+            <select
+              defaultValue=""
+              onChange={(e) => {
+                if (e.target.value) void applyTemplate(e.target.value);
+                e.target.value = "";
+              }}
+              className="h-10 rounded-md bg-background border border-border px-2 text-sm"
+              aria-label="Usar modelo pronto"
+            >
+              <option value="">Usar modelo pronto…</option>
+              {templates.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {[t.car_name, t.car_year, t.car_engine].filter(Boolean).join(" · ")}
+                </option>
+              ))}
+            </select>
+          )}
+          <span className="hidden sm:flex items-center gap-1.5 rule-label">
+            <Command className="w-3.5 h-3.5" /> F2 buscar · F4 finalizar
+          </span>
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_400px] items-start">
